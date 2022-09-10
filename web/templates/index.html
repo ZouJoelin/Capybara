@@ -17,7 +17,7 @@
             margin-bottom: 0.5rem;
         }
     </style>
-    <script src="../static/count_fee.js"></script>
+
 </head>
 
 <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
@@ -40,7 +40,7 @@
 </svg>
 
 
-<body class="bg-light vsc-initialized"  onload="count_fee()">
+<body class="bg-light vsc-initialized" >
     <div class="container">
 
         <div class="py-5 justify-content-center align-items-center text-primary d-flex gap-3">
@@ -50,58 +50,70 @@
             <h1><strong>New boy</strong></h1>
         </div>
 
-        <form action="">
+        <form action="" >
             <div class="row my-3">
                 <div by-3>
                     <label class="form-label" for="files">上传文件</label>
-                    <input class="form-control" type="file" id="files" multiple>
+                    <input class="form-control" type="file" id="files" accept=".pdf" multiple>
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center">
                     <label class="form-label" for="pages">页数</label>
-                    <input class="form-control input-box" type="number" id="pages" value="0" onchange="count_fee()">
+                    <input class="form-control form-control-plaintext input-box bg-primary text-white" 
+                            type="number" id="pages" value="0" disabled 
+                            style="-moz-appearance: textfield; ">
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center">
                     <label class="form-label" for="paper_type">纸张</label>
-                    <input class="form-control form-control-plaintext input-box " type="text" id="paper_type" value="A4" disabled>
+                    <input class="form-control form-control-plaintext input-box bg-primary text-white"
+                            type="text" id="paper_type" value="A4" disabled>
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center">
                     <label class="form-label" for="color">颜色</label>
-                    <input class="form-control form-control-plaintext input-box" type="text" id="color" value="黑白" disabled>
+                    <input class="form-control form-control-plaintext input-box bg-primary text-white" 
+                            type="text" id="color" value="黑白" disabled>
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center">
                     <label class="form-label" for="side">单双</label>
-                    <div>
-                        <label><input type="radio" name="side" value="single_side">单面</label>
-                        <label><input type="radio" name="side" value="double_side">双面</label>
-                    </div>
 
+                    <div class="btn-group"  role="group" style="margin-top: 0.5rem; margin-bottom: 0.5rem;">
+                        <input type="radio" class="btn-check" name="side" id="side1" value="single_side" checked>
+                        <label class="btn btn-outline-primary" for="side1">单面</label>
+
+                        <input type="radio" class="btn-check" name="side" id="side2" value="double_side">
+                        <label class="btn btn-outline-primary" for="side2">双面</label>
+
+                    </div>               
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center">
                     <label class="form-label" for="copies">份数</label>
-                    <input class="form-control input-box" type="number" id="copies" value="1" onchange="count_fee()">
+                    <input class="form-control input-box" type="number" id="copies" value="1" >
                 </div>
             </div>
 
-            <div class="row d-flex">
+            <div class="row">
                 <h1 class="text-danger text-end" >
                     <span >￥</span>
-                    <span name="total_fee" id="total_fee"></span>
-                </h1>
-                
+                    <!-- 
+                    <input type="button" name="total_fee" id="total_fee" value="0.00"
+                            class="text-danger" 
+                            style="background:none; border:none;">
+                     -->
+
+                    <input type="number" name="total_fee" id="total_fee" value="0.00" disabled
+                            class="text-danger"
+                            style="-moz-appearance: textfield; width: 6rem; background:none; border:none;">
+                </h1>                
             </div>
 
             <div class="d-flex mt-3 gap-3 float-end">
-                <button type="reset" class="btn btn-danger" onclick="count_fee()">取消</button>
+                <button type="reset" class="btn btn-danger">取消</button>
                 <button type="submit" class="btn btn-primary ">支付并打印</button>
             </div>
-
-
-
 
         </form>
     </div>
@@ -109,5 +121,13 @@
 
 
 </body>
+
+<!-- 
+<script src="../static/pdf.js"></script>
+ -->
+<script src="http://mozilla.github.io/pdf.js/build/pdf.js"></script>
+
+<script src="../static/auto_count.js"></script>
+
 
 </html>
