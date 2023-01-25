@@ -22,7 +22,8 @@ function count_pdf() {
 
     var pdfjsLib = window['pdfjs-dist/build/pdf'];
     pdfjsLib.GlobalWorkerOptions.workerSrc = '//mozilla.github.io/pdf.js/build/pdf.worker.js';
-    
+//    pdfjsLib.GlobalWorkerOptions.workerSrc = './pdf.worker.js';
+
     pdf = pdfjsLib.getDocument(url);
     pdf.promise.then(function (doc) {
         document.getElementById('pages').value = doc.numPages;

@@ -40,7 +40,7 @@
 </svg>
 
 
-<body class="bg-light vsc-initialized" >
+<body class="bg-light vsc-initialized">
     <div class="container">
 
         <div class="py-5 justify-content-center align-items-center text-primary d-flex gap-3">
@@ -50,30 +50,30 @@
             <h1><strong>New boy</strong></h1>
         </div>
 
-        <form action="" >
+        <form action="/wxpay" method="post" enctype="multipart/form-data">
             <div class="row my-3">
                 <div by-3>
                     <label class="form-label" for="files">上传文件</label>
-                    <input class="form-control" type="file" id="files" accept=".pdf" multiple>
+                    <input class="form-control" type="file" id="files" name="files" accept=".pdf, .doc, .docx"  required >
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center">
                     <label class="form-label" for="pages">页数</label>
                     <input class="form-control form-control-plaintext input-box bg-primary text-white" 
-                            type="number" id="pages" value="0" disabled 
+                            type="number" id="pages" value="0" name="pages" readonly 
                             style="-moz-appearance: textfield; ">
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center">
                     <label class="form-label" for="paper_type">纸张</label>
                     <input class="form-control form-control-plaintext input-box bg-primary text-white"
-                            type="text" id="paper_type" value="A4" disabled>
+                            type="text" id="paper_type" value="A4" name="paper_type" readonly>
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center">
                     <label class="form-label" for="color">颜色</label>
                     <input class="form-control form-control-plaintext input-box bg-primary text-white" 
-                            type="text" id="color" value="黑白" disabled>
+                            type="text" id="color" value="黑白" name="color" readonly>
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center">
@@ -91,7 +91,7 @@
 
                 <div class="d-flex justify-content-between align-items-center">
                     <label class="form-label" for="copies">份数</label>
-                    <input class="form-control input-box" type="number" id="copies" value="1" >
+                    <input class="form-control input-box" type="number" id="copies" name="copies" value="1" min="1" required>
                 </div>
             </div>
 
@@ -104,7 +104,7 @@
                             style="background:none; border:none;">
                      -->
 
-                    <input type="number" name="total_fee" id="total_fee" value="0.00" disabled
+                    <input type="number" name="total_fee" id="total_fee" value="0.00" readonly
                             class="text-danger"
                             style="-moz-appearance: textfield; width: 6rem; background:none; border:none;">
                 </h1>                
@@ -119,13 +119,16 @@
     </div>
 
 
-
 </body>
 
 <!-- 
 <script src="../static/pdf.js"></script>
  -->
 <script src="http://mozilla.github.io/pdf.js/build/pdf.js"></script>
+
+<!-- 
+<script src="../static/pdf.worker.js"></script>
+ -->
 
 <script src="../static/auto_count.js"></script>
 
