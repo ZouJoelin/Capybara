@@ -1,6 +1,7 @@
 
 import os
 from flask import Flask, render_template, request
+# from flask_mail import Mail, Message
 from werkzeug.utils import secure_filename
 
 UPLOAD_FOLDER = os.getcwd() + "/../files/"
@@ -11,7 +12,7 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["ALLOW_EXTENSIONS"] = ALLOW_EXTENSIONS
 
 
-## ToDo: extract the page number of documents...
+# ToDo: extract the page number of documents...
 ################ DOCX (pkg: unzip) ##################
 # unzip -p 'sample.docx' docProps/app.xml | grep -oP '(?<=\<Pages\>).*(?=\</Pages\>)'
 ################ DOC (pkg: wv) ######################
@@ -22,13 +23,48 @@ app.config["ALLOW_EXTENSIONS"] = ALLOW_EXTENSIONS
 
 def allowed_file(fileName):
     return "." in fileName and \
-            fileName.rsplit(".",1)[1].lower() in ALLOW_EXTENSIONS
+        fileName.rsplit(".", 1)[1].lower() in ALLOW_EXTENSIONS
+
+
+def OSPrint(fileName):
+    # os.path.join(app.config["UPLOAD_FOLDER"])
+    os.system("echo To Print "
+              + os.path.join(app.config["UPLOAD_FOLDER"])
+              + fileName)
+    os.system("lpr -o sides=two-sided-long-edge "
+              + os.path.join(app.config["UPLOAD_FOLDER"])
+              + fileName)
+
 
 @app.route("/")
 def index():
     return render_template("index.html")
 
-@app.route("/wxpay", methods=["POST","GET"])
+
+@app.route("/countPages", methods=["POST"])
+def countPages():
+    form = request.form
+    print("HELLO 1")
+    file = request.files["files"]
+    print("HELLO 2")
+
+    fileName = file.filename
+
+    # file = request.form.get("files")
+    # file = request.files["files"]
+    if file:
+        print("HELLO" + fileName)
+        os.system("pdfinfo " + fileName +
+                  "| grep -oP '(?<=Pages:          )[ A-Za-z0-9]*' ")
+        os.system("echo hello")
+        pages = os.popen("pdfinfo " + fileName +
+                         "| grep -oP '(?<=Pages:          )[ A-Za-z0-9]*' ")
+    else:
+        pages = "0"
+    return render_template("search.html", pages=pages)
+
+
+@app.route("/wxpay", methods=["POST", "GET"])
 def wepay():
     if request.method == "POST":
         form = request.form
@@ -41,9 +77,17 @@ def wepay():
         file.save(os.path.join(app.config["UPLOAD_FOLDER"], file.filename))
         print("file uploaded successfully!!!")
 
-        return render_template("pay.html", file = file, form = form)
+        return render_template("pay.html", file=file, form=form)
+
+
+@app.route("/print", methods=["POST", "GET"])
+def printFile():
+    if request.method == "POST":
+        form = request.form
+        fileName = form.get("fileName")
+        OSPrint(fileName)
+        return render_template("print.html", fileName=fileName)
 
 
 if __name__ == "__main__":
     app.run(debug=True)
-

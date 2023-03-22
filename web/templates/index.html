@@ -30,12 +30,13 @@
 
     <symbol id="plus" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
         <title>plus</title>
-        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+        <path
+            d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z" />
     </symbol>
 
     <symbol id="minus" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
         <title>minus</title>
-        <path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8z"/>
+        <path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8z" />
     </symbol>
 </svg>
 
@@ -54,60 +55,81 @@
             <div class="row my-3">
                 <div by-3>
                     <label class="form-label" for="files">上传文件</label>
-                    <input class="form-control" type="file" id="files" name="files" accept=".pdf, .doc, .docx"  required >
+                    <input class="form-control" type="file" id="files" name="files" accept=".pdf, .doc, .docx" required>
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center">
                     <label class="form-label" for="pages">页数</label>
-                    <input class="form-control form-control-plaintext input-box bg-primary text-white" 
-                            type="number" id="pages" value="0" name="pages" readonly 
-                            style="-moz-appearance: textfield; ">
+                    <input class="form-control form-control-plaintext input-box bg-primary text-white" type="number"
+                        id="pages" value="0" name="pages" readonly style="-moz-appearance: textfield; ">
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center">
                     <label class="form-label" for="paper_type">纸张</label>
-                    <input class="form-control form-control-plaintext input-box bg-primary text-white"
-                            type="text" id="paper_type" value="A4" name="paper_type" readonly>
+                    <input class="form-control form-control-plaintext input-box bg-primary text-white" type="text"
+                        id="paper_type" value="A4" name="paper_type" readonly>
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center">
                     <label class="form-label" for="color">颜色</label>
-                    <input class="form-control form-control-plaintext input-box bg-primary text-white" 
-                            type="text" id="color" value="黑白" name="color" readonly>
+                    <input class="form-control form-control-plaintext input-box bg-primary text-white" type="text"
+                        id="color" value="黑白" name="color" readonly>
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center">
                     <label class="form-label" for="side">单双</label>
 
-                    <div class="btn-group"  role="group" style="margin-top: 0.5rem; margin-bottom: 0.5rem;">
+                    <div class="btn-group" role="group" style="margin-top: 0.5rem; margin-bottom: 0.5rem;">
                         <input type="radio" class="btn-check" name="side" id="side1" value="single_side" checked>
                         <label class="btn btn-outline-primary" for="side1">单面</label>
 
                         <input type="radio" class="btn-check" name="side" id="side2" value="double_side">
                         <label class="btn btn-outline-primary" for="side2">双面</label>
 
-                    </div>               
+                    </div>
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center">
                     <label class="form-label" for="copies">份数</label>
-                    <input class="form-control input-box" type="number" id="copies" name="copies" value="1" min="1" required>
+                    <input class="form-control input-box" type="number" id="copies" name="copies" value="1" min="1"
+                        required>
                 </div>
             </div>
 
             <div class="row">
-                <h1 class="text-danger text-end" >
-                    <span >￥</span>
+                <h1 class="text-danger text-end">
+                    <span>￥</span>
                     <!-- 
                     <input type="button" name="total_fee" id="total_fee" value="0.00"
                             class="text-danger" 
                             style="background:none; border:none;">
                      -->
 
-                    <input type="number" name="total_fee" id="total_fee" value="0.00" readonly
-                            class="text-danger"
-                            style="-moz-appearance: textfield; width: 6rem; background:none; border:none;">
-                </h1>                
+                    <input type="number" name="total_fee" id="total_fee" value="0.00" readonly class="text-danger"
+                        style="-moz-appearance: textfield; width: 6rem; background:none; border:none;">
+
+
+                    <ul></ul>
+
+                    <script>
+                        let file = document.getElementById("files");
+                        let formData = new FormData();
+                        formData.append("files", file);
+
+                        file.addEventListener('change', async function () {
+                            let response = await fetch('/countPages', {
+                                method: 'POST',
+                                credentials: 'same-origin',
+                                body: formData
+                            });
+
+                            let pages = await response.text();
+                            document.querySelector('ul').innerHTML = pages;
+                        });
+
+                    </script>
+
+                </h1>
             </div>
 
             <div class="d-flex mt-3 gap-3 float-end">
