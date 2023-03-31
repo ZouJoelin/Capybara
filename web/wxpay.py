@@ -30,7 +30,9 @@ APIV3_KEY = '34zxxLhb6j53V8VqTQLXZq77VN5xLRPt'
 APPID = 'wxb14ed541e1ac2dc3'
 
 # 回调地址，也可以在调用接口的时候覆盖。
-NOTIFY_URL = 'http://campusprinter.nat300.top'
+
+NOTIFY_URL = 'http://campusprinter.nat300.top/notify'
+# 'http://127.0.0.1:8000/notify'
 
 # 微信支付平台证书缓存目录，初始调试的时候可以设为None，首次使用确保此目录为空目录。
 CERT_DIR = None  # './cert'
@@ -86,27 +88,27 @@ def pay_native(amount=1):
     return {'code': code, 'message': message}
 
 
-@app.route('/notify', methods=['POST'])
-def notify():
-    result = wxpay.callback(request.headers, request.data)
-    if result and result.get('event_type') == 'TRANSACTION.SUCCESS':
-        resp = result.get('resource')
-        appid = resp.get('appid')
-        mchid = resp.get('mchid')
-        out_trade_no = resp.get('out_trade_no')
-        transaction_id = resp.get('transaction_id')
-        trade_type = resp.get('trade_type')
-        trade_state = resp.get('trade_state')
-        trade_state_desc = resp.get('trade_state_desc')
-        bank_type = resp.get('bank_type')
-        attach = resp.get('attach')
-        success_time = resp.get('success_time')
-        payer = resp.get('payer')
-        amount = resp.get('amount').get('total')
-        # TODO: 根据返回参数进行必要的业务处理，处理完后返回200或204
-        return jsonify({'code': 'SUCCESS', 'message': '成功'})
-    else:
-        return jsonify({'code': 'FAILED', 'message': '失败'}), 500
+# @app.route('/notify', methods=['POST'])
+# def notify():
+#     result = wxpay.callback(request.headers, request.data)
+#     if result and result.get('event_type') == 'TRANSACTION.SUCCESS':
+#         resp = result.get('resource')
+#         appid = resp.get('appid')
+#         mchid = resp.get('mchid')
+#         out_trade_no = resp.get('out_trade_no')
+#         transaction_id = resp.get('transaction_id')
+#         trade_type = resp.get('trade_type')
+#         trade_state = resp.get('trade_state')
+#         trade_state_desc = resp.get('trade_state_desc')
+#         bank_type = resp.get('bank_type')
+#         attach = resp.get('attach')
+#         success_time = resp.get('success_time')
+#         payer = resp.get('payer')
+#         amount = resp.get('amount').get('total')
+#         # TODO: 根据返回参数进行必要的业务处理，处理完后返回200或204
+#         return jsonify({'code': 'SUCCESS', 'message': '成功'})
+#     else:
+#         return jsonify({'code': 'FAILED', 'message': '失败'}), 500
 
 
 if __name__ == "__main__":

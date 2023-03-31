@@ -91,14 +91,18 @@ def wepay():
         print(">>>>>TYPE OF RESULT:     ", type(result))
         print(">>>>>RESULT:     ", result)
 
-        message = result["message"]
+        ''' used for jsonfiy return
+        result_response = json.loads(result.response[0])
+        print(">>>>>TYPE OF RESPONSE:     ", type(result_response))
+        print(">>>>>RESPONSE:     ", result_response)
+        '''
+
+        message = json.loads(result["message"])
         print(">>>>>TYPE OF MESSAGE:     ", type(message))
         print(">>>>>MESSAGE:     ", message)
 
-        pay_url = json.loads(message)
+        pay_url = message["code_url"]
         print(">>>>>TYPE OF PAY_URL:     ", type(pay_url))
-        print(">>>>>PAY_URL:     ", pay_url)
-        pay_url = pay_url["code_url"]
         print(">>>>>PAY_URL:     ", pay_url)
 
         return render_template("pay.html", file=file, form=form, pay_url=pay_url)
@@ -110,8 +114,8 @@ def pay_native_test():
 
     result = jsonify(pay_native(int(total_fee*100)))
     result_response = result.response
-    print("JSONIFY:     ", result)
-    print("JSONIFY_response:     ", result_response)
+    print(">>>>>JSONIFY:     ", result)
+    print(">>>>>JSONIFY_response:     ", result_response)
 
     return result
 
@@ -123,6 +127,31 @@ def printFile():
         fileName = form.get("fileName")
         OSPrint(fileName)
         return render_template("print.html", fileName=fileName)
+
+
+@app.route('/notify', methods=['POST'])
+def notify():
+    result = wxpay.callback(request.headers, request.data)
+    print(">>>>>CALLBACK_RESULT:     ", result)
+
+    # if result and result.get('event_type') == 'TRANSACTION.SUCCESS':
+    #     resp = result.get('resource')
+    #     appid = resp.get('appid')
+    #     mchid = resp.get('mchid')
+    #     out_trade_no = resp.get('out_trade_no')
+    #     transaction_id = resp.get('transaction_id')
+    #     trade_type = resp.get('trade_type')
+    #     trade_state = resp.get('trade_state')
+    #     trade_state_desc = resp.get('trade_state_desc')
+    #     bank_type = resp.get('bank_type')
+    #     attach = resp.get('attach')
+    #     success_time = resp.get('success_time')
+    #     payer = resp.get('payer')
+    #     amount = resp.get('amount').get('total')
+    #     # TODO: 根据返回参数进行必要的业务处理，处理完后返回200或204
+    #     return jsonify({'code': 'SUCCESS', 'message': '成功'})
+    # else:
+    #     return jsonify({'code': 'FAILED', 'message': '失败'}), 500
 
 
 if __name__ == "__main__":
