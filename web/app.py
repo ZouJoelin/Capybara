@@ -1,8 +1,16 @@
 
 import os
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 # from flask_mail import Mail, Message
 from werkzeug.utils import secure_filename
+
+#################################################
+# initialize wechatpay...
+#################################################
+
+from wxpay import *
+
+#################################################
 
 UPLOAD_FOLDER = os.getcwd() + "/../files/"
 ALLOW_EXTENSIONS = {".pdf"}
@@ -77,7 +85,37 @@ def wepay():
         file.save(os.path.join(app.config["UPLOAD_FOLDER"], file.filename))
         print("file uploaded successfully!!!")
 
-        return render_template("pay.html", file=file, form=form)
+        #############################
+        total_fee = float(form["total_fee"])
+        print(">>>>>TOTAL_FEE:     ", type(total_fee))
+
+        result = pay_native(amount=int(total_fee*100))
+        print(">>>>>TYPE OF RESULT:     ", type(result))
+        print(">>>>>RESULT:     ", result)
+
+        message = result["message"]
+        print(">>>>>TYPE OF MESSAGE:     ", type(message))
+        print(">>>>>MESSAGE:     ", message)
+
+        pay_url = json.loads(message)
+        print(">>>>>TYPE OF PAY_URL:     ", type(pay_url))
+        print(">>>>>PAY_URL:     ", pay_url)
+        pay_url = pay_url["code_url"]
+        print(">>>>>PAY_URL:     ", pay_url)
+
+        return render_template("pay.html", file=file, form=form, pay_url=pay_url)
+
+
+@app.route("/pay_native", methods=["GET"])
+def pay_native_test():
+    total_fee = float(request.args.get("total_fee"))
+
+    result = jsonify(pay_native(int(total_fee*100)))
+    result_response = result.response
+    print("JSONIFY:     ", result)
+    print("JSONIFY_response:     ", result_response)
+
+    return result
 
 
 @app.route("/print", methods=["POST", "GET"])

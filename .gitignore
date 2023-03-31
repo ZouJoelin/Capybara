@@ -3,4 +3,4 @@ __pycache__/
 /web/foo/
 /files
 /cert
-/keys
+#/keys
