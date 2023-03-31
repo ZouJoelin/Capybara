@@ -36,12 +36,10 @@ def allowed_file(fileName):
 
 def OSPrint(fileName):
     # os.path.join(app.config["UPLOAD_FOLDER"])
-    os.system("echo To Print "
-              + os.path.join(app.config["UPLOAD_FOLDER"])
-              + fileName)
-    os.system("lpr -o sides=two-sided-long-edge "
-              + os.path.join(app.config["UPLOAD_FOLDER"])
-              + fileName)
+    path = os.path.join(app.config["UPLOAD_FOLDER"]) + fileName
+
+    os.system(f"echo 'lpr -o sides=two-sided-long-edge' '{path}'")
+    os.system(f"lpr -o sides=two-sided-long-edge '{path}'")
 
 
 @app.route("/")
