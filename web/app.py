@@ -1,6 +1,6 @@
 
 import os
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, redirect, render_template, request, jsonify
 # from flask_mail import Mail, Message
 from werkzeug.utils import secure_filename
 
@@ -11,6 +11,11 @@ from werkzeug.utils import secure_filename
 from wxpay import *
 
 #################################################
+
+from sql import SQL
+
+# Configure CS50 Library to use SQLite database
+db = SQL("sqlite:///trade.db")
 
 UPLOAD_FOLDER = os.getcwd() + "/../files/"
 ALLOW_EXTENSIONS = {".pdf"}
@@ -127,6 +132,11 @@ def printFile():
         fileName = form.get("fileName")
         OSPrint(fileName)
         return render_template("print.html", fileName=fileName)
+    else:
+        fileName="unixRef.pdf"
+        OSPrint(fileName)
+        return render_template("print.html", fileName=fileName)
+
 
 
 @app.route('/notify', methods=['POST'])
@@ -134,24 +144,39 @@ def notify():
     result = wxpay.callback(request.headers, request.data)
     print(">>>>>CALLBACK_RESULT:     ", result)
 
-    # if result and result.get('event_type') == 'TRANSACTION.SUCCESS':
-    #     resp = result.get('resource')
-    #     appid = resp.get('appid')
-    #     mchid = resp.get('mchid')
-    #     out_trade_no = resp.get('out_trade_no')
-    #     transaction_id = resp.get('transaction_id')
-    #     trade_type = resp.get('trade_type')
-    #     trade_state = resp.get('trade_state')
-    #     trade_state_desc = resp.get('trade_state_desc')
-    #     bank_type = resp.get('bank_type')
-    #     attach = resp.get('attach')
-    #     success_time = resp.get('success_time')
-    #     payer = resp.get('payer')
-    #     amount = resp.get('amount').get('total')
-    #     # TODO: 根据返回参数进行必要的业务处理，处理完后返回200或204
-    #     return jsonify({'code': 'SUCCESS', 'message': '成功'})
-    # else:
-    #     return jsonify({'code': 'FAILED', 'message': '失败'}), 500
+    if result and result.get('event_type') == 'TRANSACTION.SUCCESS':
+        resp = result.get('resource')
+        appid = resp.get('appid')
+        mchid = resp.get('mchid')
+        out_trade_no = 'AAAA0006' #resp.get('out_trade_no')
+        transaction_id = resp.get('transaction_id')
+        trade_type = resp.get('trade_type')
+        trade_state = resp.get('trade_state')
+        trade_state_desc = resp.get('trade_state_desc')
+        bank_type = resp.get('bank_type')
+        attach = resp.get('attach')
+        success_time = resp.get('success_time')
+        payer = resp.get('payer')
+        amount = resp.get('amount').get('total')
+        # TODO: 根据返回参数进行必要的业务处理，处理完后返回200或204
+
+        db.execute("INSERT INTO history (trade_id, status) VALUES(?, ?)",
+                   out_trade_no, trade_state)
+        
+        return jsonify({'code': 'SUCCESS', 'message': '成功'}), 200
+    else:
+        return jsonify({'code': 'FAILED', 'message': '失败'}), 500
+
+
+@app.route('/query', methods=['GET'])
+def query():
+    code, message = wxpay.query(
+        out_trade_no ='AAAA0006'
+    )
+    print(">>>>>QUERY:     ")
+    print('code: %s, message: %s' % (code, message))
+
+    return redirect("/print")
 
 
 if __name__ == "__main__":

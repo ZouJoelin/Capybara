@@ -69,7 +69,7 @@ app = Flask(__name__)
 @app.route('/')
 def pay_native(amount=1):
     # 以native下单为例，下单成功后即可获取到'code_url'，将'code_url'转换为二维码，并用微信扫码即可进行支付测试。
-    out_trade_no = ''.join(sample(ascii_letters + digits, 8))
+    out_trade_no =  'AAAA0006' #''.join(sample(ascii_letters + digits, 8))
     description = 'demo-description'
 #    amount = 1
     print("=============in pay_native()========================")
@@ -84,7 +84,7 @@ def pay_native(amount=1):
         amount={'total': amount},
         pay_type=WeChatPayType.NATIVE
     )
-
+    print("========================end========================")
     return {'code': code, 'message': message}
 
 
