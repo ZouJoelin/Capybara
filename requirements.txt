@@ -1,5 +1,0 @@
-flask
-wechatpayv3
-SQLAlchemy==1.4.46
-sqlparse
-termcolor
