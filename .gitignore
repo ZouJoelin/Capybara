@@ -1,3 +1,4 @@
 /.docs
 /private_security
 *.db
+/file_temp/*
