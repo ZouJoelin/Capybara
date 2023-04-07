@@ -5,7 +5,7 @@ from flask import Flask, render_template, redirect, request
 
 from sql import SQL
 import wxpay
-import utils 
+from utils import * 
 ###############################################
 # initialize Flask.app & session & sqlite
 ###############################################
@@ -18,6 +18,8 @@ app = Flask(__name__)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["ALLOW_EXTENSIONS"] = ALLOW_EXTENSIONS
 
+# Custom filter
+app.jinja_env.filters["rmb"] = rmb
 
 items = ["filename", "pages", "paper_type", "color", "side", "copies", "fee"]
 
@@ -32,9 +34,8 @@ db = SQL("sqlite:///capybara.db")
 # input:    GET request
 # output:   render("index.html")
 def index():
-    """ToDo"""
-
-    return render_template("index.html")
+    fee = 1234.5678
+    return render_template("index.html", fee=fee)
 
 
 @app.route("/auto_count")
@@ -46,7 +47,8 @@ def auto_count():
     ## 1. save file, count pages
     ## 2. calculate fee
 
-    return 
+    return apology("auto_count: ToDo...")
+    return
 
 
 @app.route("/pay")
@@ -67,7 +69,7 @@ def pay():
 
         # parse message
 
-
+        return apology("pay: ToDo...")
         return render_template("pay.html")
     
 
@@ -81,6 +83,8 @@ def query():
     # call utils.query() according to out_trade_to
 
     # log into sql
+
+    return apology("query: ToDo...")
 
     return 
 
@@ -107,6 +111,8 @@ def print_file():
     # make print command according to session["*"]
 
     # update sql's col: print_stateS
+
+    return apology("print_file: ToDo...")
 
     return render_template("print_file.html")
 

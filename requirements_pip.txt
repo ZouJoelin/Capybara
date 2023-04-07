@@ -1,6 +1,7 @@
 
 
 flask
+flask_session
 wechatpayv3
 SQLAlchemy==1.4.46
 sqlparse
