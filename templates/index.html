@@ -3,12 +3,13 @@
 
 {% block main %}
 <div>
-    <form id="infomation_form">
+    <form id="file-form">
         <div class="">
             <label class="form-label" for="files">上传文件</label>
             <input class="form-control" type="file" id="file" name="file" accept=".pdf" required autofocus>
         </div>
-
+    </form>
+    <form id="information-form">
         <div class="d-flex justify-content-between align-items-center">
             <label class="form-label" for="pages">页数</label>
             <input class="form-control form-control-plaintext input-box bg-primary text-white" type="number" id="pages"
@@ -44,24 +45,30 @@
         </div>
     </form>
 
-    <h1 class="text-danger text-end" id="fee">
-        {{ fee | rmb}}
+    <h1 class="text-danger text-end">
+        <span>￥</span><span id="fee">0.00</span>
     </h1>
 </div>
 
 <div class="d-flex mt-3 gap-3 float-end">
-    <button type="reset" class="btn btn-danger" form="infomation_form">取消</button>
+    <button type="reset" class="btn btn-danger" id="reset-btn">取消</button>
     <a href="/pay" class="btn btn-primary">支付并打印</a>
 </div>
+
+<script>
+    document.getElementById("reset-btn").addEventListener("click", resetForm);
+    function resetForm() {
+        document.getElementById("file-form").reset();
+        document.getElementById("information-form").reset();
+    }
+</script>
+
 
 {% endblock %}
 
 
 
 {% block js %}
-
-
-
 
 <script src="./static/js/auto_count.js"></script>
 

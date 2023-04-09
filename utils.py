@@ -3,7 +3,7 @@ import os
 
 from flask import redirect, render_template, request, session
 
-
+ALLOW_EXTENSIONS = {".pdf"}
 
 # render apology page when something goes wrong
 def apology(message, code=400):
@@ -20,9 +20,14 @@ def rmb(fee):
 
 # validate file's type
 def validate_file(filename):
+    return "." in filename and \
+    filename.rsplit(".", 1)[1].lower() in ALLOW_EXTENSIONS
 
-    return
 
+# secure input string for anti-injection-hack
+def secure_string(s):
+     
+     return
 
 # convert filename to secure-format
 def secure_filename(filename):

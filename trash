@@ -1,0 +1,68 @@
+
+
+//////////////////////////////////////////
+// .then() format
+
+let file = document.getElementById("file");
+let form = document.getElementById("information-form");
+
+file.addEventListener('change', function (event) {
+    let uploadFile = event.target.files[0];
+
+    let formData = new FormData();
+    formData.append('file', uploadFile);
+    console.log(formData.get("file"));
+
+    fetch('/auto_count', {
+        method: 'POST',
+        body: formData
+    })
+        .then(function (response) {
+            console.log("response:" + response);
+            return response.json();
+        })
+        .then(function (result) {
+            console.log("result:" + result);
+            let pages = result.pages;
+            console.log("pages:" + +pages);
+
+            document.getElementById('pages').value = pages;
+            console.log(document.getElementById('pages').value);
+        });
+});
+
+
+
+//////////////////////////////////////////
+// change linkage
+```
+<div id="myDiv">
+    hi
+</div>
+
+<input type="text" id="myInput" placeholder="Text" />
+
+<button id="myBtn">Click to fire event</button>
+```
+
+document.getElementById("myDiv").addEventListener('change', function (event) {
+    alert("myDiv activated!!!")
+    var elem = event.target;
+});
+
+document.getElementById("myInput").addEventListener('change', function (event) {
+    alert("myInput activated!!!")
+    var elem = event.target;
+    document.getElementById("myDiv").innerHTML = "Somethinig";
+    alert("tmpt to activate myDiv...");
+    document.getElementById("myDiv").dispatchEvent(new Event('change'));
+
+});
+
+document.getElementById("myBtn").addEventListener('click', function (event) {
+    document.getElementById("myInput").value = "New";
+    // let event = new Event('change');
+    document.getElementById("myInput").dispatchEvent(new Event('change'));
+});
+
+////////////////////////////////
