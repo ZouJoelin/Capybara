@@ -1,8 +1,10 @@
 
 import os
+from PyPDF2 import PdfReader
 
 from flask import Flask, render_template, redirect, request, jsonify
 from flask_session import Session
+
 
 from sql import SQL
 import wxpay
@@ -13,8 +15,8 @@ from utils import *
 # initialize Flask.app & session & sqlite
 ###############################################
 
-
-UPLOAD_FOLDER = os.getcwd() + "./files_temp/"
+PRICE_PER_PAGE = 0.01
+UPLOAD_FOLDER = os.getcwd() + "/files_temp/"
 
 # Configure application
 app = Flask(__name__)
@@ -37,6 +39,8 @@ Session(app)
 # init session["*"]
 items = ["filename", "pages", "paper_type", "color", "side", "copies", "fee"]
 session = dict.fromkeys(items)
+session["pages"] = 0
+session["copies"] = 1
 
 # Custom filter
 app.jinja_env.filters["rmb"] = rmb
@@ -51,8 +55,8 @@ db = SQL("sqlite:///capybara.db")
 # input:    GET request
 # output:   render("index.html")
 def index():
-
-    return render_template("index.html")
+        
+        return render_template("index.html")
 
 
 @app.route("/auto_count", methods=["POST"])
@@ -60,63 +64,75 @@ def index():
 # output:   pages, fee
 def auto_count():
 
-    file = request.files
-    information = request.form
+    print(">>>>>request.cotent-length:     ", request.content_length)
+    # reset session["*"]
+    if  request.content_length == 0:
+        print(">>>>>reset session...")
+        session["filename"] = None
+        session["pages"] = 0
+        session["fee"] = 0.00
+        return 'OK'
+
     print(">>>>>request:     ", request)
-    print(">>>>>file?:     ", file)
-    print(">>>>>info?:     ", information)
+    print(">>>>>file?:     ", request.files)
+    print(">>>>>form?:     ", request.form)
 
+    # · save file, count pages
     if request.files:
+        ## process file
         print(">>>>>received file...")
-        # file = request.files["file"]
-        # filename = file.filename
-        # print(">>>>>original filename:     ", filename)
-        return jsonify({'pages': 12})
+        file = request.files["file"]
+        filename = file.filename
+        print(">>>>>type of filename:     ", type(filename))
+        print(">>>>>original filename:     ", filename)
 
+        if not validate_file(filename):
+            return apology("请上传pdf文件")
+        print(">>>>>out of validate_file()")
 
-    if request.form:
-        print(">>>>>received infomation...")
-        # information = request.form
-        # print(">>>>>infomation:     ", information)
-        return jsonify({'fee': 34})
+        filename = secure_filename(filename)
+        print(">>>>>secured filename:     ", filename)
 
+        ## save file
+        filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+        print(">>>>>file's save-path:     ", filepath)
+        file.save(filepath)
+        print(">>>>>file uploaded successfully!!!")
 
-    #     if not validate_file(filename):
-    #         return apology("请上传pdf文件")
+        ## count pages
+        readpdf = PdfReader(file)
+        pages = len(readpdf.pages)
 
-    #     filename = secure_filename(filename)
-    #     print(">>>>>secure filename:     ", filename)
+        ## update session["*"]
+        session["filename"] = filename
+        session["pages"] = int(pages)
 
-    #     filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-    #     print(">>>>>file's save-path:     ", filepath)
-    #     file.save(filepath)
-    #     print(">>>>>file uploaded successfully!!!")
-    #     print(">>>>>return: ",jsonify({"pages": 12}))
-    #     return jsonify({'pages': 12})
+        return jsonify({'pages': session["pages"]})
     
-    # else:
-    #     print(">>>>>received information...")
-    #     information = request.form
-    #     print(">>>>>type of copies:     ", type(information["copies"]))
-    #     print(">>>>>form's copies:     ", information["copies"])
-    #     print(">>>>>return:     ",jsonify({"fee": 34}))
+    # · calculate fee, update session["*"]
+    if request.form:
+        print(">>>>>received form...")
+        form = request.form
+        print(">>>>>form:     ", form)
 
-    #     return jsonify({'fee': 34})
+        ## update session["*"]
+        print(">>>>>>>>>>>>>>> form >>>>>>>>>>")
+        for key in form.keys():
+            print(">>>>>" + key + ":     ", form[key])
+            if key == "pages":
+                continue
+            elif key == "copies":
+                session[key] = int(form[key])
+            else:
+                    session[key] = form[key]
 
+        ## calculate fee
+        session["fee"] = session["pages"] * session["copies"] * PRICE_PER_PAGE
+        print(">>>>>>>>>>>>>>> session >>>>>>>>>>")
+        for key in session.keys():
+            print(">>>>>"+ key +":     ", session[key])
 
-
-
-    # session["pages"] = count_pages(filename)
-
-    # session["fee"] = calc_fee(pages=session["pages"], copies=session["copies"])
-
-
-    # update session["*"]
-    ## 1. save file, count pages
-    ## 2. calculate fee
-
-    # return apology("auto_count: ToDo...")
-    # return
+        return jsonify({'fee': session["fee"]})
 
 
 

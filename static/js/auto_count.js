@@ -15,9 +15,9 @@ file.addEventListener('change', async function (event) {
     });
 
     alert("response:" + response);
-    let result = await response.json();
-    alert("result:" + result);
-    let pages = result.pages;
+    let parsedJSON = await response.json();
+    alert("parsedJSON:" + parsedJSON);
+    let pages = parsedJSON.pages;
     alert("pages:" + +pages);
 
     document.getElementById('pages').value = pages;
@@ -29,6 +29,7 @@ file.addEventListener('change', async function (event) {
 
 
 let form = document.getElementById("information-form");
+
 form.addEventListener('change', async function (event) {
     console.log(event)
     console.log(event.target)
@@ -36,9 +37,11 @@ form.addEventListener('change', async function (event) {
     console.log(form.form)
     let uploadForm = form;
 
-    let formData = new FormData();
-    formData.append('form', uploadForm);
-    console.log(formData.get("form"));
+    let formData = new FormData(uploadForm);
+    // below line WOULDN'T work! must add it in Constructor!!!
+    // FUCK javascript!!!!
+    // formData.append('form', uploadForm);
+    // console.log(formData.get("form"));
 
     let response = await fetch('/auto_count', {
         method: 'POST',
@@ -46,9 +49,9 @@ form.addEventListener('change', async function (event) {
     });
 
     alert("response:" + response);
-    let result = await response.json();
-    alert("result:" + result);
-    let fee = result.fee;
+    let parsedJSON = await response.json();
+    alert("parsedJSON:" + parsedJSON);
+    let fee = parsedJSON.fee;
     alert("fee:" + fee);
 
     document.getElementById('fee').innerHTML = fee.toFixed(2);

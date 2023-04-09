@@ -55,12 +55,23 @@
     <a href="/pay" class="btn btn-primary">支付并打印</a>
 </div>
 
+
 <script>
     document.getElementById("reset-btn").addEventListener("click", resetForm);
     function resetForm() {
         document.getElementById("file-form").reset();
         document.getElementById("information-form").reset();
+        document.getElementById("fee").innerHTML = 0.00;
+        fetch('/auto_count', {
+            method: 'POST',
+            body: ''
+        }).then(response => {
+            console.log(response);
+        }).catch(error => {
+            console.error(error);
+        });
     }
+
 </script>
 
 
@@ -70,6 +81,6 @@
 
 {% block js %}
 
-<script src="./static/js/auto_count.js"></script>
+<script src="/static/js/auto_count.js"></script>
 
 {% endblock %}

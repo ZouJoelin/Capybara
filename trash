@@ -66,3 +66,12 @@ document.getElementById("myBtn").addEventListener('click', function (event) {
 });
 
 ////////////////////////////////
+// sumit form
+<div>
+    <button type="submit" id="submit-btn">submit</button>
+</div>
+
+document.getElementById("submit-btn").addEventListener("click", submitForm);
+function submitForm() {
+    let result = document.getElementById("information-form").submit();
+}

@@ -4,4 +4,4 @@
 /.docs
 /private_security
 *.db
-/file_temp/*
+/files_temp/*
