@@ -2,6 +2,7 @@
 import os
 
 from flask import redirect, render_template, request, session
+from functools import wraps
 
 ALLOW_EXTENSIONS = {"pdf"}
 
@@ -46,10 +47,25 @@ def secure_filename(filename):
 
 
 
-def formfilled_required(f):
-    """ToDo"""    
-    
-    return
+def formfilled_required(session):
+    """
+    Decorate routes to require formfilled. see below:
+    https://www.liaoxuefeng.com/wiki/1016959663602400/1017451662295584
+    """
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            print(">>>>> @decorated >>>>>")
+            print(">>>>>keys:     ", session.keys())
+
+            for key in session.keys():
+                print(">>>>>"+ key +":     ", session[key])
+                if session[key] is None:
+                    print("支付并打印前请完成表格信息")
+                    return apology("支付并打印前请完成表格信息")
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
 
 
 # return the useful infomation in message

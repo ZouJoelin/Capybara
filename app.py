@@ -1,5 +1,10 @@
 
 import os
+import time
+import json
+from random import sample
+from string import ascii_letters, digits
+
 from PyPDF2 import PdfReader
 
 from flask import Flask, render_template, redirect, request, jsonify
@@ -7,7 +12,7 @@ from flask_session import Session
 
 
 from sql import SQL
-import wxpay
+from wxpay import *
 from utils import * 
 
 
@@ -50,6 +55,14 @@ app.jinja_env.filters["rmb"] = rmb
 db = SQL("sqlite:///capybara.db")
 
 
+@app.after_request
+def after_request(response):
+    """Ensure responses aren't cached"""
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Expires"] = 0
+    response.headers["Pragma"] = "no-cache"
+    return response
+
 
 @app.route("/")
 # input:    GET request
@@ -70,7 +83,7 @@ def auto_count():
         print(">>>>>reset session...")
         session["filename"] = None
         session["pages"] = 0
-        session["fee"] = 0.00
+        session["fee"] = None
         return 'OK'
 
     print(">>>>>request:     ", request)
@@ -139,23 +152,43 @@ def auto_count():
 @app.route("/pay")
 # input:    GET request
 # output:   render("pay.html", form, out_trade_no, pay_url)
+@formfilled_required(session)
 def pay():
-    if request.methods == "POST":
+    if request.method == "POST":
         """ToDO"""
         # withdraw webpage
 
         return redirect("/")
     
     else:
-        """ToDo"""
         # generate trade info
+        print(">>>>>type of FEE:     ", type(session["fee"]))
+        print(">>>>>FEE:     ", session["fee"])
 
-        # call wxpay according to session["fee"]
+        amount = int(session["fee"] * 100)
+        print(">>>>>amount:     " ,amount)
+
+        out_trade_no = time.strftime("%Y%m%dT%H%M", time.localtime()) + ''.join(sample(ascii_letters,3))
+        print(">>>>>out_trade_no:     " ,out_trade_no)
+
+        description = session["filename"]
+        print(">>>>>description:     " ,description)
+
+        # call wxpay.pay_native()
+        result = pay_native(amount, out_trade_no, description)
+        print(">>>>>TYPE OF RESULT:     ", type(result))
+        print(">>>>>RESULT:     ", result)
 
         # parse message
+        message = json.loads(result["message"])
+        print(">>>>>TYPE OF MESSAGE:     ", type(message))
+        print(">>>>>MESSAGE:     ", message)
 
-        return apology("pay: ToDo...")
-        return render_template("pay.html")
+        pay_url = message["code_url"]
+        print(">>>>>TYPE OF PAY_URL:     ", type(pay_url))
+        print(">>>>>PAY_URL:     ", pay_url)
+
+        return render_template("pay.html", form=session, out_trade_no=out_trade_no, pay_url=pay_url)
     
 
 @app.route("/query")

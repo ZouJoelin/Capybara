@@ -58,10 +58,12 @@
 
 <script>
     document.getElementById("reset-btn").addEventListener("click", resetForm);
+    window.addEventListener("load", resetForm)
+
     function resetForm() {
         document.getElementById("file-form").reset();
         document.getElementById("information-form").reset();
-        document.getElementById("fee").innerHTML = 0.00;
+        document.getElementById("fee").innerHTML = '0.00';
         fetch('/auto_count', {
             method: 'POST',
             body: ''
