@@ -1,0 +1,71 @@
+{% extends 'layout.html' %}
+
+
+{% block main %}
+
+<div class="container">
+    <table class="table table-striped text-center">
+        <tr>
+            <th>打印文件</th>
+            <td>{{form.filename}}</td>
+        </tr>
+        <tr>
+            <th>文件页数</th>
+            <td>{{form.pages}}</td>
+        </tr>
+        <tr>
+            <th>纸张类型</th>
+            <td>{{form.paper_type}}</td>
+        </tr>
+        <tr>
+            <th>颜色</th>
+            <td>{{form.color}}</td>
+        </tr>
+        <tr>
+            <th>单双</th>
+            {% if form.side == "single_side" %}
+            <td>单面打印</td>
+            {% else %}
+            <td>双面打印</td>
+            {% endif %}
+        </tr>
+        <tr>
+            <th>份数</th>
+            <td>{{form.copies}}</td>
+        </tr>
+    </table>
+</div>
+
+<div class="text-center">
+    <h1 class="text-danger text-center">
+        <span>￥</span><span id="fee">{{form["fee"]}}</span>
+    </h1>
+    <!-- <p class="" id="out_trade_no">{{out_trade_no}}</p>
+    <p class="" id="pay_url">{{pay_url}}</p> -->
+    <img class="" id="pay_img">
+</div>
+
+<div class="text-center">
+    <button type="reset" class="btn btn-danger" id="withdraw-btn">撤销</button>
+</div>
+
+
+{% endblock %}
+
+
+
+{% block js %}
+
+<script src="/static/js/qrious.js"></script>
+
+<script>
+
+    var qrious = new QRious({
+        element: document.getElementById("pay_img"),// 指定的是图片所在的DOM对象
+        size: 250,									//指定图片的像素大小
+        level: 'H',									//指定二维码的容错级别(H:可以恢复30%的数据)
+        value: '{{pay_url}}'                        //指定二维码图片url
+    })
+</script>
+
+{% endblock %}
