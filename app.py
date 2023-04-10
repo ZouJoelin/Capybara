@@ -201,22 +201,17 @@ def polling_query():
 
     # lookup local sql first to avoid unnecessary network requests
     """ToDo"""
+    ## if out_trade_no exists and file printed: apology("订单所对应文件已打印过")
+
 
     # call utils.query() according to out_trade_to
     code, trade_state, trade_time = query(out_trade_no)
-    # print('>>>>>code: %s \n>>>>>message: %s' % (code, message))
-    # print(">>>>>type of message:     ", type(message))
-    # parse message
-
-
-
-    return jsonify({'message': trade_state})
 
     # log into sql
 
-    return apology("query: ToDo...")
 
-    return 
+    return jsonify({'trade_state': trade_state})
+
 
 
 @app.route("/notify")

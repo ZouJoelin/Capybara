@@ -83,8 +83,12 @@
                 }
             })
             .then(data => {
-                queryResult.textContent = JSON.stringify(data);
-                setTimeout(fetchQuery, 5000); // 间隔5秒后再次调用 fetchQuery 函数
+                console.log("trade_state: ", data.trade_state);
+                if (data.trade_state == 'SUCCESS') {
+                    window.location.href = '/print_file';
+                } else {
+                    setTimeout(fetchQuery, 5000); // 间隔5秒后再次调用 fetchQuery 函数
+                }
             })
             .catch(error => {
                 console.error(error);
