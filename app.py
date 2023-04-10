@@ -148,16 +148,15 @@ def auto_count():
         return jsonify({'fee': session["fee"]})
 
 
-
-@app.route("/pay")
+@app.route("/pay", methods=["GET", "POST"])
 # input:    GET request
 # output:   render("pay.html", form, out_trade_no, pay_url)
 @formfilled_required(session)
 def pay():
     if request.method == "POST":
-        """ToDO"""
         # withdraw webpage
-
+        out_trade_no = request.form["out_trade_no"]
+        close(out_trade_no)
         return redirect("/")
     
     else:
@@ -191,14 +190,27 @@ def pay():
         return render_template("pay.html", form=session, out_trade_no=out_trade_no, pay_url=pay_url)
     
 
-@app.route("/query")
+@app.route("/polling_query")
 # input:    GET request: out_trade_no
 # output:   message
-def query():
-    """ToDo"""
+def polling_query():
+
+    print(">>>>>>>>>> @query >>>>>>>>>>")
+    out_trade_no = request.args.get("out_trade_no")
+    print(">>>>>out_trade_no:     ", out_trade_no)
+
     # lookup local sql first to avoid unnecessary network requests
+    """ToDo"""
 
     # call utils.query() according to out_trade_to
+    code, trade_state, trade_time = query(out_trade_no)
+    # print('>>>>>code: %s \n>>>>>message: %s' % (code, message))
+    # print(">>>>>type of message:     ", type(message))
+    # parse message
+
+
+
+    return jsonify({'message': trade_state})
 
     # log into sql
 

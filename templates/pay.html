@@ -40,13 +40,14 @@
     <h1 class="text-danger text-center">
         <span>￥</span><span id="fee">{{form["fee"]}}</span>
     </h1>
-    <!-- <p class="" id="out_trade_no">{{out_trade_no}}</p>
-    <p class="" id="pay_url">{{pay_url}}</p> -->
     <img class="" id="pay_img">
 </div>
 
 <div class="text-center">
-    <button type="reset" class="btn btn-danger" id="withdraw-btn">撤销</button>
+    <form action="/pay" method="post">
+        <input type="text" name="out_trade_no" id="" value="{{out_trade_no}}" hidden>
+        <button type="submit" class="btn btn-danger" id="withdraw-btn">撤销</button>
+    </form>
 </div>
 
 
@@ -66,6 +67,33 @@
         level: 'H',									//指定二维码的容错级别(H:可以恢复30%的数据)
         value: '{{pay_url}}'                        //指定二维码图片url
     })
+</script>
+
+
+<script>
+    const out_trade_no = '{{out_trade_no}}'
+
+    function fetchQuery() {
+        fetch('/polling_query?out_trade_no=' + out_trade_no)
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('请求失败：' + response.statusText);
+                }
+            })
+            .then(data => {
+                queryResult.textContent = JSON.stringify(data);
+                setTimeout(fetchQuery, 5000); // 间隔5秒后再次调用 fetchQuery 函数
+            })
+            .catch(error => {
+                console.error(error);
+                setTimeout(fetchQuery, 5000); // 如果请求失败，则间隔5秒后再次调用 fetchQuery 函数
+            });
+    }
+
+    fetchQuery(); // 初次调用 fetchQuery 函数
+
 </script>
 
 {% endblock %}

@@ -75,3 +75,21 @@ document.getElementById("submit-btn").addEventListener("click", submitForm);
 function submitForm() {
     let result = document.getElementById("information-form").submit();
 }
+
+
+/////////////////////////////////
+// withdraw page
+document.getElementById("withdraw-btn").addEventListener("click", () => {
+
+    let formData = new FormData();
+    formData.append('out_trade_no', '{{out_trade_no}}');
+    fetch('/pay', {
+        method: 'POST',
+        body: formData
+    }).then(response => {
+        console.log(response);
+    }).catch(error => {
+        console.error(error);
+    });
+});
+

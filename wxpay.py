@@ -1,4 +1,5 @@
 
+import json
 
 from wechatpayv3 import SignType, WeChatPay, WeChatPayType
 
@@ -77,13 +78,37 @@ def pay_native(amount, out_trade_no, description):
 
 # close the trade
 def close(out_trade_no):
+     
+    code, message = wxpay.close(out_trade_no=out_trade_no)
+    print(">>>>>>>>>>>>>>> close trade  >>>>>>>>>>")
+    print('>>>>>code: %s \n>>>>>message: %s' % (code, message))
 
-
-    return
+    return code, message
 
 
 # query for trade state
 def query(out_trade_no):
+
+    code, message = wxpay.query(out_trade_no=out_trade_no)
+    print('>>>>>code: %s \n>>>>>message: %s' % (code, message))
+    print(">>>>>type of message:     ", type(message))
+
+    # parse message
+    message = json.loads(message)
+    print(">>>>>TYPE OF MESSAGE:     ", type(message))
+    print(">>>>>MESSAGE:     ", message)
+
+    for key in message.keys():
+        print(">>>>>"+ key +":     ", message[key])
+        print(">>>>>type of " + key +":     ", type(message[key]))
+        
+    trade_state = message.get("trade_state")
+    trade_time = message.get("success_time")
+
+    print(">>>>>trade_state:     ", trade_state)
+    print(">>>>>trade_time:     ", trade_time)
+
+    return code, trade_state, trade_time
 
 
     return
