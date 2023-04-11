@@ -111,9 +111,6 @@ def query(out_trade_no):
     return code, trade_state, trade_time
 
 
-    return
-
-
 # receive wx's callback
 def callback(header, data):
 

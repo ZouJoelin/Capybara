@@ -23,10 +23,12 @@
         </tr>
         <tr>
             <th>单双</th>
-            {% if form.side == "single_side" %}
+            {% if form.side == "one_side" %}
             <td>单面打印</td>
+            {% elif form.side == "two_side_long_edge"%}
+            <td>双面打印，长边翻转</td>
             {% else %}
-            <td>双面打印</td>
+            <td>双面打印，短边翻转</td>
             {% endif %}
         </tr>
         <tr>
@@ -44,7 +46,8 @@
 </div>
 
 <div class="text-center">
-    <form action="/pay" method="post">
+    <form action="/" method="post">
+        <input type="text" name="source" id="source" value="pay.html" hidden>
         <input type="text" name="out_trade_no" id="" value="{{out_trade_no}}" hidden>
         <button type="submit" class="btn btn-danger" id="withdraw-btn">撤销</button>
     </form>

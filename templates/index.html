@@ -31,11 +31,17 @@
         <div class="d-flex justify-content-between align-items-center">
             <label class="form-label" for="side">单双</label>
             <div class="btn-group" role="group" style="margin-top: 0.5rem; margin-bottom: 0.5rem;">
-                <input type="radio" class="btn-check" id="single_side" name="side" value="single_side">
-                <label class="btn btn-outline-primary" for="single_side">单面</label>
 
-                <input type="radio" class="btn-check" id="double_side" name="side" value="double_side" checked>
-                <label class="btn btn-outline-primary" for="double_side">双面</label>
+                <input type="radio" class="btn-check" id="one_side" name="side" value="one_side">
+                <label class="btn btn-outline-primary" for="one_side">单面</label>
+
+                <input type="radio" class="btn-check" id="two_side_long_edge" name="side" value="two_side_long_edge"
+                    checked>
+                <label class="btn btn-outline-primary" for="two_side_long_edge">双面长边</label>
+
+                <input type="radio" class="btn-check" id="two_side_short_edge" name="side" value="two_side_short_edge">
+                <label class="btn btn-outline-primary" for="two_side_short_edge">双面短边</label>
+
             </div>
         </div>
 
@@ -51,8 +57,10 @@
 </div>
 
 <div class="d-flex mt-3 gap-3 float-end">
-    <button type="reset" class="btn btn-danger" id="reset-btn">取消</button>
-    <a href="/pay" class="btn btn-primary">支付并打印</a>
+    <form action="/pay" method="post">
+        <button type="reset" class="btn btn-danger" id="reset-btn">取消</button>
+        <button type="submit" class="btn btn-primary">支付并打印</button>
+    </form>
 </div>
 
 
@@ -64,9 +72,12 @@
         document.getElementById("file-form").reset();
         document.getElementById("information-form").reset();
         document.getElementById("fee").innerHTML = '0.00';
-        fetch('/auto_count', {
+
+        let formData = new FormData();
+        formData.append('source', 'index.html');
+        fetch('/', {
             method: 'POST',
-            body: ''
+            body: formData
         }).then(response => {
             console.log(response);
         }).catch(error => {

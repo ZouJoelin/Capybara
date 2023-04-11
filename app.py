@@ -7,7 +7,7 @@ from string import ascii_letters, digits
 
 from PyPDF2 import PdfReader
 
-from flask import Flask, render_template, redirect, request, jsonify
+from flask import Flask, render_template, redirect, request, jsonify, url_for
 from flask_session import Session
 
 
@@ -64,27 +64,36 @@ db = SQL("sqlite:///capybara.db")
 #     return response
 
 
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 # input:    GET request
 # output:   render("index.html")
+# input:    POST request
+# output:   redirect("/")
 def index():
-        
+    if request.method == "POST":
+        source = request.form["source"]
+        if source == "pay.html":
+            # withdraw from pay.html
+            print(">>>>>withdraw from pay.html")
+            out_trade_no = request.form["out_trade_no"]
+            close(out_trade_no)
+            return redirect("/")
+        else:
+            # call reset from index.html
+            print(">>>>>reset session...")
+            session["filename"] = None
+            session["pages"] = 0
+            session["fee"] = None
+            return 'OK'
+   
+    else:
         return render_template("index.html")
 
 
 @app.route("/auto_count", methods=["POST"])
 # input:    POST request: files | form's items
-# output:   pages, fee
+# output:   pages or fee
 def auto_count():
-
-    print(">>>>>request.cotent-length:     ", request.content_length)
-    # reset session["*"]
-    if  request.content_length == 0:
-        print(">>>>>reset session...")
-        session["filename"] = None
-        session["pages"] = 0
-        session["fee"] = None
-        return 'OK'
 
     print(">>>>>request:     ", request)
     print(">>>>>file?:     ", request.files)
@@ -149,17 +158,13 @@ def auto_count():
 
 
 @app.route("/pay", methods=["GET", "POST"])
+# inout:    POST request
+# output:   redirect("/pay?pay_url=___&out_trade_no=___")
 # input:    GET request
 # output:   render("pay.html", form, out_trade_no, pay_url)
 @formfilled_required(session)
 def pay():
     if request.method == "POST":
-        # withdraw webpage
-        out_trade_no = request.form["out_trade_no"]
-        close(out_trade_no)
-        return redirect("/")
-    
-    else:
         # generate trade info
         print(">>>>>type of FEE:     ", type(session["fee"]))
         print(">>>>>FEE:     ", session["fee"])
@@ -187,8 +192,15 @@ def pay():
         print(">>>>>TYPE OF PAY_URL:     ", type(pay_url))
         print(">>>>>PAY_URL:     ", pay_url)
 
-        return render_template("pay.html", form=session, out_trade_no=out_trade_no, pay_url=pay_url)
-    
+        url = url_for('pay', pay_url=pay_url, out_trade_no=out_trade_no)
+        print(">>>>>url_for:     ", url)
+        return redirect(url)
+
+    else:
+        pay_url = request.args.get("pay_url")
+        out_trade_no = request.args.get("out_trade_no")
+        return render_template("pay.html", out_trade_no=out_trade_no, pay_url=pay_url, form=session)
+
 
 @app.route("/polling_query")
 # input:    GET request: out_trade_no
