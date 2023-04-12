@@ -85,9 +85,9 @@
                     throw new Error('请求失败：' + response.statusText);
                 }
             })
-            .then(data => {
-                console.log("trade_state: ", data.trade_state);
-                if (data.trade_state == 'SUCCESS') {
+            .then(result => {
+                console.log("message: ", result.message);
+                if (result.message == 'SUCCESS') {
                     window.location.href = '/print_file';
                 } else {
                     setTimeout(fetchQuery, 5000); // 间隔5秒后再次调用 fetchQuery 函数

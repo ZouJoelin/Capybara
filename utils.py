@@ -6,6 +6,7 @@ from functools import wraps
 
 ALLOW_EXTENSIONS = {"pdf"}
 
+
 # render apology page when something goes wrong
 def apology(message, code=400):
 

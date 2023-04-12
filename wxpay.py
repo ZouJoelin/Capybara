@@ -3,7 +3,7 @@ import json
 
 from wechatpayv3 import SignType, WeChatPay, WeChatPayType
 
-
+from sql import SQL
 
 #############################
 # initialize wxpay
@@ -56,6 +56,9 @@ wxpay = WeChatPay(
     proxy=PROXY)
 
 
+# Configure CS50 Library to use SQLite database
+db = SQL("sqlite:///capybara.db")
+
 
 
 # make a trade: native
@@ -78,10 +81,12 @@ def pay_native(amount, out_trade_no, description):
 
 # close the trade
 def close(out_trade_no):
-     
-    code, message = wxpay.close(out_trade_no=out_trade_no)
+
     print(">>>>>>>>>>>>>>> close trade  >>>>>>>>>>")
+    code, message = wxpay.close(out_trade_no=out_trade_no)
     print('>>>>>code: %s \n>>>>>message: %s' % (code, message))
+    db.execute("UPDATE print_order SET trade_state = (?) WHERE out_trade_no = (?)", 
+            "CLOSED", out_trade_no)
 
     return code, message
 

@@ -85,7 +85,6 @@ def index():
             session["pages"] = 0
             session["fee"] = None
             return 'OK'
-   
     else:
         return render_template("index.html")
 
@@ -192,6 +191,11 @@ def pay():
         print(">>>>>TYPE OF PAY_URL:     ", type(pay_url))
         print(">>>>>PAY_URL:     ", pay_url)
 
+        # log into sql
+        db.execute("INSERT INTO print_order (id, filename, pages, paper_type, color, side, copies, fee, out_trade_no, trade_type) VALUES((SELECT MAX(id) + 1 FROM print_order), ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    session["filename"], session["pages"], session["side"], session["paper_type"], session["color"], session["copies"], session["fee"],
+                    out_trade_no, "NATIVE")
+
         url = url_for('pay', pay_url=pay_url, out_trade_no=out_trade_no)
         print(">>>>>url_for:     ", url)
         return redirect(url)
@@ -212,17 +216,37 @@ def polling_query():
     print(">>>>>out_trade_no:     ", out_trade_no)
 
     # lookup local sql first to avoid unnecessary network requests
-    """ToDo"""
-    ## if out_trade_no exists and file printed: apology("订单所对应文件已打印过")
+    print_order = db.execute("SELECT trade_state, print_state FROM print_order WHERE out_trade_no = (?)", out_trade_no)
+    print(">>>>>print_order:     ", print_order)
 
+    if not print_order:
+        print(">>>>>untracked out_pay_no!!!")
+        return apology("oops！订单不存在", 403)
 
-    # call utils.query() according to out_trade_to
+    print_order = print_order[0]
+    if print_order["trade_state"] == "SUCCESS":
+        # capture cheating
+        if print_order["print_state"] == "SUCCESS":
+            print(">>>>>capture cheating!!!")
+            return apology("订单所对应文件已打印过", 403)
+        # shortcut return
+        else:
+            print(">>>>>shortcut return!!!")
+            return jsonify({'message': trade_state})  
+        
+    if print_order["trade_state"] in {"CLOSED", "REFUND"}:
+        print(">>>>>print_order closed!!!")
+        return apology("该订单已关闭， 请重新下单", 403)
+
+    # call wxpay.query() according to out_trade_to
     code, trade_state, trade_time = query(out_trade_no)
 
-    # log into sql
+    # update sql
+    if trade_state != "NOTPAY":
+        db.execute("UPDATE print_order SET trade_state = (?), trade_time = (?) WHERE out_trade_no = (?)", 
+                trade_state, trade_time, out_trade_no)
 
-
-    return jsonify({'trade_state': trade_state})
+    return jsonify({'message': trade_state})  
 
 
 
@@ -249,7 +273,7 @@ def print_file():
 
     # update sql's col: print_stateS
 
-    return apology("print_file: ToDo...")
+    return apology("print_file: ToDo...", 404)
 
     return render_template("print_file.html")
 
