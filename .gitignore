@@ -1,7 +1,9 @@
 /__pycache__
 /flask_session
+/files_temp/*
 
 /.docs
 /private_security
 *.db
-/files_temp/*
+
+trash
