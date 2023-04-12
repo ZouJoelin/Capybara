@@ -75,7 +75,14 @@ def parse(message):
     return
 
 
-def OSprint():
+def OSprint(filepath, session):
+    print(">>>>>>>>>> OS printing >>>>>>>>>>")
+    # -o landscape???
+    option = "-o media={} -o sides={} -# {}".format(
+        session["paper_type"], session["sides"], session["copies"])
+    print(">>>>>option:     ", option)
+    os.system(f"echo 'lpr {option}' '{filepath}'")
+    os.system(f"lpr {option} '{filepath}' ")
 
     return
     

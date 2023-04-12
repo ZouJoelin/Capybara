@@ -23,9 +23,9 @@
         </tr>
         <tr>
             <th>单双</th>
-            {% if form.side == "one_side" %}
+            {% if form.sides == "one-sided" %}
             <td>单面打印</td>
-            {% elif form.side == "two_side_long_edge"%}
+            {% elif form.sides == "two-sided-long-edge"%}
             <td>双面打印，长边翻转</td>
             {% else %}
             <td>双面打印，短边翻转</td>
@@ -88,7 +88,7 @@
             .then(result => {
                 console.log("message: ", result.message);
                 if (result.message == 'SUCCESS') {
-                    window.location.href = '/print_file';
+                    window.location.href = '/print_file?out_trade_no=' + out_trade_no;
                 } else {
                     setTimeout(fetchQuery, 5000); // 间隔5秒后再次调用 fetchQuery 函数
                 }

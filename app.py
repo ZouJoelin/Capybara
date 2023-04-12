@@ -42,7 +42,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # init session["*"]
-items = ["filename", "pages", "paper_type", "color", "side", "copies", "fee"]
+items = ["filename", "pages", "paper_type", "color", "sides", "copies", "fee"]
 session = dict.fromkeys(items)
 session["pages"] = 0
 session["copies"] = 1
@@ -192,8 +192,8 @@ def pay():
         print(">>>>>PAY_URL:     ", pay_url)
 
         # log into sql
-        db.execute("INSERT INTO print_order (id, filename, pages, paper_type, color, side, copies, fee, out_trade_no, trade_type) VALUES((SELECT MAX(id) + 1 FROM print_order), ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                    session["filename"], session["pages"], session["side"], session["paper_type"], session["color"], session["copies"], session["fee"],
+        db.execute("INSERT INTO print_order (id, filename, pages, paper_type, color, sides, copies, fee, out_trade_no, trade_type) VALUES((SELECT MAX(id) + 1 FROM print_order), ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    session["filename"], session["pages"], session["sides"], session["paper_type"], session["color"], session["copies"], session["fee"],
                     out_trade_no, "NATIVE")
 
         url = url_for('pay', pay_url=pay_url, out_trade_no=out_trade_no)
@@ -267,15 +267,43 @@ def notify():
 @app.route("/print_file")
 # input:    GET
 # output:   render("print_file.html", filename)
+@formfilled_required(session)
 def print_file():
-    """ToDO"""
+    print(">>>>>>>>>> print_file >>>>>>>>>>")
+    out_trade_no = request.args.get("out_trade_no")
+    print_order = db.execute("SELECT filename, trade_state, print_state FROM print_order WHERE out_trade_no = (?)", out_trade_no)
+    print(">>>>>out_trade_no:     ", out_trade_no)
+    print(">>>>>print_order:     ", print_order)
+
+    # verify out_trade_no 
+    if not print_order:
+        print(">>>>>untracked out_pay_no!!!")
+        return apology("oops！订单不存在", 403)
+    
+    print_order = print_order[0]
+    if print_order["trade_state"] != "SUCCESS":
+        print(">>>>>unpaid out_pay_no!!!")
+        return apology("订单未支付", 403)
+    else:
+        if print_order["print_state"] == "SUCCESS":
+            print(">>>>>capture cheating!!!")
+            return apology("订单所对应文件已打印过", 403)
+    
+    if print_order["filename"] != session["filename"]:
+        return apology("订单号与提交文件不符")
+    
     # make print command according to session["*"]
+    filepath = os.path.join(app.config["UPLOAD_FOLDER"], session["filename"])
+    print(">>>>>filefolder:     ", app.config["UPLOAD_FOLDER"])
+    print(">>>>>filepath:     ", filepath)
+    OSprint(filepath=filepath, session=session)
 
     # update sql's col: print_stateS
+    db.execute("UPDATE print_order SET print_state = (?) WHERE out_trade_no = (?)", 
+                "SUCCESS", out_trade_no)
 
-    return apology("print_file: ToDo...", 404)
+    return render_template("print_file.html", filename = session["filename"])
 
-    return render_template("print_file.html")
 
 if __name__ == "__main__":
     app.run(debug=True)
