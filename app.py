@@ -145,7 +145,7 @@ def auto_count():
             elif key == "copies":
                 session[key] = int(form[key])
             else:
-                    session[key] = form[key]
+                session[key] = form[key]
 
         ## calculate fee
         session["fee"] = session["pages"] * session["copies"] * PRICE_PER_PAGE
@@ -216,7 +216,7 @@ def polling_query():
     print(">>>>>out_trade_no:     ", out_trade_no)
 
     # lookup local sql first to avoid unnecessary network requests
-    print_order = db.execute("SELECT trade_state, print_state FROM print_order WHERE out_trade_no = (?)", out_trade_no)
+    print_order = db.execute("SELECT trade_state FROM print_order WHERE out_trade_no = (?)", out_trade_no)
     print(">>>>>print_order:     ", print_order)
 
     if not print_order:
@@ -225,14 +225,9 @@ def polling_query():
 
     print_order = print_order[0]
     if print_order["trade_state"] == "SUCCESS":
-        # capture cheating
-        if print_order["print_state"] == "SUCCESS":
-            print(">>>>>capture cheating!!!")
-            return apology("订单所对应文件已打印过", 403)
         # shortcut return
-        else:
-            print(">>>>>shortcut return!!!")
-            return jsonify({'message': trade_state})  
+        print(">>>>>shortcut return!!!")
+        return jsonify({'message':  print_order["trade_state"]})  
         
     if print_order["trade_state"] in {"CLOSED", "REFUND"}:
         print(">>>>>print_order closed!!!")
@@ -290,6 +285,7 @@ def print_file():
             return apology("订单未支付", 403)
         else:
             if print_order["print_state"] == "SUCCESS":
+                # capture cheating
                 print(">>>>>capture cheating!!!")
                 return apology("订单所对应文件已打印过", 403)
     
@@ -300,12 +296,16 @@ def print_file():
         filepath = os.path.join(app.config["UPLOAD_FOLDER"], session["filename"])
         print(">>>>>filefolder:     ", app.config["UPLOAD_FOLDER"])
         print(">>>>>filepath:     ", filepath)
-        OSprint(filepath=filepath, session=session)
+        print_state = OSprint(filepath=filepath, session=session)
 
         # update sql's col: print_stateS
         db.execute("UPDATE print_order SET print_state = (?) WHERE out_trade_no = (?)", 
-                    "SUCCESS", out_trade_no)
-        return redirect("/print_file")
+                    print_state, out_trade_no)
+        
+        if print_state == "FAILED":
+            return apology("打印失败", 500)
+        else:
+            return redirect("/print_file")
     
     else:
         return render_template("print_file.html", filename = session["filename"])

@@ -14,14 +14,14 @@ file.addEventListener('change', async function (event) {
         body: formData
     });
 
-    alert("response:" + response);
+    //alert("response:" + response);
     let parsedJSON = await response.json();
-    alert("parsedJSON:" + parsedJSON);
+    //alert("parsedJSON:" + parsedJSON);
     let pages = parsedJSON.pages;
-    alert("pages:" + +pages);
+    //alert("pages:" + +pages);
 
     document.getElementById('pages').value = pages;
-    alert(document.getElementById('pages').value);
+    //alert(document.getElementById('pages').value);
 
     let pagesChangeEvent = new Event("change", { "bubbles": true });
     document.getElementById("information-form").dispatchEvent(pagesChangeEvent);
@@ -48,12 +48,12 @@ form.addEventListener('change', async function (event) {
         body: formData
     });
 
-    alert("response:" + response);
+    //alert("response:" + response);
     let parsedJSON = await response.json();
-    alert("parsedJSON:" + parsedJSON);
+    //alert("parsedJSON:" + parsedJSON);
     let fee = parsedJSON.fee;
-    alert("fee:" + fee);
+    //alert("fee:" + fee);
 
     document.getElementById('fee').innerHTML = fee.toFixed(2);
-    alert(document.getElementById('fee').innerHTML);
+    //alert(document.getElementById('fee').innerHTML);
 });

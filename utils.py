@@ -82,9 +82,13 @@ def OSprint(filepath, session):
         session["paper_type"], session["sides"], session["copies"])
     print(">>>>>option:     ", option)
     os.system(f"echo 'lpr {option}' '{filepath}'")
-    os.system(f"lpr {option} '{filepath}' ")
 
-    return
+    response_error = os.system(f"lpr {option} '{filepath}' ")
+    # 0: succeeded; !0: failed
+    if response_error == 0:
+        return 'SUCCESS'
+    else:
+        return 'FAILED'
     
 
 
