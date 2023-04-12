@@ -53,6 +53,12 @@
     </form>
 </div>
 
+<div hidden>
+    <form action="/print_file" method="post" id="print-order">
+        <input type="text" name="out_trade_no" id="" value="{{out_trade_no}}" hidden>
+    </form>
+</div>
+
 
 {% endblock %}
 
@@ -88,7 +94,8 @@
             .then(result => {
                 console.log("message: ", result.message);
                 if (result.message == 'SUCCESS') {
-                    window.location.href = '/print_file?out_trade_no=' + out_trade_no;
+                    document.getElementById("print-order").submit();
+                    //window.location.href = '/print_file?out_trade_no=' + out_trade_no;
                 } else {
                     setTimeout(fetchQuery, 5000); // 间隔5秒后再次调用 fetchQuery 函数
                 }
