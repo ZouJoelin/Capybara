@@ -5,11 +5,10 @@ import json
 from random import sample
 from string import ascii_letters, digits
 
-from PyPDF2 import PdfReader
-
 from flask import Flask, render_template, redirect, request, jsonify, url_for
 from flask_session import Session
 
+from PyPDF2 import PdfReader
 
 from sql import SQL
 from wxpay import *
@@ -54,6 +53,10 @@ app.jinja_env.filters["rmb"] = rmb
 # Configure CS50 Library to use SQLite database
 db = SQL("sqlite:///capybara.db")
 
+
+###############################################
+# service logic start here
+###############################################
 
 # @app.after_request
 # def after_request(response):

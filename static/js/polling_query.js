@@ -1,4 +1,6 @@
-const out_trade_no = '{{out_trade_no}}'
+
+
+const out_trade_no = document.getElementById("out_trade_no").value
 
 function fetchQuery() {
     fetch('/polling_query?out_trade_no=' + out_trade_no)
@@ -25,3 +27,4 @@ function fetchQuery() {
 }
 
 fetchQuery(); // 初次调用 fetchQuery 函数
+

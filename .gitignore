@@ -1,9 +1,10 @@
 /__pycache__
 /flask_session
 /files_temp/*
+*.log
 
 /.docs
 /private_security
-*.db
+capybara.db
 
 trash
