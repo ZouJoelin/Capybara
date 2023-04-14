@@ -8,3 +8,5 @@ sqlparse
 termcolor
 PyPDF2
 
+gunicorn
+gevent

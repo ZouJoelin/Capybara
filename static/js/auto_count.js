@@ -31,10 +31,10 @@ file.addEventListener('change', async function (event) {
 let form = document.getElementById("information-form");
 
 form.addEventListener('change', async function (event) {
-    // console.log(event)
-    // console.log(event.target)
-    // console.log(form)
-    // console.log(form.form)
+    // console.log(event);
+    // console.log(event.target);
+    // console.log(form);
+    // console.log(form.form);
     let uploadForm = form;
 
     let formData = new FormData(uploadForm);
