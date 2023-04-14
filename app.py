@@ -49,7 +49,6 @@ session["copies"] = 1
 # Custom filter
 app.jinja_env.filters["rmb"] = rmb
 
-
 # Configure CS50 Library to use SQLite database
 db = SQL("sqlite:///capybara.db")
 
@@ -77,13 +76,13 @@ def index():
         source = request.form["source"]
         if source == "pay.html":
             # withdraw from pay.html
-            print(">>>>>withdraw from pay.html")
+            print(">>>>>>>>>> withdraw from pay.html >>>>>>>>>>")
             out_trade_no = request.form["out_trade_no"]
             close(out_trade_no)
             return redirect("/")
         else:
             # call reset from index.html
-            print(">>>>>reset session...")
+            print(">>>>>>>>>> reset session >>>>>>>>>>")
             session["filename"] = None
             session["pages"] = 0
             session["fee"] = None
@@ -97,31 +96,30 @@ def index():
 # output:   pages or fee
 def auto_count():
 
-    print(">>>>>request:     ", request)
-    print(">>>>>file?:     ", request.files)
-    print(">>>>>form?:     ", request.form)
+    # print(">>>>>request:     ", request)
+    # print(">>>>>file?:     ", request.files)
+    # print(">>>>>form?:     ", request.form)
 
     # · save file, count pages
     if request.files:
         ## process file
-        print(">>>>>received file...")
+        print(">>>>>>>>>> received file >>>>>>>>>>")
         file = request.files["file"]
         filename = file.filename
-        print(">>>>>type of filename:     ", type(filename))
-        print(">>>>>original filename:     ", filename)
+        # print(">>>>>type of filename:     ", type(filename))
+        # print(">>>>>original filename:     ", filename)
 
         if not validate_file(filename):
             return apology("请上传pdf文件")
-        print(">>>>>out of validate_file()")
 
         filename = secure_filename(filename)
-        print(">>>>>secured filename:     ", filename)
+        # print(">>>>>secured filename:     ", filename)
 
         ## save file
         filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-        print(">>>>>file's save-path:     ", filepath)
+        # print(">>>>>file's save-path:     ", filepath)
         file.save(filepath)
-        print(">>>>>file uploaded successfully!!!")
+        # print(">>>>>file uploaded successfully!!!")
 
         ## count pages
         readpdf = PdfReader(file)
@@ -135,14 +133,13 @@ def auto_count():
     
     # · calculate fee, update session["*"]
     if request.form:
-        print(">>>>>received form...")
+        print(">>>>>>>>>> received form >>>>>>>>>>")
         form = request.form
-        print(">>>>>form:     ", form)
+        # print(">>>>>form:     ", form)
 
         ## update session["*"]
-        print(">>>>>>>>>>>>>>> form >>>>>>>>>>")
         for key in form.keys():
-            print(">>>>>" + key + ":     ", form[key])
+            # print(">>>>>" + key + ":     ", form[key])
             if key == "pages":
                 continue
             elif key == "copies":
@@ -152,7 +149,7 @@ def auto_count():
 
         ## calculate fee
         session["fee"] = session["pages"] * session["copies"] * PRICE_PER_PAGE
-        print(">>>>>>>>>>>>>>> session >>>>>>>>>>")
+        print(">>>>>>>>>> session >>>>>>>>>>")
         for key in session.keys():
             print(">>>>>"+ key +":     ", session[key])
 
@@ -168,31 +165,31 @@ def auto_count():
 def pay():
     if request.method == "POST":
         # generate trade info
-        print(">>>>>type of FEE:     ", type(session["fee"]))
-        print(">>>>>FEE:     ", session["fee"])
+        # print(">>>>>type of FEE:     ", type(session["fee"]))
+        # print(">>>>>FEE:     ", session["fee"])
 
         amount = int(session["fee"] * 100)
-        print(">>>>>amount:     " ,amount)
+        # print(">>>>>amount:     " ,amount)
 
         out_trade_no = time.strftime("%Y%m%dT%H%M", time.localtime()) + ''.join(sample(ascii_letters,3))
-        print(">>>>>out_trade_no:     " ,out_trade_no)
+        # print(">>>>>out_trade_no:     " ,out_trade_no)
 
         description = session["filename"]
-        print(">>>>>description:     " ,description)
+        # print(">>>>>description:     " ,description)
 
         # call wxpay.pay_native()
         result = pay_native(amount, out_trade_no, description)
-        print(">>>>>TYPE OF RESULT:     ", type(result))
-        print(">>>>>RESULT:     ", result)
+        # print(">>>>>TYPE OF RESULT:     ", type(result))
+        # print(">>>>>RESULT:     ", result)
 
         # parse message
         message = json.loads(result["message"])
-        print(">>>>>TYPE OF MESSAGE:     ", type(message))
-        print(">>>>>MESSAGE:     ", message)
+        # print(">>>>>TYPE OF MESSAGE:     ", type(message))
+        # print(">>>>>MESSAGE:     ", message)
 
         pay_url = message["code_url"]
-        print(">>>>>TYPE OF PAY_URL:     ", type(pay_url))
-        print(">>>>>PAY_URL:     ", pay_url)
+        # print(">>>>>TYPE OF PAY_URL:     ", type(pay_url))
+        # print(">>>>>PAY_URL:     ", pay_url)
 
         # log into sql
         db.execute("INSERT INTO print_order (id, filename, pages, paper_type, color, sides, copies, fee, out_trade_no, trade_type) VALUES((SELECT MAX(id) + 1 FROM print_order), ?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -200,7 +197,7 @@ def pay():
                     out_trade_no, "NATIVE")
 
         url = url_for('pay', pay_url=pay_url, out_trade_no=out_trade_no)
-        print(">>>>>url_for:     ", url)
+        # print(">>>>>url_for:     ", url)
         return redirect(url)
 
     else:
@@ -214,13 +211,13 @@ def pay():
 # output:   message
 def polling_query():
 
-    print(">>>>>>>>>> @query >>>>>>>>>>")
+    print(">>>>>>>>>> polling_query >>>>>>>>>>")
     out_trade_no = request.args.get("out_trade_no")
-    print(">>>>>out_trade_no:     ", out_trade_no)
+    # print(">>>>>out_trade_no:     ", out_trade_no)
 
     # lookup local sql first to avoid unnecessary network requests
     print_order = db.execute("SELECT trade_state FROM print_order WHERE out_trade_no = (?)", out_trade_no)
-    print(">>>>>print_order:     ", print_order)
+    # print(">>>>>print_order:     ", print_order)
 
     if not print_order:
         print(">>>>>untracked out_pay_no!!!")
@@ -264,7 +261,7 @@ def notify():
         db.execute("UPDATE print_order SET trade_state = (?), trade_time = (?) WHERE out_trade_no = (?)", 
                 result["trade_state"], result["trade_time"], result["out_trade_no"])
         db.execute("COMMIT")
-        
+
     # make response to wx's callback
         return jsonify({'code': 'SUCCESS', 'message': '成功'}), 200
     else:
@@ -279,13 +276,13 @@ def notify():
 # output:   render("print_file.html", filename)
 @formfilled_required(session)
 def print_file():
-    print(">>>>>>>>>> print_file >>>>>>>>>>")
 
     if request.method == "POST":
+        print(">>>>>>>>>> print_file >>>>>>>>>>")
         out_trade_no = request.form["out_trade_no"]
         print_order = db.execute("SELECT filename, trade_state, print_state FROM print_order WHERE out_trade_no = (?)", out_trade_no)
-        print(">>>>>out_trade_no:     ", out_trade_no)
-        print(">>>>>print_order:     ", print_order)
+        # print(">>>>>out_trade_no:     ", out_trade_no)
+        # print(">>>>>print_order:     ", print_order)
 
         # verify out_trade_no 
         if not print_order:
@@ -303,12 +300,13 @@ def print_file():
                 return apology("订单所对应文件已打印过", 403)
     
         if print_order["filename"] != session["filename"]:
+            print(">>>>>filename doesn't match!!!")
             return apology("订单号与提交文件不符")
     
         # make print command according to session["*"]
         filepath = os.path.join(app.config["UPLOAD_FOLDER"], session["filename"])
-        print(">>>>>filefolder:     ", app.config["UPLOAD_FOLDER"])
-        print(">>>>>filepath:     ", filepath)
+        # print(">>>>>filefolder:     ", app.config["UPLOAD_FOLDER"])
+        # print(">>>>>filepath:     ", filepath)
         print_state = OSprint(filepath=filepath, session=session)
 
         # update sql's col: print_stateS

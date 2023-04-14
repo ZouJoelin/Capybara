@@ -1,4 +1,3 @@
-
 import os
 
 from flask import redirect, render_template, request, session
@@ -6,6 +5,10 @@ from functools import wraps
 
 ALLOW_EXTENSIONS = {"pdf"}
 
+
+#############################
+# utils function start here
+#############################
 
 # render apology page when something goes wrong
 def apology(message, code=400):
@@ -21,7 +24,6 @@ def rmb(fee):
 
 # validate file's type
 def validate_file(filename):
-    print(">>>>>inside validate_file()")
     return "." in filename and \
     filename.rsplit(".", 1)[1].lower() in ALLOW_EXTENSIONS
 
@@ -47,7 +49,6 @@ def secure_filename(filename):
     return filename
 
 
-
 def formfilled_required(session):
     """
     Decorate routes to require formfilled. see below:
@@ -56,35 +57,30 @@ def formfilled_required(session):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            print(">>>>> @decorated >>>>>")
-            print(">>>>>keys:     ", session.keys())
+            # print(">>>>> @decorated >>>>>")
+            # print(">>>>>keys:     ", session.keys())
 
             for key in session.keys():
-                print(">>>>>"+ key +":     ", session[key])
+                # print(">>>>>"+ key +":     ", session[key])
                 if session[key] is None:
-                    print("支付并打印前请完成表格信息")
+                    print(">>>>>form unfilled as required!!!")
                     return apology("支付并打印前请完成表格信息")
             return func(*args, **kwargs)
         return wrapper
     return decorator
 
 
-# return the useful infomation in message
-def parse(message):
-
-    return
-
-
 def OSprint(filepath, session):
-    print(">>>>>>>>>> OS printing >>>>>>>>>>")
+    print("========== in OSprint()==========")
     # -o landscape???
     option = "-o media={} -o sides={} -# {}".format(
         session["paper_type"], session["sides"], session["copies"])
-    print(">>>>>option:     ", option)
+    # print(">>>>>option:     ", option)
     os.system(f"echo 'lpr {option}' '{filepath}'")
 
     response_error = os.system(f"lpr {option} '{filepath}' ")
     # 0: succeeded; !0: failed
+    print("========== end OSprint() ==========")
     if response_error == 0:
         return 'SUCCESS'
     else:

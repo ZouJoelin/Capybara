@@ -12,7 +12,7 @@ function fetchQuery() {
             }
         })
         .then(result => {
-            console.log("message: ", result.message);
+            // console.log("message: ", result.message);
             if (result.message == 'SUCCESS') {
                 document.getElementById("print-order").submit();
                 //window.location.href = '/print_file?out_trade_no=' + out_trade_no;

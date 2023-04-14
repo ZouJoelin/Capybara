@@ -79,10 +79,10 @@ db = SQL("sqlite:///capybara.db")
 
 # make a trade: native
 def pay_native(amount, out_trade_no, description):
-    print("=============in pay_native()========================")
-    print(">>>>>AMOUNT:     ", amount)
-    print(">>>>>OUT_TRADE_NO     :    ", out_trade_no)
-    print(">>>>>DESCRIPTION:     ", description)
+    print("========== in pay_native()==========")
+    # print(">>>>>AMOUNT:     ", amount)
+    # print(">>>>>OUT_TRADE_NO     :    ", out_trade_no)
+    # print(">>>>>DESCRIPTION:     ", description)
 
     code, message = wxpay.pay(
         description=description,
@@ -90,40 +90,43 @@ def pay_native(amount, out_trade_no, description):
         amount={'total': amount},
         pay_type=WeChatPayType.NATIVE
     )
-    print("========================end========================")
+    print("========== end pay_native() ==========")
     return {'code': code, 'message': message}
 
 
 # close the trade
 def close(out_trade_no):
-    print(">>>>>>>>>>>>>>> close trade  >>>>>>>>>>")
+    print("========== close() ==========")
     code, message = wxpay.close(out_trade_no=out_trade_no)
-    print('>>>>>code: %s \n>>>>>message: %s' % (code, message))
+    # print('>>>>>code: %s \n>>>>>message: %s' % (code, message))
     db.execute("UPDATE print_order SET trade_state = (?) WHERE out_trade_no = (?)", 
             "CLOSED", out_trade_no)
+    print("========== end close() ==========")
 
     return code, message
 
 
 # query for trade state
 def query(out_trade_no):
+    print("========== in query()==========")
     code, message = wxpay.query(out_trade_no=out_trade_no)
-    print('>>>>>code: %s \n>>>>>message: %s' % (code, message))
-    print(">>>>>type of message:     ", type(message))
+    # print('>>>>>code: %s \n>>>>>message: %s' % (code, message))
+    # print(">>>>>type of message:     ", type(message))
 
     # parse message
     message = json.loads(message)
-    print(">>>>>TYPE OF MESSAGE:     ", type(message))
-    print(">>>>>MESSAGE:     ", message)
+    # print(">>>>>TYPE OF MESSAGE:     ", type(message))
+    # print(">>>>>MESSAGE:     ", message)
 
-    for key in message.keys():
-        print(">>>>>"+ key +":     ", message[key])
-        print(">>>>>type of " + key +":     ", type(message[key]))
+    # for key in message.keys():
+    #     print(">>>>>"+ key +":     ", message[key])
+    #     print(">>>>>type of " + key +":     ", type(message[key]))
         
     trade_state = message.get("trade_state")
     trade_time = message.get("success_time")
-    print(">>>>>trade_state:     ", trade_state)
-    print(">>>>>trade_time:     ", trade_time)
+    # print(">>>>>trade_state:     ", trade_state)
+    # print(">>>>>trade_time:     ", trade_time)
+    print("========== end query() ==========")
 
     return code, trade_state, trade_time
 
@@ -131,7 +134,7 @@ def query(out_trade_no):
 # parse wx's callback request
 def parse_callback(headers, data):
     result = wxpay.callback(headers, data)
-    print(">>>>>CALLBACK_RESULT:     ", result)
+    # print(">>>>>CALLBACK_RESULT:     ", result)
 
     if result and result.get('event_type') == 'TRANSACTION.SUCCESS':
         response = result.get('resource')
