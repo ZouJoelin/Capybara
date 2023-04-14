@@ -253,23 +253,23 @@ def polling_query():
 # output:   response to wx
 def notify():
 
-    if callback(request.headers, request.data):
-        out_trade_no, trade_state, trade_time = callback(request.headers)
-
-        # TODO: 根据返回参数进行必要的业务处理，处理完后返回200或204
-
-
+    result = parse_callback(request.headers, request.data)
+    if result:
+        # update sql
+        db.execute("BEGIN TRANSACTION")
+        row = db.execute("SELECT trade_state FROM print_order WHERE out_trade_no = (?)", result["out_trade_no"])
+        if row[0]["trade_state"] == "SUCCESS":
+            return jsonify({'code': 'SUCCESS', 'message': '成功'}), 200
+        
+        db.execute("UPDATE print_order SET trade_state = (?), trade_time = (?) WHERE out_trade_no = (?)", 
+                result["trade_state"], result["trade_time"], result["out_trade_no"])
+        db.execute("COMMIT")
+        
+    # make response to wx's callback
         return jsonify({'code': 'SUCCESS', 'message': '成功'}), 200
     else:
-        return jsonify({'code': 'FAILED', 'message': '失败'}), 500
-
-    # parse the request
-
-    # update sql
-
-    # make response to wx's callback
-
-    return        
+        return jsonify({'code': 'FAIL', 'message': '失败'}), 500
+      
 
 
 @app.route("/print_file", methods=["GET", "POST"])

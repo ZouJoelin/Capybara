@@ -128,8 +128,8 @@ def query(out_trade_no):
     return code, trade_state, trade_time
 
 
-# receive wx's callback
-def callback(headers, data):
+# parse wx's callback request
+def parse_callback(headers, data):
     result = wxpay.callback(headers, data)
     print(">>>>>CALLBACK_RESULT:     ", result)
 
@@ -147,7 +147,9 @@ def callback(headers, data):
         # attach = response.get('attach')
         # payer = response.get('payer')
         # amount = response.get('amount').get('total')
-        return out_trade_no, trade_state, success_time
+        return {'out_trade_no': out_trade_no, 
+                'trade_state':trade_state,
+                'trade_time': success_time}
 
     return None
 
