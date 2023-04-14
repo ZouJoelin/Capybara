@@ -129,10 +129,27 @@ def query(out_trade_no):
 
 
 # receive wx's callback
-def callback(header, data):
+def callback(headers, data):
+    result = wxpay.callback(headers, data)
+    print(">>>>>CALLBACK_RESULT:     ", result)
 
+    if result and result.get('event_type') == 'TRANSACTION.SUCCESS':
+        response = result.get('resource')
+        # mchid = response.get('mchid')
+        # appid = response.get('appid')
+        out_trade_no = response.get('out_trade_no')
+        # transaction_id = response.get('transaction_id')
+        trade_type = response.get('trade_type')
+        trade_state = response.get('trade_state')
+        success_time = response.get('success_time')
+        # trade_state_desc = response.get('trade_state_desc')
+        # bank_type = response.get('bank_type')
+        # attach = response.get('attach')
+        # payer = response.get('payer')
+        # amount = response.get('amount').get('total')
+        return out_trade_no, trade_state, success_time
 
-    return
+    return None
 
 
 

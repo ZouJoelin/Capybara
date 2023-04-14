@@ -248,11 +248,21 @@ def polling_query():
 
 
 
-@app.route("/notify")
+@app.route("/notify", methods=['POST'])
 # input:    POST from wx
 # output:   response to wx
 def notify():
-    """ToDo""" 
+
+    if callback(request.headers, request.data):
+        out_trade_no, trade_state, trade_time = callback(request.headers)
+
+        # TODO: 根据返回参数进行必要的业务处理，处理完后返回200或204
+
+
+        return jsonify({'code': 'SUCCESS', 'message': '成功'}), 200
+    else:
+        return jsonify({'code': 'FAILED', 'message': '失败'}), 500
+
     # parse the request
 
     # update sql
