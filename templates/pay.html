@@ -3,8 +3,12 @@
 
 {% block main %}
 
-<div class="container">
-    <table class="table table-striped text-center">
+<div class="container text-center">
+    <h2 class="text-success">
+        确认信息
+    </h2>
+
+    <table class="table table-striped">
         <tr>
             <th>打印文件</th>
             <td>{{form.filename}}</td>
@@ -38,19 +42,12 @@
     </table>
 </div>
 
+<br>
+
 <div class="text-center">
     <h1 class="text-danger text-center">
         <span>￥</span><span id="fee">{{form["fee"]}}</span>
     </h1>
-    <img class="" id="pay_img">
-</div>
-
-<div class="text-center">
-    <form action="/" method="post">
-        <input type="text" name="source" id="source" value="pay.html" hidden>
-        <input type="text" name="out_trade_no" id="" value="{{out_trade_no}}" hidden>
-        <button type="submit" class="btn btn-danger" id="withdraw-btn">撤销</button>
-    </form>
 </div>
 
 <div hidden>
@@ -59,6 +56,43 @@
     </form>
 </div>
 
+<br>
+
+<div class="d-flex mt-3 gap-4 justify-content-center">
+    <form action="/" method="post">
+        <input type="text" name="source" id="source" value="pay.html" hidden>
+        <input type="text" name="out_trade_no" id="" value="{{out_trade_no}}" hidden>
+        <button type="submit" class="btn btn-danger" id="withdraw-btn">返回</button>
+    </form>
+
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal">拉起支付</button>
+</div>
+
+
+<div class="modal fade" id="modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- 模态框头部 -->
+            <div class="modal-header">
+                <h4 class="modal-title">微信扫码支付</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <!-- 模态框内容 -->
+            <div class="modal-body text-center">
+                <p>支付完成后，需等待约5秒...</p>
+
+                <img class="" id="pay_img">
+            </div>
+
+            <!-- 模态框底部 -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">关闭</button>
+            </div>
+
+        </div>
+    </div>
+</div>
 
 {% endblock %}
 

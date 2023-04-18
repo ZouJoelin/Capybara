@@ -26,6 +26,7 @@ UPLOAD_FOLDER = os.getcwd() + "/files_temp/"
 app = Flask(__name__)
 # app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'default-secret-key')
 
+
 """!!!Delete after development!!!"""
 # Ensure templates are auto-reloaded
 app.config["TEMPLATES_AUTO_RELOAD"] = True
