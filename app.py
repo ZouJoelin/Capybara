@@ -7,6 +7,7 @@ from string import ascii_letters, digits
 
 from flask import Flask, render_template, redirect, request, jsonify, url_for
 from flask_session import Session
+from flask_mobility import Mobility
 
 from PyPDF2 import PdfReader
 
@@ -40,6 +41,8 @@ app.config["ALLOW_EXTENSIONS"] = ALLOW_EXTENSIONS
 app.config["SESSION_PERMANENT"] = False
 # app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
+
+Mobility(app)
 
 # init session["*"]
 items = ["filename", "pages", "paper_type", "color", "sides", "copies", "fee"]
@@ -159,9 +162,9 @@ def auto_count():
 
 @app.route("/pay", methods=["GET", "POST"])
 # inout:    POST request
-# output:   redirect("/pay?pay_url=***&out_trade_no=***")
+# output:   redirect("/pay?code_url=***&out_trade_no=***")
 # input:    GET request
-# output:   render("pay.html", form, out_trade_no, pay_url)
+# output:   render("pay.html", form, out_trade_no, code_url)
 @formfilled_required(session)
 def pay():
     if request.method == "POST":
@@ -171,40 +174,52 @@ def pay():
 
         amount = int(session["fee"] * 100)
         # print(">>>>>amount:     " ,amount)
-
         out_trade_no = time.strftime("%Y%m%dT%H%M", time.localtime()) + ''.join(sample(ascii_letters,3))
         # print(">>>>>out_trade_no:     " ,out_trade_no)
-
         description = session["filename"]
         # print(">>>>>description:     " ,description)
 
-        # call wxpay.pay_native()
-        result = pay_native(amount, out_trade_no, description)
-        # print(">>>>>TYPE OF RESULT:     ", type(result))
-        # print(">>>>>RESULT:     ", result)
+        if not request.MOBILE:
+            print(">>>>> access from pc!!!")
+            # call wxpay.pay_native()
+            code, message = pay_native(amount, out_trade_no, description)
 
-        # parse message
-        message = json.loads(result["message"])
-        # print(">>>>>TYPE OF MESSAGE:     ", type(message))
-        # print(">>>>>MESSAGE:     ", message)
+            if code not in range(200, 300):
+                return apology("下单失败", code=code)
+            
+            code_url = message["code_url"]
 
-        pay_url = message["code_url"]
-        # print(">>>>>TYPE OF PAY_URL:     ", type(pay_url))
-        # print(">>>>>PAY_URL:     ", pay_url)
+            # log into sql
+            db.execute("INSERT INTO print_order (id, filename, pages, paper_type, color, sides, copies, fee, out_trade_no, trade_type) VALUES((SELECT MAX(id) + 1 FROM print_order), ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                        session["filename"], session["pages"], session["sides"], session["paper_type"], session["color"], session["copies"], session["fee"],
+                        out_trade_no, "NATIVE")
 
-        # log into sql
-        db.execute("INSERT INTO print_order (id, filename, pages, paper_type, color, sides, copies, fee, out_trade_no, trade_type) VALUES((SELECT MAX(id) + 1 FROM print_order), ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                    session["filename"], session["pages"], session["sides"], session["paper_type"], session["color"], session["copies"], session["fee"],
-                    out_trade_no, "NATIVE")
+            url = url_for('pay', code_url=code_url, out_trade_no=out_trade_no)
+            # print(">>>>>url_for:     ", url)
+            return redirect(url)
 
-        url = url_for('pay', pay_url=pay_url, out_trade_no=out_trade_no)
-        # print(">>>>>url_for:     ", url)
-        return redirect(url)
+        else:
+            print(">>>>>access from mobile!!!")
+            code, message = pay_native(amount, out_trade_no, description)
+
+            if code not in range(200, 300):
+                return apology("下单失败", code=code)
+            
+            code_url = message["code_url"]
+
+            # log into sql
+            db.execute("INSERT INTO print_order (id, filename, pages, paper_type, color, sides, copies, fee, out_trade_no, trade_type) VALUES((SELECT MAX(id) + 1 FROM print_order), ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                        session["filename"], session["pages"], session["sides"], session["paper_type"], session["color"], session["copies"], session["fee"],
+                        out_trade_no, "NATIVE")
+
+            url = url_for('pay', code_url=code_url, out_trade_no=out_trade_no)
+            # print(">>>>>url_for:     ", url)
+            return redirect(url)
 
     else:
-        pay_url = request.args.get("pay_url")
+        code_url = request.args.get("code_url")
         out_trade_no = request.args.get("out_trade_no")
-        return render_template("pay.html", out_trade_no=out_trade_no, pay_url=pay_url, form=session)
+        return render_template("pay.html", out_trade_no=out_trade_no, code_url=code_url, form=session)
 
 
 @app.route("/polling_query")

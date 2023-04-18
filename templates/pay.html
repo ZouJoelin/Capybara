@@ -80,9 +80,13 @@
 
             <!-- 模态框内容 -->
             <div class="modal-body text-center">
-                <p>支付完成后，需等待约5秒...</p>
-
+                <p>支付完成后，需等待约3秒...</p>
+                {% if request.MOBILE %}
+                <p>pull up chooseWXPay</p>
+                <p>ToDo...</p>
+                {% else %}
                 <img class="" id="pay_img">
+                {% endif %}
             </div>
 
             <!-- 模态框底部 -->
@@ -108,7 +112,7 @@
         element: document.getElementById("pay_img"),// 指定的是图片所在的DOM对象
         size: 250,									//指定图片的像素大小
         level: 'H',									//指定二维码的容错级别(H:可以恢复30%的数据)
-        value: '{{pay_url}}'                        //指定二维码图片url
+        value: '{{code_url}}'                        //指定二维码图片url
     })
 </script>
 

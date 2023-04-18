@@ -90,8 +90,44 @@ def pay_native(amount, out_trade_no, description):
         amount={'total': amount},
         pay_type=WeChatPayType.NATIVE
     )
+    if code in range(200, 300):
+        message = json.loads(message)
+        message = {
+            'code_url': message.get('code_url')
+        }
+    else:
+        message = None
     print("========== end pay_native() ==========")
-    return {'code': code, 'message': message}
+    return code, message
+
+
+# make a trade: jsapi
+def pay_jsapi(amount, out_trade_no, description, payer):
+    print("========== in pay_jsapi()==========")
+
+    code, message = wxpay.pay(
+        description=description,
+        out_trade_no=out_trade_no,
+        amount={'total': amount},
+        pay_type=WeChatPayType.JSAPI,
+        payer=payer
+    )
+
+    if code in range(200, 300):
+        message = json.loads(message)
+        message = {
+            'prepay_id': message.get('prepay_id'),
+            'appid':  APPID,
+            'timestamp': 'demo-timestamp',
+            'noncestr': 'demo-nocestr',
+            'package' : 'prepay_id=' + message.get('prepay_id'),
+            'paysign': wxpay.sign([APPID])
+        }
+    else:
+        message = None
+
+    print("========== end pay_jsapi() ==========")
+    return code, message
 
 
 # close the trade
