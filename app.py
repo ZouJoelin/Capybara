@@ -3,11 +3,12 @@ import os
 import time
 import json
 from random import sample
-from string import ascii_letters, digits
+from string import ascii_uppercase, digits
 
 from flask import Flask, render_template, redirect, request, jsonify, url_for
 from flask_session import Session
 from flask_mobility import Mobility
+import requests
 
 from PyPDF2 import PdfReader
 
@@ -76,6 +77,16 @@ db = SQL("sqlite:///capybara.db")
 # input:    POST request
 # output:   redirect("/")
 def index():
+
+    if request.MOBILE and not session.get("open_id"):
+        redirect_uri = 'http://campusprinter.nat300.top/wx_auth'
+        scope = 'snsapi_base'
+        auth_url = f'https://open.weixin.qq.com/connect/oauth2/authorize?'\
+                f'appid={APPID}&redirect_uri={redirect_uri}&'\
+                f'response_type=code&scope={scope}#wechat_redirect'
+        # print(">>>>>auth_url:     ", auth_url)
+        return redirect(auth_url)
+
     if request.method == "POST":
         source = request.form["source"]
         if source == "pay.html":
@@ -93,6 +104,28 @@ def index():
             return 'OK'
     else:
         return render_template("index.html")
+
+
+@app.route("/wx_auth")
+def wx_auth():
+    code = request.args.get('code')
+    # print(">>>>>code:     ", code)
+
+    token_url = f'https://api.weixin.qq.com/sns/oauth2/access_token?'\
+                f'appid={APPID}&secret={APP_SECRET}&code={code}&grant_type=authorization_code'
+    
+    response = requests.get(token_url)
+    # print(">>>>>response:     ", response)
+    # print(">>>>>parsed_response:     ", json.loads(response.text))
+    response = json.loads(response.text)
+
+    if response.get("errcode"):
+        return apology("access_token failed!!!\n" + response.get("errmsg"))
+    
+    open_id = response.get("openid")
+    # print(">>>>>open_id:     ", open_id)
+    session["open_id"] = open_id
+    return redirect("/")
 
 
 @app.route("/auto_count", methods=["POST"])
@@ -174,52 +207,73 @@ def pay():
 
         amount = int(session["fee"] * 100)
         # print(">>>>>amount:     " ,amount)
-        out_trade_no = time.strftime("%Y%m%dT%H%M", time.localtime()) + ''.join(sample(ascii_letters,3))
+        out_trade_no = time.strftime("%Y%m%dT%H%M", time.localtime()) + ''.join(sample(ascii_uppercase,3))
         # print(">>>>>out_trade_no:     " ,out_trade_no)
         description = session["filename"]
         # print(">>>>>description:     " ,description)
 
         if not request.MOBILE:
             print(">>>>> access from pc!!!")
-            # call wxpay.pay_native()
-            code, message = pay_native(amount, out_trade_no, description)
+            code, code_url = pay_native(amount, out_trade_no, description)
 
             if code not in range(200, 300):
                 return apology("下单失败", code=code)
-            
-            code_url = message["code_url"]
 
             # log into sql
             db.execute("INSERT INTO print_order (id, filename, pages, paper_type, color, sides, copies, fee, out_trade_no, trade_type) VALUES((SELECT MAX(id) + 1 FROM print_order), ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                        session["filename"], session["pages"], session["sides"], session["paper_type"], session["color"], session["copies"], session["fee"],
+                        session["filename"], session["pages"], session["paper_type"], session["color"], session["sides"], session["copies"], session["fee"],
                         out_trade_no, "NATIVE")
 
-            url = url_for('pay', code_url=code_url, out_trade_no=out_trade_no)
+            url = url_for('pay', out_trade_no=out_trade_no, code_url=code_url)
             # print(">>>>>url_for:     ", url)
             return redirect(url)
 
         else:
             print(">>>>>access from mobile!!!")
-            code, message = pay_native(amount, out_trade_no, description)
+            code, prepay_id = pay_jsapi(amount, out_trade_no, description, session["open_id"])
 
             if code not in range(200, 300):
                 return apology("下单失败", code=code)
             
-            code_url = message["code_url"]
+            timestamp = str(int(time.time()))
+            nonceStr = ''.join(sample(ascii_uppercase + digits, 16))
+            package = 'prepay_id=' + prepay_id
+            signType = 'RSA'
+            paySign = wxpay.sign([APPID, timestamp, nonceStr, package])
+
+            # print(">>>>>timestamp:     ", timestamp)
+            # print(">>>>>nonceStr:     ", nonceStr)
+            # print(">>>>>package:     ", package) 
+            # print(">>>>>paysign:     ", paySign)
 
             # log into sql
             db.execute("INSERT INTO print_order (id, filename, pages, paper_type, color, sides, copies, fee, out_trade_no, trade_type) VALUES((SELECT MAX(id) + 1 FROM print_order), ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                        session["filename"], session["pages"], session["sides"], session["paper_type"], session["color"], session["copies"], session["fee"],
-                        out_trade_no, "NATIVE")
+                        session["filename"], session["pages"], session["paper_type"], session["color"], session["sides"], session["copies"], session["fee"],
+                        out_trade_no, "JSAPI")
 
-            url = url_for('pay', code_url=code_url, out_trade_no=out_trade_no)
+            jsapi_sign = {
+                "appId": APPID,
+                "timestamp": timestamp,
+                "nonceStr": nonceStr,
+                "package" : package,
+                "signType": signType,
+                "paySign": paySign
+            }
+            url = url_for('pay', out_trade_no=out_trade_no, jsapi_sign=jsapi_sign)
             # print(">>>>>url_for:     ", url)
             return redirect(url)
 
     else:
-        code_url = request.args.get("code_url")
         out_trade_no = request.args.get("out_trade_no")
-        return render_template("pay.html", out_trade_no=out_trade_no, code_url=code_url, form=session)
+        if request.MOBILE:
+            jsapi_sign = request.args.get("jsapi_sign").replace("'", "\"")
+            jsapi_sign = json.loads(jsapi_sign)
+            # print(">>>>>type of jsapi_sign:     ", type(jsapi_sign))
+            # print(">>>>>jsapi_sign:     ", jsapi_sign)
+            return render_template("pay.html", out_trade_no=out_trade_no, jsapi_sign=jsapi_sign, form=session)
+        else:
+            code_url = request.args.get("code_url")
+            return render_template("pay.html", out_trade_no=out_trade_no, code_url=code_url, form=session)
 
 
 @app.route("/polling_query")

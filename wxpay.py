@@ -41,6 +41,11 @@ if not os.environ.get("NOTIFY_URL"):
     raise RuntimeError("NOTIFY_URL not set")
 NOTIFY_URL = os.environ.get("NOTIFY_URL")
 
+# 公众号开发者密码(AppSecret)
+if not os.environ.get("APP_SECRET"):
+    raise RuntimeError("APP_SECRET not set")
+APP_SECRET = os.environ.get("APP_SECRET")
+
 # 代理设置，None或者{"https": "http://10.10.1.10:1080"}，详细格式参见https://docs.python-requests.org/zh_CN/latest/user/advanced.html
 PROXY = None
 
@@ -85,49 +90,33 @@ def pay_native(amount, out_trade_no, description):
     # print(">>>>>DESCRIPTION:     ", description)
 
     code, message = wxpay.pay(
-        description=description,
-        out_trade_no=out_trade_no,
         amount={'total': amount},
+        out_trade_no=out_trade_no,
+        description=description,
         pay_type=WeChatPayType.NATIVE
     )
-    if code in range(200, 300):
-        message = json.loads(message)
-        message = {
-            'code_url': message.get('code_url')
-        }
-    else:
-        message = None
+    message = json.loads(message)
+    code_url = message.get('code_url')
     print("========== end pay_native() ==========")
-    return code, message
+    return code, code_url
 
 
 # make a trade: jsapi
-def pay_jsapi(amount, out_trade_no, description, payer):
+def pay_jsapi(amount, out_trade_no, description, open_id):
     print("========== in pay_jsapi()==========")
-
+    
+    payer = {'openid': open_id}
     code, message = wxpay.pay(
-        description=description,
-        out_trade_no=out_trade_no,
         amount={'total': amount},
+        out_trade_no=out_trade_no,
+        description=description,
         pay_type=WeChatPayType.JSAPI,
         payer=payer
     )
-
-    if code in range(200, 300):
-        message = json.loads(message)
-        message = {
-            'prepay_id': message.get('prepay_id'),
-            'appid':  APPID,
-            'timestamp': 'demo-timestamp',
-            'noncestr': 'demo-nocestr',
-            'package' : 'prepay_id=' + message.get('prepay_id'),
-            'paysign': wxpay.sign([APPID])
-        }
-    else:
-        message = None
-
+    message = json.loads(message)
+    prepay_id = message.get('prepay_id') 
     print("========== end pay_jsapi() ==========")
-    return code, message
+    return code, prepay_id
 
 
 # close the trade

@@ -64,58 +64,98 @@
         <input type="text" name="out_trade_no" id="" value="{{out_trade_no}}" hidden>
         <button type="submit" class="btn btn-danger" id="withdraw-btn">返回</button>
     </form>
-
+    {% if not request.MOBILE %}
     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal">拉起支付</button>
+    {% else %}
+    <button class="btn btn-primary" id="chooseWXPay">拉起支付</button>
+    {% endif %}
 </div>
 
 
+{% if not request.MOBILE %}
+<!-- modal -->
 <div class="modal fade" id="modal">
     <div class="modal-dialog">
         <div class="modal-content">
-            <!-- 模态框头部 -->
             <div class="modal-header">
                 <h4 class="modal-title">微信扫码支付</h4>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-
-            <!-- 模态框内容 -->
             <div class="modal-body text-center">
                 <p>支付完成后，需等待约3秒...</p>
-                {% if request.MOBILE %}
-                <p>pull up chooseWXPay</p>
-                <p>ToDo...</p>
-                {% else %}
-                <img class="" id="pay_img">
-                {% endif %}
+                <img class="" id="code_img">
             </div>
-
-            <!-- 模态框底部 -->
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger" data-bs-dismiss="modal">关闭</button>
             </div>
-
         </div>
     </div>
 </div>
+{% endif %}
 
 {% endblock %}
 
 
-
 {% block js %}
 
+{% if not request.MOBILE %}
 <script src="/static/js/qrious.js"></script>
 
 <script>
-
     var qrious = new QRious({
-        element: document.getElementById("pay_img"),// 指定的是图片所在的DOM对象
-        size: 250,									//指定图片的像素大小
-        level: 'H',									//指定二维码的容错级别(H:可以恢复30%的数据)
-        value: '{{code_url}}'                        //指定二维码图片url
+        element: document.getElementById("code_img"),   // 指定的是图片所在的DOM对象
+        size: 250,									    //指定图片的像素大小
+        level: 'H',									    //指定二维码的容错级别(H:可以恢复30%的数据)
+        value: '{{code_url}}'                           //指定二维码图片url
     })
 </script>
 
 <script src="/static/js/polling_query.js"></script>
+
+{% else %}
+<script src="http://res.wx.qq.com/open/js/jweixin-1.6.0.js"></script>
+<script src="http://res2.wx.qq.com/open/js/jweixin-1.6.0.js "></script>
+
+<script>
+    wx.config({
+        debug: false,
+        appId: '{{jsapi_sign["appId"]}}',
+        timestamp: '{{jsapi_sign["timestamp"]}}',
+        nonceStr: '{{jsapi_sign["nonceStr"]}}',
+        // signature: pending...(seems unnecessary)
+        jsApiList: ['chooseWXPay']
+    });
+
+    wx.ready(function () {
+        document.getElementById("chooseWXPay").onclick = function () {
+            wx.chooseWXPay({
+                timestamp: '{{jsapi_sign["timestamp"]}}',
+                nonceStr: '{{jsapi_sign["nonceStr"]}}',
+                package: '{{jsapi_sign["package"]}}',
+                signType: '{{jsapi_sign["signType"]}}',
+                paySign: '{{jsapi_sign["paySign"]}}',
+                success: function (res) {
+                    // 支付成功后的回调函数
+                    // console.log(res);
+                    document.getElementById("print-order").submit();
+                },
+                fail: function (res) {
+                    // 支付失败后的回调函数
+                    // console.log(res);
+                },
+                cancel: function (res) {
+                    // 支付取消回调函数
+                    // console.log(res)
+                },
+            });
+        };
+    });
+
+    wx.error(function (res) {
+        alert(res.errMsg);
+    });
+</script>
+
+{% endif %}
 
 {% endblock %}
