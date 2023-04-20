@@ -9,6 +9,7 @@ from flask import Flask, render_template, redirect, request, jsonify, url_for, s
 from flask_session import Session
 from flask_mobility import Mobility
 import requests
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from PyPDF2 import PdfReader
 
@@ -27,6 +28,11 @@ UPLOAD_FOLDER = os.getcwd() + "/files_temp/"
 # Configure application
 app = Flask(__name__)
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'default-secret-key')
+
+# tell flask it is behind a proxy
+app.wsgi_app = ProxyFix(
+    app.wsgi_app, x_host=1, x_for=1, x_proto=0, x_port=0, x_prefix=0
+)
 
 
 """!!!Delete after development!!!"""
@@ -72,11 +78,16 @@ def after_request(response):
 # output:   redirect("/")
 def index():
 
+    # print(">>>>>request header:     \n", request.headers)
+
     if request.MOBILE and not session.get("open_id"):
-        redirect_uri = 'http://campusprinter.nat300.top/wx_auth'
+        # 授权后重定向的回调链接地址
+        if not os.environ.get("REDIRECT_URI"):
+            raise RuntimeError("REDIRECT_URI not set")
+        REDIRECT_URI = os.environ.get("REDIRECT_URI")
         scope = 'snsapi_base'
         auth_url = f'https://open.weixin.qq.com/connect/oauth2/authorize?'\
-                f'appid={APPID}&redirect_uri={redirect_uri}&'\
+                f'appid={APPID}&redirect_uri={REDIRECT_URI}&'\
                 f'response_type=code&scope={scope}#wechat_redirect'
         # print(">>>>>auth_url:     ", auth_url)
         return redirect(auth_url)
