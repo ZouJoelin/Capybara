@@ -5,7 +5,7 @@ import json
 from random import sample
 from string import ascii_uppercase, digits
 
-from flask import Flask, render_template, redirect, request, jsonify, url_for
+from flask import Flask, render_template, redirect, request, jsonify, url_for, session
 from flask_session import Session
 from flask_mobility import Mobility
 import requests
@@ -26,7 +26,7 @@ UPLOAD_FOLDER = os.getcwd() + "/files_temp/"
 
 # Configure application
 app = Flask(__name__)
-# app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'default-secret-key')
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'default-secret-key')
 
 
 """!!!Delete after development!!!"""
@@ -40,16 +40,10 @@ app.config["ALLOW_EXTENSIONS"] = ALLOW_EXTENSIONS
 
 # Configure session to use filesystem (instead of signed cookies)
 app.config["SESSION_PERMANENT"] = False
-# app.config["SESSION_TYPE"] = "filesystem"
+app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 Mobility(app)
-
-# init session["*"]
-items = ["filename", "pages", "paper_type", "color", "sides", "copies", "fee"]
-session = dict.fromkeys(items)
-session["pages"] = 0
-session["copies"] = 1
 
 # Custom filter
 app.jinja_env.filters["rmb"] = rmb
@@ -62,13 +56,13 @@ db = SQL("sqlite:///capybara.db")
 # service logic start here
 ###############################################
 
-# @app.after_request
-# def after_request(response):
-#     """Ensure responses aren't cached"""
-#     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-#     response.headers["Expires"] = 0
-#     response.headers["Pragma"] = "no-cache"
-#     return response
+@app.after_request
+def after_request(response):
+    """Ensure responses aren't cached"""
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Expires"] = 0
+    response.headers["Pragma"] = "no-cache"
+    return response
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -103,6 +97,11 @@ def index():
             session["fee"] = None
             return 'OK'
     else:
+        # init session["*"]
+        # items = ["filename", "pages", "paper_type", "color", "sides", "copies", "fee"]
+        session["filename"] = None
+        session["fee"] = None
+
         return render_template("index.html")
 
 

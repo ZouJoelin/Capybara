@@ -1,5 +1,5 @@
 
-
+sqlite3
 cups
 cups_bsd
 hplip
