@@ -31,29 +31,28 @@ file.addEventListener('change', async function (event) {
 let form = document.getElementById("information-form");
 
 form.addEventListener('change', async function (event) {
-    // console.log(event);
-    // console.log(event.target);
-    // console.log(form);
-    // console.log(form.form);
-    let uploadForm = form;
+    try {
+        let uploadForm = form;
+        let formData = new FormData(uploadForm);
+        // below line WOULDN'T work! must add it in Constructor!!!
+        // FUCK javascript!!!!
+        // formData.append('form', uploadForm);
+        // console.log(formData.get("form"));
 
-    let formData = new FormData(uploadForm);
-    // below line WOULDN'T work! must add it in Constructor!!!
-    // FUCK javascript!!!!
-    // formData.append('form', uploadForm);
-    // console.log(formData.get("form"));
+        let response = await fetch('/auto_count', {
+            method: 'POST',
+            body: formData
+        });
+        if (!response.ok) {
+            let errorJSON = await response.json();
+            throw errorJSON;
+        }
+        let parsedJSON = await response.json();
+        let fee = parsedJSON.fee;
+        document.getElementById('fee').innerHTML = fee.toFixed(2);
 
-    let response = await fetch('/auto_count', {
-        method: 'POST',
-        body: formData
-    });
-
-    //alert("response:" + response);
-    let parsedJSON = await response.json();
-    //alert("parsedJSON:" + parsedJSON);
-    let fee = parsedJSON.fee;
-    //alert("fee:" + fee);
-
-    document.getElementById('fee').innerHTML = fee.toFixed(2);
-    //alert(document.getElementById('fee').innerHTML);
+    } catch (errorJSON) {
+        let error_message = errorJSON.error_message;
+        alert(error_message);
+    }
 });

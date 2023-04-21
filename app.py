@@ -5,7 +5,7 @@ import json
 from random import sample
 from string import ascii_uppercase, digits
 
-from flask import Flask, render_template, redirect, request, jsonify, url_for, session
+from flask import Flask, session, request, render_template, redirect, jsonify, url_for
 from flask_session import Session
 from flask_mobility import Mobility
 import requests
@@ -24,6 +24,10 @@ from utils import *
 
 PRICE_PER_PAGE = 0.01
 UPLOAD_FOLDER = os.getcwd() + "/files_temp/"
+
+PAPER_TYPE = {"A4"}
+COLOR = {"黑白"}
+SIDES = {"one-sided", "two-sided-long-edge", "two-sided-short-edge"}
 
 # Configure application
 app = Flask(__name__)
@@ -77,11 +81,10 @@ def after_request(response):
 # input:    POST request
 # output:   redirect("/")
 def index():
-
     # print(">>>>>request header:     \n", request.headers)
 
+    # 微信浏览器授权后重定向到回调链接地址
     if request.MOBILE and not session.get("open_id"):
-        # 授权后重定向的回调链接地址
         if not os.environ.get("REDIRECT_URI"):
             raise RuntimeError("REDIRECT_URI not set")
         REDIRECT_URI = os.environ.get("REDIRECT_URI")
@@ -111,6 +114,7 @@ def index():
         # init session["*"]
         # items = ["filename", "pages", "paper_type", "color", "sides", "copies", "fee"]
         session["filename"] = None
+        session["pages"] = 0
         session["fee"] = None
 
         return render_template("index.html")
@@ -119,11 +123,8 @@ def index():
 @app.route("/wx_auth")
 def wx_auth():
     code = request.args.get('code')
-    # print(">>>>>code:     ", code)
-
     token_url = f'https://api.weixin.qq.com/sns/oauth2/access_token?'\
                 f'appid={APPID}&secret={APP_SECRET}&code={code}&grant_type=authorization_code'
-    
     response = requests.get(token_url)
     # print(">>>>>response:     ", response)
     # print(">>>>>parsed_response:     ", json.loads(response.text))
@@ -133,7 +134,6 @@ def wx_auth():
         return apology("access_token failed!!!\n" + response.get("errmsg"))
     
     open_id = response.get("openid")
-    # print(">>>>>open_id:     ", open_id)
     session["open_id"] = open_id
     return redirect("/")
 
@@ -142,7 +142,6 @@ def wx_auth():
 # input:    POST request: files | form's items
 # output:   pages or fee
 def auto_count():
-
     # print(">>>>>request:     ", request)
     # print(">>>>>file?:     ", request.files)
     # print(">>>>>form?:     ", request.form)
@@ -184,15 +183,19 @@ def auto_count():
         form = request.form
         # print(">>>>>form:     ", form)
 
-        ## update session["*"]
-        for key in form.keys():
-            # print(">>>>>" + key + ":     ", form[key])
-            if key == "pages":
-                continue
-            elif key == "copies":
-                session[key] = int(form[key])
-            else:
-                session[key] = form[key]
+        ## validate form and update session["*"]
+        if form["paper_type"] not in PAPER_TYPE:
+            return jsonify({'error_message': "请输入正确的纸张类型"}), 400
+        if form["color"] not in COLOR:
+            return jsonify({'error_message': "请输入正确的打印颜色"}), 400
+        if form["sides"] not in SIDES:
+            return jsonify({'error_message': "请选择正确的单双面选项"}), 400
+        if (not form["copies"].isdigit()) or (int(form["copies"]) == 0):
+            return jsonify({'error_message': "打印份数需为正整数"}), 400
+        session["paper_type"] = form["paper_type"]
+        session["color"] = form["color"]
+        session["sides"] = form["sides"]
+        session["copies"] = int(form["copies"])
 
         ## calculate fee
         session["fee"] = session["pages"] * session["copies"] * PRICE_PER_PAGE
@@ -212,9 +215,6 @@ def auto_count():
 def pay():
     if request.method == "POST":
         # generate trade info
-        # print(">>>>>type of FEE:     ", type(session["fee"]))
-        # print(">>>>>FEE:     ", session["fee"])
-
         amount = int(session["fee"] * 100)
         # print(">>>>>amount:     " ,amount)
         out_trade_no = time.strftime("%Y%m%dT%H%M", time.localtime()) + ''.join(sample(ascii_uppercase,3))
@@ -235,7 +235,6 @@ def pay():
                         out_trade_no, "NATIVE")
 
             url = url_for('pay', out_trade_no=out_trade_no, code_url=code_url)
-            # print(">>>>>url_for:     ", url)
             return redirect(url)
 
         else:
@@ -270,7 +269,6 @@ def pay():
                 "paySign": paySign
             }
             url = url_for('pay', out_trade_no=out_trade_no, jsapi_sign=jsapi_sign)
-            # print(">>>>>url_for:     ", url)
             return redirect(url)
 
     else:
@@ -278,8 +276,6 @@ def pay():
         if request.MOBILE:
             jsapi_sign = request.args.get("jsapi_sign").replace("'", "\"")
             jsapi_sign = json.loads(jsapi_sign)
-            # print(">>>>>type of jsapi_sign:     ", type(jsapi_sign))
-            # print(">>>>>jsapi_sign:     ", jsapi_sign)
             return render_template("pay.html", out_trade_no=out_trade_no, jsapi_sign=jsapi_sign, form=session)
         else:
             code_url = request.args.get("code_url")
@@ -290,10 +286,8 @@ def pay():
 # input:    GET request: out_trade_no
 # output:   message
 def polling_query():
-
     print(">>>>>>>>>> polling_query >>>>>>>>>>")
     out_trade_no = request.args.get("out_trade_no")
-    # print(">>>>>out_trade_no:     ", out_trade_no)
 
     # lookup local sql first to avoid unnecessary network requests
     print_order = db.execute("SELECT trade_state FROM print_order WHERE out_trade_no = (?)", out_trade_no)
@@ -329,7 +323,6 @@ def polling_query():
 # input:    POST from wx
 # output:   response to wx
 def notify():
-
     result = parse_callback(request.headers, request.data)
     if result:
         # update sql
@@ -337,7 +330,6 @@ def notify():
         row = db.execute("SELECT trade_state FROM print_order WHERE out_trade_no = (?)", result["out_trade_no"])
         if row[0]["trade_state"] == "SUCCESS":
             return jsonify({'code': 'SUCCESS', 'message': '成功'}), 200
-        
         db.execute("UPDATE print_order SET trade_state = (?), trade_time = (?) WHERE out_trade_no = (?)", 
                 result["trade_state"], result["trade_time"], result["out_trade_no"])
         db.execute("COMMIT")
@@ -356,7 +348,6 @@ def notify():
 # output:   render("print_file.html", filename)
 @formfilled_required(session)
 def print_file():
-
     if request.method == "POST":
         print(">>>>>>>>>> print_file >>>>>>>>>>")
         out_trade_no = request.form["out_trade_no"]
@@ -378,7 +369,6 @@ def print_file():
                 # capture cheating
                 print(">>>>>capture cheating!!!")
                 return apology("订单所对应文件已打印过", 403)
-    
         if print_order["filename"] != session["filename"]:
             print(">>>>>filename doesn't match!!!")
             return apology("订单号与提交文件不符")
