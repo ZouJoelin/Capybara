@@ -3,6 +3,8 @@ import os
 from flask import redirect, render_template, request, session
 from functools import wraps
 
+from PyPDF2 import PdfReader, errors
+
 ALLOW_EXTENSIONS = {"pdf"}
 
 
@@ -23,9 +25,24 @@ def rmb(fee):
 
 
 # validate file's type
-def validate_file(filename):
-    return "." in filename and \
-    filename.rsplit(".", 1)[1].lower() in ALLOW_EXTENSIONS
+def validate_file(file):
+    filename = file.filename
+
+    if "." in filename and \
+    filename.rsplit(".", 1)[1].lower() in ALLOW_EXTENSIONS:
+        try:
+            PdfReader(file)
+            return True
+        except errors.PdfReadError:
+            return False
+    return False
+
+
+# count pdf's pages
+def count_pdf_pages(file):
+    readpdf = PdfReader(file)
+    pages = len(readpdf.pages)
+    return pages
 
 
 # secure input string for anti-injection-hack

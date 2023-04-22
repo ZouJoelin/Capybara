@@ -11,8 +11,6 @@ from flask_mobility import Mobility
 import requests
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-from PyPDF2 import PdfReader
-
 from sql import SQL
 from wxpay import *
 from utils import * 
@@ -151,25 +149,23 @@ def auto_count():
         ## process file
         print(">>>>>>>>>> received file >>>>>>>>>>")
         file = request.files["file"]
+
         filename = file.filename
-        # print(">>>>>type of filename:     ", type(filename))
         # print(">>>>>original filename:     ", filename)
-
-        if not validate_file(filename):
-            return apology("请上传pdf文件")
-
         filename = secure_filename(filename)
         # print(">>>>>secured filename:     ", filename)
 
         ## save file
         filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-        # print(">>>>>file's save-path:     ", filepath)
         file.save(filepath)
         # print(">>>>>file uploaded successfully!!!")
 
-        ## count pages
-        readpdf = PdfReader(file)
-        pages = len(readpdf.pages)
+        # MUST save file before construct PdfReader(), for PdfReader will corrupt the file stream
+        print(">>>>>validate file:     ", validate_file(file))
+        if not validate_file(file):
+            return jsonify({'error_message': "请上传正确的pdf文件"}), 400
+
+        pages = count_pdf_pages(file)
 
         ## update session["*"]
         session["filename"] = filename
@@ -295,7 +291,7 @@ def polling_query():
 
     if not print_order:
         print(">>>>>untracked out_pay_no!!!")
-        return apology("oops！订单不存在", 403)
+        return jsonify({'error_message': "oops！订单不存在"}), 403
 
     print_order = print_order[0]
     if print_order["trade_state"] == "SUCCESS":
@@ -305,7 +301,7 @@ def polling_query():
         
     if print_order["trade_state"] in {"CLOSED", "REFUND"}:
         print(">>>>>print_order closed!!!")
-        return apology("该订单已关闭， 请重新下单", 403)
+        return jsonify({'error_message': "该订单已关闭， 请重新下单"}), 403
 
     # call wxpay.query() according to out_trade_to
     code, trade_state, trade_time = query(out_trade_no)

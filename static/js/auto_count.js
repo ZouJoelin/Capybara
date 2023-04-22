@@ -1,35 +1,46 @@
 
 
+const MAX_SIZE = 50 * 1024 * 1024; // x * 1MB
 
 let file = document.getElementById("file");
 file.addEventListener('change', async function (event) {
-    let uploadFile = event.target.files[0];
+    try {
+        let uploadFile = event.target.files[0];
 
-    let formData = new FormData();
-    formData.append('file', uploadFile);
-    // console.log(formData.get("file"));
+        // constrain file size
+        // Max~50MB; nomarl-max~30MB;
+        if (uploadFile.size > MAX_SIZE) {
+            alert('文件大小不能超过 50MB');
+            // event.preventDefault();
+            return;
+        }
 
-    let response = await fetch('/auto_count', {
-        method: 'POST',
-        body: formData
-    });
+        let formData = new FormData();
+        formData.append('file', uploadFile);
+        // console.log(formData.get("file"));
+        let response = await fetch('/auto_count', {
+            method: 'POST',
+            body: formData
+        });
+        if (!response.ok) {
+            let errorJSON = await response.json();
+            throw errorJSON;
+        }
+        let parsedJSON = await response.json();
+        let pages = parsedJSON.pages;
+        document.getElementById('pages').value = pages;
 
-    //alert("response:" + response);
-    let parsedJSON = await response.json();
-    //alert("parsedJSON:" + parsedJSON);
-    let pages = parsedJSON.pages;
-    //alert("pages:" + +pages);
+        let pagesChangeEvent = new Event("change", { "bubbles": true });
+        document.getElementById("information-form").dispatchEvent(pagesChangeEvent);
 
-    document.getElementById('pages').value = pages;
-    //alert(document.getElementById('pages').value);
-
-    let pagesChangeEvent = new Event("change", { "bubbles": true });
-    document.getElementById("information-form").dispatchEvent(pagesChangeEvent);
+    } catch (errorJSON) {
+        let error_message = errorJSON.error_message;
+        alert(error_message);
+    }
 });
 
 
 let form = document.getElementById("information-form");
-
 form.addEventListener('change', async function (event) {
     try {
         let uploadForm = form;
@@ -38,7 +49,6 @@ form.addEventListener('change', async function (event) {
         // FUCK javascript!!!!
         // formData.append('form', uploadForm);
         // console.log(formData.get("form"));
-
         let response = await fetch('/auto_count', {
             method: 'POST',
             body: formData
