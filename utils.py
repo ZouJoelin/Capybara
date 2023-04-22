@@ -1,4 +1,5 @@
 import os
+import re
 
 from flask import redirect, render_template, request, session
 from functools import wraps
@@ -24,6 +25,26 @@ def rmb(fee):
     return f"￥{fee:,.2f}"
 
 
+# capture anti-injection-hack
+PATTERN = r'(select|insert|delete|drop|update|truncate)[\s]*'
+def capture_injection(s):
+     capture = re.search(PATTERN, s, re.IGNORECASE)
+     
+     return capture is not None
+
+
+# convert filename to secure-format
+def secure_filename(filename):
+    # special character repo:
+    # , ("_", "__"), ("?", "~q"),
+    for old, new in [(" ", "_"), ("\"", "^"), ("\'", "^"), 
+                    ("/", "~s"), ("%", "~p"), ("#", "~h"),
+                    ("--", "_"), (";", "_")]:
+        filename = filename.replace(old, new)
+
+    return filename
+
+
 # validate file's type
 def validate_file(file):
     filename = file.filename
@@ -43,27 +64,6 @@ def count_pdf_pages(file):
     readpdf = PdfReader(file)
     pages = len(readpdf.pages)
     return pages
-
-
-# secure input string for anti-injection-hack
-def secure_string(s):
-     """ToDo"""
-     s=s
-     
-     return s
-
-
-# convert filename to secure-format
-def secure_filename(filename):
-    filename = secure_string(filename)
-
-    # special character repo:
-    # ("-", "--"), ("_", "__"), ("?", "~q"),
-    for old, new in [(" ", "_"), ("\"", "^"), ("\'", "^"), 
-                    ("/", "~s"), ("%", "~p"), ("#", "~h")]:
-        filename = filename.replace(old, new)
-
-    return filename
 
 
 def formfilled_required(session):

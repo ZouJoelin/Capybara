@@ -149,19 +149,18 @@ def auto_count():
         ## process file
         print(">>>>>>>>>> received file >>>>>>>>>>")
         file = request.files["file"]
-
         filename = file.filename
-        # print(">>>>>original filename:     ", filename)
         filename = secure_filename(filename)
-        # print(">>>>>secured filename:     ", filename)
 
+        # if capture_injection(filename):
+        #     return jsonify({'error_message': "Illegal filename!\nNice try. keep going!"}), 403
+        
         ## save file
         filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
         file.save(filepath)
         # print(">>>>>file uploaded successfully!!!")
 
-        # MUST save file before construct PdfReader(), for PdfReader will corrupt the file stream
-        print(">>>>>validate file:     ", validate_file(file))
+        # MUST save file before calling PdfReader(), otherwise PdfReader will corrupt the file.
         if not validate_file(file):
             return jsonify({'error_message': "请上传正确的pdf文件"}), 400
 
