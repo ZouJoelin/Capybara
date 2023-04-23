@@ -5,6 +5,7 @@ from flask import redirect, render_template, request, session
 from functools import wraps
 
 from PyPDF2 import PdfReader, errors
+import cups
 
 ALLOW_EXTENSIONS = {"pdf"}
 
@@ -104,8 +105,41 @@ def OSprint(filepath, session):
         return 'FAILED'
     
 
+# detect printer status
+def printer_status():
+    conn = cups.Connection()
+    printers = conn.getPrinters()
+    for printer in printers:
+        printer_state = printers[printer]["printer-state"]
+        printer_state_reason = printers[printer]["printer-state-reasons"][0]
+        printer_state_message = printers[printer]["printer-state-message"]
+        break
+    ok = "none"
+    door_open = "open"
+    out_of_paper = "media-empty"
+    out_of_toner = "toner-empty"
+    offline = "offline"
+    connecting = "connecting"
+    other = "other"
 
+    # print(printer_state_reason)
+    # print(">>>>>type:     ", type(printer_state_reason))
+    # print(">>>>>entry:     ", ok == printer_state_reason)
 
+    if ok == printer_state_reason:
+        return "ok"
+    if door_open in printer_state_reason:
+        return "打印机盖未闭合"
+    if out_of_paper in printer_state_reason:
+        return "纸张不足"
+    if out_of_toner in printer_state_reason:
+        return "墨粉不足"
+    if offline in printer_state_reason or connecting in printer_state_reason:
+        return "未连接打印机"
+    if other in printer_state_reason:
+        return "未知错误"
+
+    
 
 
 

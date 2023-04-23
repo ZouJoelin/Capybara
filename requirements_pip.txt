@@ -8,6 +8,7 @@ SQLAlchemy==1.4.46
 sqlparse
 termcolor
 PyPDF2
+pycups
 
 gunicorn
 gevent

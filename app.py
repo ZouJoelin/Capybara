@@ -81,6 +81,11 @@ def after_request(response):
 def index():
     # print(">>>>>request header:     \n", request.headers)
 
+    # pre-check printer status
+    status = printer_status()
+    if status is not "ok":
+        return apology(status, 418)
+
     # 微信浏览器授权后重定向到回调链接地址
     if request.MOBILE and not session.get("open_id"):
         if not os.environ.get("REDIRECT_URI"):
