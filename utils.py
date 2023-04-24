@@ -105,26 +105,27 @@ def OSprint(filepath, session):
         return 'FAILED'
     
 
-# detect printer status
-def printer_status():
+# detect printer state
+def printer_state():
     conn = cups.Connection()
     printers = conn.getPrinters()
     for printer in printers:
         printer_state = printers[printer]["printer-state"]
         printer_state_reason = printers[printer]["printer-state-reasons"][0]
-        printer_state_message = printers[printer]["printer-state-message"]
+        # printer_state_message = printers[printer]["printer-state-message"]
         break
     ok = "none"
     door_open = "open"
     out_of_paper = "media-empty"
     out_of_toner = "toner-empty"
+    jam = "jam"
     offline = "offline"
     connecting = "connecting"
     other = "other"
 
-    # print(printer_state_reason)
-    # print(">>>>>type:     ", type(printer_state_reason))
-    # print(">>>>>entry:     ", ok == printer_state_reason)
+    # print(">>>>>printer state:     ", printer_state)
+    # print(">>>>>state_reason:     ", printer_state_reason)
+    # print(">>>>>state message:     ", printer_state_message)
 
     if ok == printer_state_reason:
         return "ok"
@@ -134,11 +135,12 @@ def printer_status():
         return "纸张不足"
     if out_of_toner in printer_state_reason:
         return "墨粉不足"
+    if jam in printer_state_reason:
+        return "有纸张堵塞"
     if offline in printer_state_reason or connecting in printer_state_reason:
         return "未连接打印机"
-    if other in printer_state_reason:
+    else:
         return "未知错误"
-
     
 
 

@@ -9,3 +9,4 @@ capybara.db
 
 trash
 *.txt
+printer.py

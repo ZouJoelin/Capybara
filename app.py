@@ -81,10 +81,10 @@ def after_request(response):
 def index():
     # print(">>>>>request header:     \n", request.headers)
 
-    # pre-check printer status
-    status = printer_status()
-    if status is not "ok":
-        return apology(status, 418)
+    # pre-check printer state
+    state = printer_state()
+    if state != "ok":
+        return apology(state, 418)
 
     # 微信浏览器授权后重定向到回调链接地址
     if request.MOBILE and not session.get("open_id"):
@@ -318,7 +318,6 @@ def polling_query():
     return jsonify({'message': trade_state})  
 
 
-
 @app.route("/notify", methods=['POST'])
 # input:    POST from wx
 # output:   response to wx
@@ -340,7 +339,6 @@ def notify():
         return jsonify({'code': 'FAIL', 'message': '失败'}), 500
       
 
-
 @app.route("/print_file", methods=["GET", "POST"])
 # input:    GET
 #output:    redirect("/print_file")
@@ -359,7 +357,6 @@ def print_file():
         if not print_order:
             print(">>>>>untracked out_pay_no!!!")
             return apology("oops！订单不存在", 403)
-    
         print_order = print_order[0]
         if print_order["trade_state"] != "SUCCESS":
             print(">>>>>unpaid out_pay_no!!!")
@@ -371,25 +368,46 @@ def print_file():
                 return apology("订单所对应文件已打印过", 403)
         if print_order["filename"] != session["filename"]:
             print(">>>>>filename doesn't match!!!")
-            return apology("订单号与提交文件不符")
+            return apology("订单号与提交文件不符", 403)
     
         # make print command according to session["*"]
         filepath = os.path.join(app.config["UPLOAD_FOLDER"], session["filename"])
-        # print(">>>>>filefolder:     ", app.config["UPLOAD_FOLDER"])
-        # print(">>>>>filepath:     ", filepath)
         print_state = OSprint(filepath=filepath, session=session)
+
+        # post-check printer state
+        """aborted"""
+        # state = printer_state()
+        # if state != "ok":
+        #     return apology(state+"\n出错啦！请联系管理员", 500)
 
         # update sql's col: print_stateS
         db.execute("UPDATE print_order SET print_state = (?) WHERE out_trade_no = (?)", 
                     print_state, out_trade_no)
         
         if print_state == "FAILED":
-            return apology("打印失败", 500)
+            return apology("打印失败\n出错啦！请联系管理员", 500)
         else:
             return redirect("/print_file")
     
     else:
         return render_template("print_file.html", filename = session["filename"])
+
+
+@app.route("/contact")
+# input:    GET
+# output:   render("contact.html")
+def contact():
+    return render_template("contact.html")
+
+
+@app.route("/library")
+def library():
+    return apology("共享文库，To be continued...", 501)
+
+
+@app.route("/board")
+def board():
+    return apology("留言板，To be continued...", 501)
 
 
 if __name__ == "__main__":

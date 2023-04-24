@@ -3,22 +3,24 @@
 
 {% block main %}
 
-<div class="text-center">
-    <h1 class="text-primary">正在打印您的文件</h1>
-    <h2>{{filename}}</h1>
-        <h1 class="text-primary">请及时取走</h1>
-</div>
+<div class="mx-auto" id="" style="max-width: 1000px;">
+    <div class="text-center">
+        <h1 class="text-primary">正在打印您的文件</h1>
+        <h2>{{filename}}</h1>
+            <h1 class="text-primary">请及时取走</h1>
+    </div>
 
-<br><br><br>
+    <br><br><br>
 
-<div class="text-center">
-    <form action="/" method="get">
-        <button type="submit" class="btn btn-danger" id="">返回主页</button>
-    </form>
+    <div class="text-center">
+        <form action="/" method="get">
+            <button type="submit" class="btn btn-danger" id="">返回主页</button>
+        </form>
+    </div>
+
 </div>
 
 {% endblock %}
-
 
 
 {% block js %}
