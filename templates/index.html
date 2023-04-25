@@ -9,7 +9,8 @@
         <form id="file-form">
             <div class="">
                 <label class="form-label" for="files">上传文件</label>
-                <input class="form-control" type="file" id="file" name="file" accept=".pdf" required autofocus>
+                <input class="form-control" type="file" id="file" name="file" accept=".pdf" required autofocus
+                    data-bs-toggle="tooltip" title="由于word等文件兼容性低，请转换成pdf文件再上传">
             </div>
         </form>
         <form id="information-form">
@@ -70,6 +71,19 @@
 
 </div>
 
+{% endblock %}
+
+
+{% block js %}
+
+<script>
+    // pull up tooltip
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+</script>
+
 <script>
     // reset form
     document.getElementById("reset-btn").addEventListener("click", resetForm);
@@ -92,11 +106,6 @@
         });
     }
 </script>
-
-{% endblock %}
-
-
-{% block js %}
 
 <script src="/static/js/auto_count.js"></script>
 
