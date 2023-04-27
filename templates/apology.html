@@ -3,18 +3,38 @@
 
 {% block main%}
 
-<div class="alert alert-primary mb-0 text-center" role="alert">
-    <h1>code: {{code}}</h1>
-    <h1>message: {{message}}</h1>
-</div>
+<main class="container py-4 ">
 
-<br><br><br>
+    <div class="alert alert-danger text-center" role="alert">
 
-<div class="text-center">
-    <form action="/" method="get">
-        <button type="submit" class="btn btn-danger" id="">返回主页</button>
-    </form>
-</div>
+        <!-- capybara!!! -->
+        <div class="d-flex flex-column" id="capybara">
+            <div class="bubble grow bottom text-center mx-auto" id="capybara_talkbox">
+                <h1 class="text-danger">Error:{{code}}</h1>
+                <h1 class="">{{message}}</h1>
+            </div>
+            <div class="mx-auto" id="capybara_body">
+                <img src="/static/img/capybara1_5.png" srcset="" width="150">
+            </div>
+        </div>
+        <style>
+            #capybara_talkbox {
+                background-color: inherit;
+            }
+        </style>
+    </div>
+
+    <br><br><br>
+
+    <div class="text-center">
+        <form action="/" method="get">
+            <button type="submit" class="btn btn-danger" id="">返回主页</button>
+        </form>
+    </div>
+
+</main>
+
+<br><br><br><br><br><br><br><br>
 
 {% endblock%}
 

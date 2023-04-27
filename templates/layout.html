@@ -10,12 +10,18 @@
     <link href="https://cdn.staticfile.org/twitter-bootstrap/5.1.1/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.staticfile.org/twitter-bootstrap/5.1.1/js/bootstrap.bundle.min.js"></script>
 
+    <!-- get font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/bubble.css">
     <!-- <link rel="stylesheet" href="/static/css/bootstrap.override.css"> -->
 
-    <link rel="icon" type="image/png" sizes="32x32" href="/static/img/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/static/img/favicon-16x16.png">
-    <link rel="manifest" href="/static/img/site.webmanifest">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/icon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/icon/favicon-16x16.png">
+    <link rel="manifest" href="/static/icon/site.webmanifest">
     <title>Capybara自助打印机</title>
 
 </head>
@@ -74,11 +80,13 @@
                         <svg width="55" height="55">
                             <use xlink:href="#printer" />
                         </svg>
-                        <span><strong>Capybara</strong></span>
+                        <span>
+                            <strong>Capybara</strong>
+                        </span>
                     </a>
                 </div>
                 <!-- menu button -->
-                <div class="navbar-right">
+                <div class="navbar-right float-end">
                     <button class="navbar-toggler " data-bs-target="#navbar" data-bs-toggle="collapse">
                         <span class="navbar-toggler-icon"></span>
                     </button>
@@ -118,13 +126,10 @@
 
 
     <!-- main -->
-    <main class="container py-4 mx-auto">
-        {% block main %}
+    {% block main %}
 
-        {% endblock %}
-    </main>
+    {% endblock %}
 
-    <br><br><br><br><br><br><br><br>
 
     <!-- footer -->
     <footer>
@@ -132,6 +137,7 @@
             <i>Copyright@Capybara自助打印机</i>
         </div>
     </footer>
+
 
     <!-- inlcude .js -->
     {% block js %}

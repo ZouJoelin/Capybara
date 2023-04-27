@@ -3,98 +3,103 @@
 
 {% block main %}
 
-<div class="mx-auto" id="" style="max-width: 1000px;">
+<main class="container py-4 ">
+    <div class="mx-auto" id="confirm-info" style="max-width: 1000px;">
 
-    <div class="container text-center">
-        <h2 class="text-success">
-            确认信息
-        </h2>
-
-        <table class="table table-striped">
-            <tr>
-                <th>文件</th>
-                <td>{{form.filename}}</td>
-            </tr>
-            <tr>
-                <th>页数</th>
-                <td>{{form.pages}}</td>
-            </tr>
-            <tr>
-                <th>纸张</th>
-                <td>{{form.paper_type}}</td>
-            </tr>
-            <tr>
-                <th>颜色</th>
-                <td>{{form.color}}</td>
-            </tr>
-            <tr>
-                <th>单双</th>
-                {% if form.sides == "one-sided" %}
-                <td>单面打印</td>
-                {% elif form.sides == "two-sided-long-edge"%}
-                <td>双面打印，长边翻转</td>
-                {% else %}
-                <td>双面打印，短边翻转</td>
-                {% endif %}
-            </tr>
-            <tr>
-                <th>份数</th>
-                <td>{{form.copies}}</td>
-            </tr>
-        </table>
-    </div>
-
-    <br>
-
-    <div class="text-center">
-        <h1 class="text-danger text-center">
-            <span>￥</span><span id="fee">{{form["fee"]}}</span>
-        </h1>
-    </div>
-
-    <div hidden>
-        <form action="/print_file" method="post" id="print-order">
-            <input type="text" name="out_trade_no" id="out_trade_no" value="{{out_trade_no}}" hidden>
-        </form>
-    </div>
-
-    <br>
-
-    <div class="d-flex mt-3 gap-4 justify-content-center">
-        <form action="/" method="post">
-            <input type="text" name="source" id="source" value="pay.html" hidden>
-            <input type="text" name="out_trade_no" id="" value="{{out_trade_no}}" hidden>
-            <button type="submit" class="btn btn-danger" id="withdraw-btn">返回</button>
-        </form>
-        {% if not request.MOBILE %}
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal">拉起支付</button>
-        {% else %}
-        <button class="btn btn-primary" id="chooseWXPay">拉起支付</button>
-        {% endif %}
-    </div>
-
-</div>
-
-
-{% if not request.MOBILE %}
-<!-- modal -->
-<div class="modal fade" id="modal">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">微信扫码支付</h4>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <!-- capybara!!! -->
+        <div class="d-flex align-items-center justify-content-center gap-4" id="capybara">
+            <div id="capybara_body">
+                <img src="/static/img/capybara1_5.png" srcset="" width="150">
             </div>
-            <div class="modal-body text-center">
-                <p>支付完成后，需等待约3秒...</p>
-                <img class="" id="code_img">
+            <div id="capybara_talkbox" class="bubble grow left">
+                <p class="mb-0"> >Please confirm information below</p>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">关闭</button>
+        </div>
+
+        <div class="text-center">
+            <table class="table table-striped">
+                <tr>
+                    <th>文件</th>
+                    <td>{{form.filename}}</td>
+                </tr>
+                <tr>
+                    <th>页数</th>
+                    <td>{{form.pages}}</td>
+                </tr>
+                <tr>
+                    <th>纸张</th>
+                    <td>{{form.paper_type}}</td>
+                </tr>
+                <tr>
+                    <th>颜色</th>
+                    <td>{{form.color}}</td>
+                </tr>
+                <tr>
+                    <th>单双</th>
+                    {% if form.sides == "one-sided" %}
+                    <td>单面打印</td>
+                    {% elif form.sides == "two-sided-long-edge"%}
+                    <td>双面打印，长边翻转</td>
+                    {% else %}
+                    <td>双面打印，短边翻转</td>
+                    {% endif %}
+                </tr>
+                <tr>
+                    <th>份数</th>
+                    <td>{{form.copies}}</td>
+                </tr>
+            </table>
+
+            <h1 class="text-danger ">
+                <span>￥</span><span id="fee">{{form["fee"]}}</span>
+            </h1>
+        </div>
+
+        <div hidden>
+            <form action="/print_file" method="post" id="print-order">
+                <input type="text" name="out_trade_no" id="out_trade_no" value="{{out_trade_no}}" hidden>
+            </form>
+        </div>
+
+        <div class="d-flex mt-4 gap-4 justify-content-center">
+            <form action="/" method="post">
+                <input type="text" name="source" id="source" value="pay.html" hidden>
+                <input type="text" name="out_trade_no" id="" value="{{out_trade_no}}" hidden>
+                <button type="submit" class="btn btn-danger" id="withdraw-btn">返回</button>
+            </form>
+            {% if not request.MOBILE %}
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal">拉起支付</button>
+            {% else %}
+            <button class="btn btn-primary" id="chooseWXPay">拉起支付</button>
+            {% endif %}
+        </div>
+
+    </div>
+
+    {% if not request.MOBILE %}
+    <!-- modal -->
+    <div class="modal fade" id="modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <img src="/static/img/WePayLogo.png" alt="微信支付" width="150px">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <p>支付完成后，需等待约3秒...</p>
+                    <img class="d-block mx-auto" id="code_img">
+                    <img src="/static/img/WePay_caption.png" width="200px">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">关闭</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
+</main>
+
+<br><br><br><br><br><br><br><br>
+
 {% endif %}
 
 {% endblock %}

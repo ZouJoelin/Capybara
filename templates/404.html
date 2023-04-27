@@ -13,9 +13,9 @@
     <link rel="stylesheet" href="/static/css/style.css">
     <!-- <link rel="stylesheet" href="/static/css/bootstrap.override.css"> -->
 
-    <link rel="icon" type="image/png" sizes="32x32" href="/static/img/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/static/img/favicon-16x16.png">
-    <link rel="manifest" href="/static/img/site.webmanifest">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/icon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/icon/favicon-16x16.png">
+    <link rel="manifest" href="/static/icon/site.webmanifest">
     <title>404 Not Found</title>
 
 </head>
@@ -74,11 +74,13 @@
                         <svg width="55" height="55">
                             <use xlink:href="#printer" />
                         </svg>
-                        <span><strong>Capybara</strong></span>
+                        <span>
+                            <strong>Capybara</strong>
+                        </span>
                     </a>
                 </div>
                 <!-- menu button -->
-                <div class="navbar-right">
+                <div class="navbar-right float-end">
                     <button class="navbar-toggler " data-bs-target="#navbar" data-bs-toggle="collapse">
                         <span class="navbar-toggler-icon"></span>
                     </button>
@@ -118,9 +120,9 @@
 
 
     <!-- main -->
-    <main class="container py-4 mx-auto">
+    <!-- {% block main %} -->
 
-        <!-- {% block main %} -->
+    <main class="container py-4 mx-auto">
 
         <div class="text-center py-4">
             <h1 class="display-3 text-primary">404 Not Found</h1>
@@ -128,13 +130,12 @@
         </div>
         <hr>
 
-        <br><br><br><br><br><br><br><br>
-
-        <!-- {% endblock %} -->
-
     </main>
 
-    <br><br><br><br><br><br><br><br>
+    <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+    <!-- {% endblock %} -->
+
 
     <!-- footer -->
     <footer>
