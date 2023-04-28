@@ -9,12 +9,18 @@
         <!-- capybara!!! -->
         <div class="d-flex align-items-center justify-content-center gap-4" id="capybara">
             <div id="capybara_body">
-                <img src="/static/img/capybara1_5.png" srcset="" width="150">
+                <img src="/static/img/capybara1_2.png" srcset="" width="120">
             </div>
             <div id="capybara_talkbox" class="bubble grow left">
-                <p class="mb-0"> >Please confirm information below</p>
+                <p class="mb-0"> >请确认打印信息</p>
             </div>
         </div>
+        <style>
+            #capybara_talkbox {
+                font-family: sans-serif;
+                font-size: x-large;
+            }
+        </style>
 
         <div class="text-center">
             <table class="table table-striped">
@@ -96,11 +102,11 @@
             </div>
         </div>
     </div>
+    {% endif %}
+
 </main>
 
-<br><br><br><br><br><br><br><br>
-
-{% endif %}
+<br><br><br>
 
 {% endblock %}
 

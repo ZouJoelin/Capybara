@@ -84,7 +84,7 @@ def index():
     # pre-check printer state
     state = printer_state()
     if state != "ok":
-        return apology(state, 418)
+        return apology(state+"<br>请联系管理员", 418)
 
     # 微信浏览器授权后重定向到回调链接地址
     if request.MOBILE and not session.get("open_id"):
@@ -134,7 +134,7 @@ def wx_auth():
     response = json.loads(response.text)
 
     if response.get("errcode"):
-        return apology("access_token failed!!!\n" + response.get("errmsg"))
+        return apology("access_token failed!!!<br>" + response.get("errmsg"))
     
     open_id = response.get("openid")
     session["open_id"] = open_id
@@ -378,14 +378,14 @@ def print_file():
         """aborted"""
         # state = printer_state()
         # if state != "ok":
-        #     return apology(state+"\n出错啦！请联系管理员", 500)
+        #     return apology(state+"<br>出错啦！请联系管理员", 500)
 
         # update sql's col: print_stateS
         db.execute("UPDATE print_order SET print_state = (?) WHERE out_trade_no = (?)", 
                     print_state, out_trade_no)
         
         if print_state == "FAILED":
-            return apology("打印失败\n出错啦！请联系管理员", 500)
+            return apology("打印失败<br>出错啦！请联系管理员", 500)
         else:
             return redirect("/print_file")
     
@@ -402,12 +402,12 @@ def contact():
 
 @app.route("/library")
 def library():
-    return apology("共享文库，To be continued...", 501)
+    return apology("共享文库<br>To Be Continued...", 501)
 
 
 @app.route("/board")
 def board():
-    return apology("留言板，To be continued...", 501)
+    return apology("留言板<br>To Be Continued...", 501)
 
 
 if __name__ == "__main__":

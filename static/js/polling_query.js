@@ -19,7 +19,6 @@ async function fetchQuery() {
         }
     } catch (errorJSON) {
         let error_message = await errorJSON.error_message;
-        alert(error_message);
         setTimeout(fetchQuery, 5000); // 如果请求失败，则间隔5秒后再次调用 fetchQuery 函数
 
     }
