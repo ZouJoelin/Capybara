@@ -37,9 +37,9 @@ app.wsgi_app = ProxyFix(
 )
 
 
-"""!!!Delete after development!!!"""
-# Ensure templates are auto-reloaded
-app.config["TEMPLATES_AUTO_RELOAD"] = True
+# """!!!Delete after development!!!"""
+# # Ensure templates are auto-reloaded
+# app.config["TEMPLATES_AUTO_RELOAD"] = True
 
 
 # Configure file upload
