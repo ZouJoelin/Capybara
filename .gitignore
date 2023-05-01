@@ -1,7 +1,8 @@
 /__pycache__
 /flask_session
 /files_temp/*
-*.log
+/log/*
+!/log/logrotate.conf
 
 /.docs
 /private_security

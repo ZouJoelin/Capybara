@@ -84,6 +84,7 @@ def index():
     # pre-check printer state
     state = printer_state()
     if state != "ok":
+        print(">>>>>Error:     ", state)
         return apology(state+"<br>请联系管理员", 418)
 
     # 微信浏览器授权后重定向到回调链接地址
@@ -102,13 +103,13 @@ def index():
         source = request.form["source"]
         if source == "pay.html":
             # withdraw from pay.html
-            print(">>>>>>>>>> withdraw from pay.html >>>>>>>>>>")
+            # print(">>>>>>>>>> withdraw from pay.html >>>>>>>>>>")
             out_trade_no = request.form["out_trade_no"]
             close(out_trade_no)
             return redirect("/")
         else:
             # call reset from index.html
-            print(">>>>>>>>>> reset session >>>>>>>>>>")
+            # print(">>>>>>>>>> reset session >>>>>>>>>>")
             session["filename"] = None
             session["pages"] = 0
             session["fee"] = None
@@ -134,6 +135,7 @@ def wx_auth():
     response = json.loads(response.text)
 
     if response.get("errcode"):
+        print(">>>>>Error:     access_token failed!!!", response.get("errmsg"))
         return apology("access_token failed!!!<br>" + response.get("errmsg"))
     
     open_id = response.get("openid")
@@ -152,7 +154,7 @@ def auto_count():
     # · save file, count pages
     if request.files:
         ## process file
-        print(">>>>>>>>>> received file >>>>>>>>>>")
+        # print(">>>>>>>>>> received file >>>>>>>>>>")
         file = request.files["file"]
         filename = file.filename
         filename = secure_filename(filename)
@@ -167,6 +169,7 @@ def auto_count():
 
         # MUST save file before calling PdfReader(), otherwise PdfReader will corrupt the file.
         if not validate_file(file):
+            print(">>>>>Error:     wrong file type!!!")
             return jsonify({'error_message': "请上传正确的pdf文件"}), 400
 
         pages = count_pdf_pages(file)
@@ -179,18 +182,22 @@ def auto_count():
     
     # · calculate fee, update session["*"]
     if request.form:
-        print(">>>>>>>>>> received form >>>>>>>>>>")
+        # print(">>>>>>>>>> received form >>>>>>>>>>")
         form = request.form
         # print(">>>>>form:     ", form)
 
         ## validate form and update session["*"]
         if form["paper_type"] not in PAPER_TYPE:
+            print(">>>>>Error:     wrong paper type!!!")
             return jsonify({'error_message': "请输入正确的纸张类型"}), 400
         if form["color"] not in COLOR:
+            print(">>>>>Error:     wrong color choice!!!")
             return jsonify({'error_message': "请输入正确的打印颜色"}), 400
         if form["sides"] not in SIDES:
+            print(">>>>>Error:     wrong sides choice!!!")
             return jsonify({'error_message': "请选择正确的单双面选项"}), 400
         if (not form["copies"].isdigit()) or (int(form["copies"]) == 0):
+            print(">>>>>Error:     wrong copies input!!!")
             return jsonify({'error_message': "打印份数需为正整数"}), 400
         session["paper_type"] = form["paper_type"]
         session["color"] = form["color"]
@@ -199,9 +206,9 @@ def auto_count():
 
         ## calculate fee
         session["fee"] = session["pages"] * session["copies"] * PRICE_PER_PAGE
-        print(">>>>>>>>>> session >>>>>>>>>>")
-        for key in session.keys():
-            print(">>>>>"+ key +":     ", session[key])
+        # print(">>>>>>>>>> session >>>>>>>>>>")
+        # for key in session.keys():
+        #     print(">>>>>"+ key +":     ", session[key])
 
         return jsonify({'fee': session["fee"]})
 
@@ -222,11 +229,14 @@ def pay():
         description = session["filename"]
         # print(">>>>>description:     " ,description)
 
+        print(f'>>>>>print_order:     filename: "{session["filename"]}"  pages: "{session["pages"]}"  copies: "{session["copies"]}"  fee: "{session["fee"]}"  out_trade_no: "{out_trade_no}"')
+
         if not request.MOBILE:
-            print(">>>>> access from pc!!!")
+            # print(">>>>> access from pc!!!")
             code, code_url = pay_native(amount, out_trade_no, description)
 
             if code not in range(200, 300):
+                print(">>>>>Error:     pay_native() failed!!!", code)
                 return apology("下单失败", code=code)
 
             # log into sql
@@ -238,10 +248,11 @@ def pay():
             return redirect(url)
 
         else:
-            print(">>>>>access from mobile!!!")
+            # print(">>>>>access from mobile!!!")
             code, prepay_id = pay_jsapi(amount, out_trade_no, description, session["open_id"])
 
             if code not in range(200, 300):
+                print(">>>>>Error:     pay_jsapi() failed!!!", code)
                 return apology("下单失败", code=code)
             
             timestamp = str(int(time.time()))
@@ -286,7 +297,7 @@ def pay():
 # input:    GET request: out_trade_no
 # output:   message
 def polling_query():
-    print(">>>>>>>>>> polling_query >>>>>>>>>>")
+    # print(">>>>>>>>>> polling_query >>>>>>>>>>")
     out_trade_no = request.args.get("out_trade_no")
 
     # lookup local sql first to avoid unnecessary network requests
@@ -294,21 +305,24 @@ def polling_query():
     # print(">>>>>print_order:     ", print_order)
 
     if not print_order:
-        print(">>>>>untracked out_pay_no!!!")
+        print(">>>>>Error:     untracked out_pay_no!!!")
         return jsonify({'error_message': "oops！订单不存在"}), 403
 
     print_order = print_order[0]
     if print_order["trade_state"] == "SUCCESS":
         # shortcut return
-        print(">>>>>shortcut return!!!")
+        # print(">>>>>shortcut return!!!")
+        print(">>>>>trade_state from sql:     ", print_order["trade_state"])
         return jsonify({'message':  print_order["trade_state"]})  
         
     if print_order["trade_state"] in {"CLOSED", "REFUND"}:
-        print(">>>>>print_order closed!!!")
+        print(">>>>>trade_state from sql:     ", print_order["trade_state"])
+        print(">>>>>Error:     print_order already closed!!!")
         return jsonify({'error_message': "该订单已关闭， 请重新下单"}), 403
 
     # call wxpay.query() according to out_trade_to
     code, trade_state, trade_time = query(out_trade_no)
+    print(">>>>>trade_state from query():     ", print_order["trade_state"])
 
     # update sql
     if trade_state != "NOTPAY":
@@ -347,7 +361,7 @@ def notify():
 @formfilled_required(session)
 def print_file():
     if request.method == "POST":
-        print(">>>>>>>>>> print_file >>>>>>>>>>")
+        # print(">>>>>>>>>> print_file >>>>>>>>>>")
         out_trade_no = request.form["out_trade_no"]
         print_order = db.execute("SELECT filename, trade_state, print_state FROM print_order WHERE out_trade_no = (?)", out_trade_no)
         # print(">>>>>out_trade_no:     ", out_trade_no)
@@ -355,19 +369,19 @@ def print_file():
 
         # verify out_trade_no 
         if not print_order:
-            print(">>>>>untracked out_pay_no!!!")
+            print(">>>>>Error:     untracked out_pay_no!!!")
             return apology("oops！订单不存在", 403)
         print_order = print_order[0]
         if print_order["trade_state"] != "SUCCESS":
-            print(">>>>>unpaid out_pay_no!!!")
-            return apology("订单未支付", 403)
+            print(">>>>>Error:     unpaid out_pay_no!!!")
+            return apology("订单未支付<br><i>请尝试刷新本页面！</i>", 403)
         else:
             if print_order["print_state"] == "SUCCESS":
                 # capture cheating
-                print(">>>>>capture cheating!!!")
+                print(">>>>>Error:     capture cheating!!!")
                 return apology("订单所对应文件已打印过", 403)
         if print_order["filename"] != session["filename"]:
-            print(">>>>>filename doesn't match!!!")
+            print(">>>>>Error:     filename doesn't match!!!")
             return apology("订单号与提交文件不符", 403)
     
         # make print command according to session["*"]
@@ -378,6 +392,7 @@ def print_file():
         """aborted"""
         # state = printer_state()
         # if state != "ok":
+        #     print(">>>>>Error:     ", state)
         #     return apology(state+"<br>出错啦！请联系管理员", 500)
 
         # update sql's col: print_stateS
@@ -385,6 +400,7 @@ def print_file():
                     print_state, out_trade_no)
         
         if print_state == "FAILED":
+            print(">>>>>Error:     OSprint() failed!!!")
             return apology("打印失败<br>出错啦！请联系管理员", 500)
         else:
             return redirect("/print_file")

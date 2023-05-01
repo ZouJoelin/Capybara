@@ -81,7 +81,7 @@ def formfilled_required(session):
             for key in session.keys():
                 # print(">>>>>"+ key +":     ", session[key])
                 if session[key] is None:
-                    print(">>>>>form unfilled as required!!!")
+                    print(">>>>>Error:     form unfilled as required!!!")
                     return apology("支付并打印前请完成表格信息")
             return func(*args, **kwargs)
         return wrapper
@@ -89,16 +89,16 @@ def formfilled_required(session):
 
 
 def OSprint(filepath, session):
-    print("========== in OSprint()==========")
+    # print("========== in OSprint()==========")
     # -o landscape???
     option = "-o media={} -o sides={} -# {}".format(
         session["paper_type"], session["sides"], session["copies"])
     # print(">>>>>option:     ", option)
-    os.system(f"echo 'lpr {option}' '{filepath}'")
+    os.system(f"echo RUN:     'lpr {option}' '{filepath}'")
 
     response_error = os.system(f"lpr {option} '{filepath}' ")
     # 0: succeeded; !0: failed
-    print("========== end OSprint() ==========")
+    # print("========== end OSprint() ==========")
     if response_error == 0:
         return 'SUCCESS'
     else:

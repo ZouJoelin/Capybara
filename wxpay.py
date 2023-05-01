@@ -56,8 +56,8 @@ CERT_DIR = None  # './cert'
 PARTNER_MODE = False
 
 # # 日志记录器，记录web请求和回调细节，便于调试排错。
-# logging.basicConfig(filename=os.path.join(os.getcwd(), 'demo.log'), level=logging.DEBUG, filemode='a', format='%(asctime)s - %(process)s - %(levelname)s: %(message)s')
-# LOGGER = logging.getLogger("demo")
+# logging.basicConfig(filename=os.path.join(os.getcwd(), 'log/wxpay.log'), level=logging.DEBUG, filemode='a', format='%(asctime)s - %(process)s - %(levelname)s: %(message)s')
+# LOGGER = logging.getLogger("wxpay")
 
 wxpay = WeChatPay(
     wechatpay_type=WeChatPayType.NATIVE,
@@ -84,7 +84,7 @@ db = SQL("sqlite:///capybara.db")
 
 # make a trade: native
 def pay_native(amount, out_trade_no, description):
-    print("========== in pay_native()==========")
+    # print("========== in pay_native()==========")
     # print(">>>>>AMOUNT:     ", amount)
     # print(">>>>>OUT_TRADE_NO     :    ", out_trade_no)
     # print(">>>>>DESCRIPTION:     ", description)
@@ -97,13 +97,13 @@ def pay_native(amount, out_trade_no, description):
     )
     message = json.loads(message)
     code_url = message.get('code_url')
-    print("========== end pay_native() ==========")
+    # print("========== end pay_native() ==========")
     return code, code_url
 
 
 # make a trade: jsapi
 def pay_jsapi(amount, out_trade_no, description, open_id):
-    print("========== in pay_jsapi()==========")
+    # print("========== in pay_jsapi()==========")
     
     payer = {'openid': open_id}
     code, message = wxpay.pay(
@@ -115,25 +115,25 @@ def pay_jsapi(amount, out_trade_no, description, open_id):
     )
     message = json.loads(message)
     prepay_id = message.get('prepay_id') 
-    print("========== end pay_jsapi() ==========")
+    # print("========== end pay_jsapi() ==========")
     return code, prepay_id
 
 
 # close the trade
 def close(out_trade_no):
-    print("========== close() ==========")
+    # print("========== close() ==========")
     code, message = wxpay.close(out_trade_no=out_trade_no)
     # print('>>>>>code: %s \n>>>>>message: %s' % (code, message))
     db.execute("UPDATE print_order SET trade_state = (?) WHERE out_trade_no = (?)", 
             "CLOSED", out_trade_no)
-    print("========== end close() ==========")
+    # print("========== end close() ==========")
 
     return code, message
 
 
 # query for trade state
 def query(out_trade_no):
-    print("========== in query()==========")
+    # print("========== in query()==========")
     code, message = wxpay.query(out_trade_no=out_trade_no)
     # print('>>>>>code: %s \n>>>>>message: %s' % (code, message))
     # print(">>>>>type of message:     ", type(message))
@@ -151,7 +151,7 @@ def query(out_trade_no):
     trade_time = message.get("success_time")
     # print(">>>>>trade_state:     ", trade_state)
     # print(">>>>>trade_time:     ", trade_time)
-    print("========== end query() ==========")
+    # print("========== end query() ==========")
 
     return code, trade_state, trade_time
 
