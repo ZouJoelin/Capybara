@@ -12,4 +12,4 @@ CREATE UNIQUE INDEX student_id ON users (student_id);
 
 
 -- initialize TABLE print_order...
-INSERT INTO print_order (id, filename, pages, paper_type, color, sides, copies, fee, out_trade_no, trade_type) VALUES(0, 'test.pdf', 2, 'A4', '黑白', 'two-sided-long-edge', 1, 0.02, '20230420T0043KLP', 'NATIVE')
+INSERT INTO print_order (id, filename, pages, paper_type, color, sides, copies, fee, out_trade_no, trade_type) VALUES(0, 'test.pdf', 2, 'A4', '黑白', 'two-sided-long-edge', 1, 0.02, '20230420T0043KLP', 'NATIVE');
