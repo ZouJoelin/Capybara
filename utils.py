@@ -91,7 +91,7 @@ def formfilled_required(session):
 def OSprint(filepath, session):
     # print("========== in OSprint()==========")
     # -o landscape???
-    option = "-o media={} -o sides={} -# {}".format(
+    option = "-o fit-to-page -o media={} -o sides={} -# {}".format(
         session["paper_type"], session["sides"], session["copies"])
     # print(">>>>>option:     ", option)
     os.system(f"echo RUN:     'lpr {option}' '{filepath}'")
