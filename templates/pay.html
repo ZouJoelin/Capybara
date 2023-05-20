@@ -58,7 +58,7 @@
             </table>
 
             <h1 class="text-danger ">
-                <span>￥</span><span id="fee">{{form["fee"]}}</span>
+                <span>￥</span><span id="fee">{{ "%.2f"|format(form["fee"]) }}</span>
             </h1>
         </div>
 
