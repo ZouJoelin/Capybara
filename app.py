@@ -21,6 +21,7 @@ from utils import *
 ###############################################
 
 PRICE_PER_PAGE = 0.01
+PRINTER_LOCATION = "南校180栋814"
 UPLOAD_FOLDER = os.getcwd() + "/files_temp/"
 
 PAPER_TYPE = {"A4"}
@@ -121,7 +122,7 @@ def index():
         session["pages"] = 0
         session["fee"] = None
 
-        return render_template("index.html")
+        return render_template("index.html", location = PRINTER_LOCATION)
 
 
 @app.route("/wx_auth")
@@ -406,7 +407,7 @@ def print_file():
             return redirect("/print_file")
     
     else:
-        return render_template("print_file.html", filename = session["filename"])
+        return render_template("print_file.html", filename = session["filename"], location = PRINTER_LOCATION)
 
 
 @app.route("/contact")
