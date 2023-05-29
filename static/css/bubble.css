@@ -32,7 +32,7 @@
     box-shadow: 0 -4px #fff, 0 -8px #000, 4px 0 #fff, 4px -4px #000, 8px 0 #000, 0 4px #fff, 0 8px #000, -4px 0 #fff, -4px 4px #000, -8px 0 #000, -4px -4px #000, 4px 4px #000;
     box-sizing: border-box;
     height: fit-content;
-    width: 150px;
+    width: 155px;
 }
 
 .bubble::after {
