@@ -20,7 +20,7 @@ from utils import *
 # initialize Flask.app & session & sqlite
 ###############################################
 
-PRICE_PER_PAGE = 0.05
+PRICE_PER_PAGE = 0.10
 PRINTER_LOCATION = "东校慎思园6号文化室"
 UPLOAD_FOLDER = os.getcwd() + "/files_temp/"
 
