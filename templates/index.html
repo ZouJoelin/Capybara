@@ -3,13 +3,16 @@
 
 {% block main %}
 
+<script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css" />
+
 <main class="container py-4">
     <div class="mx-auto" id="print-form" style="max-width: 1000px;">
 
         <div>
             <form id="file-form">
                 <div class="">
-                    <label class="form-label" for="files">上传文件</label>
+                    <label class="form-label" for="file">上传文件</label>
                     <input class="form-control" type="file" id="file" name="file" accept=".pdf" required
                         data-bs-toggle="popover" data-bs-trigger="hover " data-bs-content="由于word等文件兼容性低，请转换成pdf文件再上传">
                 </div>
