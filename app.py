@@ -20,7 +20,8 @@ from utils import *
 # initialize Flask.app & session & sqlite
 ###############################################
 
-PRICE_PER_PAGE = 0.10
+PRICE_PER_PAGE_ONE = 0.12
+PRICE_PER_PAGE_TWO = 0.10
 PRINTER_LOCATION = "东校慎思园6号文化室"
 UPLOAD_FOLDER = os.getcwd() + "/files_temp/"
 
@@ -206,7 +207,11 @@ def auto_count():
         session["copies"] = int(form["copies"])
 
         ## calculate fee
-        session["fee"] = session["pages"] * session["copies"] * PRICE_PER_PAGE
+        if session["sides"] == "one-sided":
+            session["fee"] = session["pages"] * PRICE_PER_PAGE_ONE * session["copies"]
+        else:
+            residual = session["pages"] % 2
+            session["fee"] = ((session["pages"] - residual) * PRICE_PER_PAGE_TWO + residual * PRICE_PER_PAGE_ONE) * session["copies"]
         # print(">>>>>>>>>> session >>>>>>>>>>")
         # for key in session.keys():
         #     print(">>>>>"+ key +":     ", session[key])
