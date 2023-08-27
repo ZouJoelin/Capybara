@@ -15,11 +15,11 @@ async function fetchQuery() {
             document.getElementById("print-order").submit();
             //window.location.href = '/print_file?out_trade_no=' + out_trade_no;
         } else {
-            setTimeout(fetchQuery, 5000); // 间隔5秒后再次调用 fetchQuery 函数
+            setTimeout(fetchQuery, 2000); // 间隔5秒后再次调用 fetchQuery 函数
         }
     } catch (errorJSON) {
         let error_message = await errorJSON.error_message;
-        setTimeout(fetchQuery, 5000); // 如果请求失败，则间隔5秒后再次调用 fetchQuery 函数
+        setTimeout(fetchQuery, 2000); // 如果请求失败，则间隔5秒后再次调用 fetchQuery 函数
 
     }
 }

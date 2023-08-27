@@ -424,12 +424,12 @@ def contact():
 
 @app.route("/library")
 def library():
-    return apology("共享文库<br>To Be Continued...", 501)
+    return apology("共享文库<br>I promise...", 501)
 
 
 @app.route("/board")
 def board():
-    return apology("留言板<br>To Be Continued...", 501)
+    return apology("留言板<br>I promise...", 501)
 
 
 if __name__ == "__main__":
