@@ -3,19 +3,21 @@
 
 {% block main %}
 
-<script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
-<link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css" />
+<link rel="stylesheet" href="/static/css/dragDrop.css">
 
 <main class="container py-4">
     <div class="mx-auto" id="print-form" style="max-width: 1000px;">
 
         <div>
             <form id="file-form">
-                <div class="">
-                    <label class="form-label" for="file">上传文件</label>
-                    <input class="form-control" type="file" id="file" name="file" accept=".pdf" required
-                        data-bs-toggle="popover" data-bs-trigger="hover " data-bs-content="由于word等文件兼容性低，请转换成pdf文件再上传">
-                </div>
+                <label class="form-label" for="file">上传文件</label>
+                <label class="form-label drag-drop-label" for="file">
+                    <div class="drag-drop-zone" data-bs-toggle="popover" data-bs-trigger="hover "
+                        data-bs-content="由于word等文件兼容性低，请转换成pdf文件再上传">
+                        <p id="filename-placeholder">点击或者拖拽上传</p>
+                    </div>
+                </label>
+                <input class="form-control" type="file" id="file" name="file" accept=".pdf" required hidden>
             </form>
             <form id="information-form">
                 <div class="d-flex justify-content-between align-items-center">
@@ -116,6 +118,7 @@
 
     function resetForm() {
         document.getElementById("file-form").reset();
+        document.getElementById('filename-placeholder').textContent = "点击或者拖拽上传";
         document.getElementById("information-form").reset();
         document.getElementById("fee").innerHTML = '0.00';
 
@@ -133,5 +136,7 @@
 </script>
 
 <script src="/static/js/auto_count.js"></script>
+
+<script src="/static/js/dragDrop.js"></script>
 
 {% endblock %}
