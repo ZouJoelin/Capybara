@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <!-- get Bootstrap -->
+    <link href="https://cdn.staticfile.org/twitter-bootstrap/5.1.1/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/5.1.1/js/bootstrap.bundle.min.js"></script>
+
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/bubble.css">
+    <!-- <link rel="stylesheet" href="/static/css/bootstrap.override.css"> -->
+
+</head>
+
+<body>
+    <main class="container py-4">
+        <div class="mx-auto" id="print-form" style="max-width: 1000px;">
+            <div>
+                <form id="file-form" ， action="https://capybara.mynatapp.cc/">
+                    <button id="file-submit" type="submit">初始化</button>
+                </form>
+            </div>
+
+            <div>
+                <form id="file-form" , action="https://capybara.mynatapp.cc/api/auto_count/pages" , method="post" ,
+                    enctype="multipart/form-data">
+                    <label class="form-label" for="file">上传文件</label>
+                    <input class="form-control" type="file" id="file" name="file" accept=".pdf" required>
+                    <button type="submit">上传</button>
+                </form>
+
+                <form id="information-form" , action="https://capybara.mynatapp.cc/api/auto_count/fee" , method="post" ,
+                    enctype="multipart/form-data">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <label class="form-label" for="pages">页数</label>
+                        <input class="form-control form-control-plaintext input-box bg-primary text-white" type="number"
+                            id="pages" name="pages" value="0" style="-moz-appearance: textfield; ">
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <label class="form-label" for="paper_type">纸张</label>
+                        <input class="form-control form-control-plaintext input-box bg-primary text-white" type="text"
+                            id="paper_type" name="paper_type" value="A4" readonly>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <label class="form-label" for="color">颜色</label>
+                        <input class="form-control form-control-plaintext input-box bg-primary text-white" type="text"
+                            id="color" name="color" value="黑白" readonly>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <label class="form-label" for="sides">单双</label>
+                        <div class="btn-group" role="group" style="margin-top: 0.5rem; margin-bottom: 0.5rem;">
+
+                            <input type="radio" class="btn-check" id="one-sided" name="sides" value="one-sided">
+                            <label class="btn btn-outline-primary" for="one-sided">单面</label>
+
+                            <input type="radio" class="btn-check" id="two-sided-long-edge" name="sides"
+                                value="two-sided-long-edge" checked>
+                            <label class="btn btn-outline-primary" for="two-sided-long-edge">双面长边</label>
+
+                            <input type="radio" class="btn-check" id="two-sided-short-edge" name="sides"
+                                value="two-sided-short-edge">
+                            <label class="btn btn-outline-primary" for="two-sided-short-edge">双面短边</label>
+
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <label class="form-label" for="copies">份数</label>
+                        <input class="form-control input-box" type="number" id="copies" name="copies" value="1" min="1"
+                            required>
+                    </div>
+
+                    <div class="d-flex mt-3 gap-3 float-end">
+                        <button type="reset" class="btn btn-danger" id="reset-btn">取消</button>
+                        <button type="submit" class="btn btn-primary">提交</button>
+                    </div>
+                </form>
+
+                <h1 class="text-danger text-end">
+                    <span>￥</span><span id="fee">0.00</span>
+                </h1>
+            </div>
+
+        </div>
+    </main>
+</body>
+
+</html>

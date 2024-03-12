@@ -84,22 +84,22 @@ def index():
     # print(">>>>>request header:     \n", request.headers)
 
     # pre-check printer state
-    state = printer_state()
+    state = printer_status()
     if state != "ok":
         print(">>>>>Error:     ", state)
         return apology(state+"<br>请联系管理员", 418)
 
     # 微信浏览器授权后重定向到回调链接地址
-    if request.MOBILE and not session.get("open_id"):
-        if not os.environ.get("REDIRECT_URI"):
-            raise RuntimeError("REDIRECT_URI not set")
-        REDIRECT_URI = os.environ.get("REDIRECT_URI")
-        scope = 'snsapi_base'
-        auth_url = f'https://open.weixin.qq.com/connect/oauth2/authorize?'\
-                f'appid={APPID}&redirect_uri={REDIRECT_URI}&'\
-                f'response_type=code&scope={scope}#wechat_redirect'
-        # print(">>>>>auth_url:     ", auth_url)
-        return redirect(auth_url)
+    # if request.MOBILE and not session.get("open_id"):
+    #     if not os.environ.get("REDIRECT_URI"):
+    #         raise RuntimeError("REDIRECT_URI not set")
+    #     REDIRECT_URI = os.environ.get("REDIRECT_URI")
+    #     scope = 'snsapi_base'
+    #     auth_url = f'https://open.weixin.qq.com/connect/oauth2/authorize?'\
+    #             f'appid={APPID}&redirect_uri={REDIRECT_URI}&'\
+    #             f'response_type=code&scope={scope}#wechat_redirect'
+    #     # print(">>>>>auth_url:     ", auth_url)
+    #     return redirect(auth_url)
 
     if request.method == "POST":
         source = request.form["source"]
@@ -146,12 +146,19 @@ def wx_auth():
 
 
 @app.route("/auto_count", methods=["POST"])
-# input:    POST request: files | form's items
-# output:   pages or fee
 def auto_count():
-    # print(">>>>>request:     ", request)
-    # print(">>>>>file?:     ", request.files)
-    # print(">>>>>form?:     ", request.form)
+    """auto count: pages for request.files | fee for request.form 
+    
+    Request:
+        - ["POST"] with request.files
+        Response: {"pages": <int>}
+
+        - ["POST"] with request.form
+        Response: {"fee": <int>}
+    """
+    print(">>>>>request:     ", request)
+    print(">>>>>file?:     ", request.files)
+    print(">>>>>form?:     ", request.form)
 
     # · save file, count pages
     if request.files:
@@ -217,7 +224,7 @@ def auto_count():
         #     print(">>>>>"+ key +":     ", session[key])
 
         return jsonify({'fee': session["fee"]})
-
+        
 
 @app.route("/pay", methods=["GET", "POST"])
 # inout:    POST request
