@@ -3,6 +3,8 @@
 
 {% block main %}
 
+<link rel="stylesheet" href="/static/css/dragDrop.css">
+
 <main class="container py-4">
 
     <!-- information -->
@@ -15,11 +17,15 @@
 
         <div>
             <form id="file-form">
-                <div class="">
-                    <label class="form-label" for="files">上传文件</label>
-                    <input class="form-control" type="file" id="file" name="file" accept=".pdf" required
-                        data-bs-toggle="popover" data-bs-trigger="hover " data-bs-content="由于word等文件兼容性低，请转换成pdf文件再上传">
-                </div>
+                <label class="form-label" for="file">上传文件</label>
+                <label class="form-label drag-drop-label" for="file">
+                    <div class="drag-drop-zone" data-bs-toggle="popover" data-bs-trigger="hover "
+                        data-bs-content="由于word等文件兼容性低，请转换成pdf文件再上传">
+                        <p id="filename-placeholder">点击或者拖拽上传</p>
+                    </div>
+                </label>
+                <input class="form-control" type="file" id="file" name="file" accept=".pdf" required hidden>
+                <!-- <input type="button" id="select-from-wx" value="从聊天记录选择文件"> -->
             </form>
             <form id="information-form">
                 <div class="d-flex justify-content-between align-items-center">
@@ -128,6 +134,7 @@
 
     function resetForm() {
         document.getElementById("file-form").reset();
+        document.getElementById('filename-placeholder').textContent = "点击或者拖拽上传";
         document.getElementById("information-form").reset();
         document.getElementById("fee").innerHTML = '0.00';
 
@@ -144,6 +151,47 @@
     }
 </script>
 
+<!-- {% if request.MOBILE %}
+<script>
+
+    // 获取文件输入框
+    const fileInput = document.getElementById('file');
+
+    // 获取用于显示文件名的<p>元素
+    const fileNamePlaceholder = document.getElementById('filename-placeholder');
+
+    // 获取“从聊天记录选择文件”按钮
+    const wxSelectFileButton = document.getElementById('select-from-wx');
+
+    // 添加“从聊天记录选择文件”按钮的点击事件监听器
+    wxSelectFileButton.addEventListener('click', () => {
+        // 使用微信浏览器的API来选择文件
+        wx.chooseMessageFile({
+            count: 1, // 选择文件的数量，此处为1
+            type: 'file', // 选择文件的类型，可以根据需求修改
+            success: function (res) {
+                const selectedFile = res.tempFiles[0];
+
+                // 更新<p>元素的内容为文件名
+                fileNamePlaceholder.textContent = selectedFile.name;
+
+                // 将所选文件添加到文件输入框中
+                const fileData = new FormData();
+                fileData.append('file', selectedFile);
+                fileInput.files = fileData;
+            },
+            fail: function (err) {
+                console.error('选择文件失败', err);
+            }
+        });
+    });
+
+</script>
+
+{% endif %} -->
+
 <script src="/static/js/auto_count.js"></script>
+
+<script src="/static/js/dragDrop.js"></script>
 
 {% endblock %}
