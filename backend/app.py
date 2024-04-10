@@ -15,7 +15,7 @@ from utils import *
 ###############################################
 
 PRICE_PER_PAGE = 0.01
-UPLOAD_FOLDER = os.getcwd() + "/files_temp/"
+UPLOAD_FOLDER = os.getcwd() + "/../files_temp/"
 
 PAPER_TYPE = {"A4"}
 COLOR = {"黑白"}
