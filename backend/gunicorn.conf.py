@@ -25,12 +25,12 @@ reload = True                                         #当代码有修改时，�
 #log
 capture_output = True                                 # Redirect stdout/stderr to log file
 
-pidfile = './log/gunicorn.pid'
+pidfile = '../log/gunicorn.pid'
 
 loglevel = 'info'                                     #errorlog level: debug info warning error critical
 # errorlog = './log/gunicorn.error.log'                                        #设置问题记录日志
 
 access_log_format = '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"'
-accesslog = errorlog = '-'                                       #设置访问日志
+accesslog = errorlog = '../log/gunicorn.log' #'-'                                       #设置访问日志
 
 

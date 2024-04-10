@@ -4,6 +4,9 @@
 /log/*
 !/log/logrotate.conf
 
+backend/__pycache__/
+backend/flask_session/
+
 /.docs
 /private_security
 capybara.db
