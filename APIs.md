@@ -66,6 +66,7 @@ https://warped-spaceship-750669.postman.co/request/33534605-a01c68b7-847d-4dff-8
 |  key   | value  | 说明 |
 |  ----  | ----  | --- |
 | "file"  | file blob | |
+| "fileName"  | str | |
 
 #### 应答参数
 |  key   | value  | 说明 |
@@ -103,7 +104,8 @@ https://warped-spaceship-750669.postman.co/request/33534605-a01c68b7-847d-4dff-8
 |  key   | value  | 说明 |
 |  ----  | ----  | --- |
 | "fee"  | int |  |
-| "error_message"  | "请输入正确的纸张类型" |  |
+| "error_message"  | "请先上传文件" |  |
+|   | "请输入正确的纸张类型" |  |
 |   | "请输入正确的打印颜色" |  |
 |   | "请选择正确的单双面选项" |  |
 |   | "打印份数需为正整数" |  |

@@ -116,9 +116,12 @@ def count_pages():
         abort(400)
     print(">>>>>>>>>> received file >>>>>>>>>>")
     file = request.files.get("file")
+    
+
     if not file:
         abort(400)
-    filename = file.filename
+    # filename = file.filename
+    filename = request.form.get("fileName")
     filename = secure_filename(filename)
 
     # if capture_injection(filename):
@@ -127,7 +130,7 @@ def count_pages():
     ## save file
     filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
     file.save(filepath)
-    print(">>>>>file uploaded successfully!!!")
+    print(f">>>>>file: {filename} uploaded successfully!!!")
 
     # MUST save file before calling PdfReader(), otherwise PdfReader will corrupt the file.
     if not validate_file(file):
@@ -179,6 +182,8 @@ def count_fee():
     session["copies"] = int(form["copies"])
 
     ## calculate fee
+    if not session.get("pages"):
+        return jsonify({'error_message': "请先上传文件"}), 400
     session["fee"] = session["pages"] * session["copies"] * PRICE_PER_PAGE
     # print(">>>>>>>>>> session >>>>>>>>>>")
     # for key in session.keys():
