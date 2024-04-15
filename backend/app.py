@@ -1,12 +1,18 @@
 
 
 import os
+import time
+from random import sample
+from string import ascii_uppercase, digits
 
 from flask import Flask, session, request, jsonify, abort, make_response
 from flask_session import Session
+import requests
 
 from werkzeug.middleware.proxy_fix import ProxyFix
 
+from sql import SQL
+from wxpay import *
 from utils import * 
 
 
@@ -43,6 +49,9 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
+# Configure CS50 Library to use SQLite database
+db = SQL("sqlite:///capybara.db")
+
 
 ###############################################
 # pre-configuration
@@ -73,9 +82,30 @@ def not_found(error):
 
 @app.route("/", methods=["GET"])
 def index():
+    """initialize session with open_id, filename, pages, fee.
+
+    Request:
+        - ["GET"] with request.args["code"]
+        Response: {"initialized": "ok"}
+    """
+
     session["filename"] = None
     session["pages"] = 0
     session["fee"] = None
+
+    code = request.args.get('code')
+    token_url = f'https://api.weixin.qq.com/sns/jscode2session?'\
+                f'appid={APPID}&secret={APP_SECRET}&js_code={code}&grant_type=authorization_code'
+    response = requests.get(token_url)
+    response = json.loads(response.text)
+
+    if response.get("errcode"):
+        print(">>>>>Error:     access_token failed!!!", response.get("errmsg"))
+        return jsonify({'error_message': 'access_token failed!!!',
+                        'reason': response.get("errmsg")})
+    open_id = response.get("openid")
+    session["open_id"] = open_id
+
     return jsonify({'initialized': 'ok'})
 
 
@@ -111,6 +141,7 @@ def count_pages():
     print(">>>>>request:     ", request)
     print(">>>>>file?:     ", request.files)
     print(">>>>>form?:     ", request.form)
+    print(">>>>>session:     ", request.headers.get("Cookie"))
 
     if not request.files:
         abort(400)
@@ -153,9 +184,10 @@ def count_fee():
         Response: {"fee": <int>}
         Exception: {"error_message": <str>}
     """
-    # print(">>>>>request:     ", request)
-    # print(">>>>>file?:     ", request.files)
-    # print(">>>>>form?:     ", request.form)
+    print(">>>>>request:     ", request)
+    print(">>>>>file?:     ", request.files)
+    print(">>>>>form?:     ", request.form)
+    print(">>>>>session:     ", request.headers.get("Cookie"))
 
     if not request.form:
         abort(400)
@@ -192,9 +224,55 @@ def count_fee():
     return jsonify({'fee': session["fee"]})
 
 
+@app.route("/api/pay", methods=["GET"])
+@formfilled_required(session)
+def pay():
+    """generate payment link
 
+    
+    """
+    # generate trade info
+    amount = int(session["fee"] * 100)
+    print(">>>>>amount:     " ,amount)
+    out_trade_no = time.strftime("%Y%m%dT%H%M", time.localtime()) + ''.join(sample(ascii_uppercase,3))
+    print(">>>>>out_trade_no:     " ,out_trade_no)
+    description = session["filename"]
+    print(">>>>>description:     " ,description)
 
+    print(f'>>>>>print_order:     filename: "{session["filename"]}"  pages: "{session["pages"]}"  copies: "{session["copies"]}"  fee: "{session["fee"]}"  out_trade_no: "{out_trade_no}"')
 
+    # print(">>>>>access from mobile!!!")
+    code, prepay_id = pay_jsapi(amount, out_trade_no, description, session["open_id"])
+
+    if code not in range(200, 300):
+        print(">>>>>Error:     pay_jsapi() failed!!!", code)
+        return jsonify({'error_message': "下单失败"})
+    
+    timestamp = str(int(time.time()))
+    nonceStr = ''.join(sample(ascii_uppercase + digits, 16))
+    package = 'prepay_id=' + prepay_id
+    signType = 'RSA'
+    paySign = wxpay.sign([APPID, timestamp, nonceStr, package])
+    print(">>>>>timestamp:     ", timestamp)
+    print(">>>>>nonceStr:     ", nonceStr)
+    print(">>>>>package:     ", package) 
+    print(">>>>>paysign:     ", paySign)
+
+    # log into sql
+    db.execute("INSERT INTO print_order (id, filename, pages, paper_type, color, sides, copies, fee, out_trade_no, trade_type) VALUES((SELECT MAX(id) + 1 FROM print_order), ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                session["filename"], session["pages"], session["paper_type"], session["color"], session["sides"], session["copies"], session["fee"],
+                out_trade_no, "JSAPI")
+
+    jsapi_sign = {
+        "appId": APPID,
+        "timestamp": timestamp,
+        "nonceStr": nonceStr,
+        "package" : package,
+        "signType": signType,
+        "paySign": paySign
+    }
+    return jsonify({"out_trade_no": out_trade_no, 
+                    "jsapi_sign": jsapi_sign})
 
 
 

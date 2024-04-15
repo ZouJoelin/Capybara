@@ -36,12 +36,16 @@ https://warped-spaceship-750669.postman.co/request/33534605-5a030443-3f46-435f-9
 确认打印机状态无误后，初始化当前会话。
 
 #### 请求参数
-无
+|  key   | value  | 说明 |
+|  ----  | ----  | --- |
+| "code"  | str | wx.login()获取code后调用此接口并传入code，以便后端换取open_id |
 
 #### 应答参数
 |  key   | value  | 说明 |
 |  ----  | ----  | --- |
 | "initialized"  | "ok" | √ |
+| "error_message"  | "access_token failed!!!" | 授权失败，具体原因在reason字段 |
+| "reason"  |  | 错误码，据此可查微信开发文档 |
 
 #### 错误码
 无
@@ -118,6 +122,29 @@ https://warped-spaceship-750669.postman.co/request/33534605-1605e60c-3237-4703-9
 ```{"fee":0.06}```
 
 -------------------------------------------------
+## 小程序下单 [GET]
+```https://capybara.mynatapp.cc/api/pay```
+小程序统一下单，移动端使用pay_jsapi()，返回wx.requestPayment()需要的参数；PC端使用pay_native()，返回支付二维码url。
+
+#### 请求参数
+无
+
+#### 应答参数
+|  key   | value  | 说明 |
+|  ----  | ----  | --- |
+| "out_trade_no"  | str | 每个订单在商户后端的唯一标识，例：20230527T1838XCF (2023.05.27 + 18:38 + 三个随机大写字母组合) |
+| "jsapi_sign"  | json | wx.requestPayment()需要的所有参数字段：appId, timestamp, nonceStr, package, signType, paySign |
+| "error_message"  | "下单失败" |  |
+
+##### 请求示例
+无
+
+
+##### 应答示例
+无
+
+-------------------------------------------------
+
 ...
 
 

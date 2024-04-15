@@ -1,7 +1,7 @@
 import os
 import re
 
-from flask import redirect, render_template, request, session
+from flask import jsonify
 from functools import wraps
 
 from PyPDF2 import PdfReader, errors
@@ -77,4 +77,22 @@ def count_pdf_pages(file):
     return pages
 
 
+def formfilled_required(session):
+    """
+    Decorate routes to require formfilled. see below:
+    https://www.liaoxuefeng.com/wiki/1016959663602400/1017451662295584
+    """
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            # print(">>>>> @decorated >>>>>")
+            # print(">>>>>keys:     ", session.keys())
 
+            for key in session.keys():
+                # print(">>>>>"+ key +":     ", session[key])
+                if session[key] is None:
+                    print(">>>>>Error:     form unfilled as required!!!")
+                    return jsonify({'error_message': "支付并打印前请完成表格信息"}), 400
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
