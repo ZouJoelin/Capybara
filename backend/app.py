@@ -221,7 +221,33 @@ def count_fee():
     # for key in session.keys():
     #     print(">>>>>"+ key +":     ", session[key])
 
-    return jsonify({'fee': session["fee"]})
+    return jsonify({'fee': f"{session['fee']:.2f}"})
+
+
+@app.route("/api/order", methods=["GET"])
+@formfilled_required(session)
+def order():
+    """generate order info
+    
+    Request:
+        - ["GET"]
+        Response: {
+            "filename": <str>,
+            "pages": <int>,
+            "paper_type": <str>,
+            "color": <str>,
+            "sides": <str>,
+            "copies": <int>,
+            "fee": <int>
+    }
+    """
+    return jsonify({"filename": str(session["filename"]),
+                    "pages": int(session["pages"]),
+                    "paper_type": str(session["paper_type"]),
+                    "color": str(session["color"]),
+                    "sides": str(session["sides"]),
+                    "copies": int(session["copies"]),
+                    "price": str(f"{session['fee']:.2f}")})
 
 
 @app.route("/api/pay", methods=["GET"])
@@ -273,6 +299,7 @@ def pay():
     }
     return jsonify({"out_trade_no": out_trade_no, 
                     "jsapi_sign": jsapi_sign})
+
 
 
 

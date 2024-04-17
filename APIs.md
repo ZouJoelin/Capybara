@@ -145,7 +145,7 @@ https://warped-spaceship-750669.postman.co/request/33534605-1605e60c-3237-4703-9
 
 -------------------------------------------------
 ## 获取打印信息 [GET]
-
+```https://capybara.mynatapp.cc/api/order```
 #### 请求参数
 无
 
@@ -162,7 +162,6 @@ https://warped-spaceship-750669.postman.co/request/33534605-1605e60c-3237-4703-9
 
 ##### 请求示例
 无
-
 
 ##### 应答示例
 无
