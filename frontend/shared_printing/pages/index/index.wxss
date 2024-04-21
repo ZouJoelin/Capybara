@@ -1,0 +1,115 @@
+/**index.wxss**/
+.container{
+  padding: 20rpx;
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  justify-content: flex-start;
+  background-color: white;
+  align-items: center;
+  color: #4e514e;
+}
+.container > view {  
+  margin-bottom: 40rpx; /* 每个view标签之间的下边距 */  
+} 
+.container > view:last-child {  
+  margin-bottom: 0; /* 最后一个view标签不需要下边距 */  
+} 
+.price > text {  
+  color: #bd3124; /* 价格文字颜色 */  
+}
+/* .uploader-container{
+  position: relative;
+} */
+.uploader{
+  position: relative;
+}
+.upload-file{
+  position: relative;
+}
+.uploader-info{
+  font-size: smaller;
+}
+.printer-status{
+  display: flex;
+  font-size: smaller;
+}
+.status-info{
+  position: relative;
+  left: -200rpx;
+}
+.page-num{
+  display: flex;
+}
+.num-label{
+  position: relative;
+  left: -250rpx;
+}
+.pgnum{
+  position: absolute;
+  right: 100rpx;
+}
+.page-danshuang{
+  display: flex;
+}
+.danshuang-label{
+  position: relative;
+  left: -250rpx;
+}
+.page-color{
+  display: flex;
+}
+.color-label{
+  position: relative;
+  left: -250rpx;
+}
+.color-picker{
+  position: absolute;
+  right: 100rpx;
+}
+.page-size{
+  display: flex;
+}
+.size-label{
+  position: relative;
+  left: -250rpx;
+}
+.size-picker{
+  position: absolute;
+  right: 100rpx;
+}
+.page-qty{
+  display: flex;
+  margin-top: 20rpx;
+}
+.qty-label{
+  position: relative;
+  left: -250rpx;
+}
+.qty-count{
+  position: absolute;
+  right: 100rpx;
+}
+.price{
+  margin-top: 5rpx;
+}
+.price-label{
+  position: absolute;
+  right: 100rpx;
+  font-size: larger;
+}
+
+.button{
+  margin-top: 40rpx;
+}
+.cancel-button{
+  position: absolute;
+  right: 250rpx;
+}
+.confirm-button{
+  position: absolute;
+  right: 100rpx;
+}
+  
+
+  

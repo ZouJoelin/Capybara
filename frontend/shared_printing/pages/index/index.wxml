@@ -1,0 +1,90 @@
+<!--index.wxml-->
+<van-notice-bar scrollable left-icon="volume-o"
+ text="这是一个滚动通知栏" />
+<view class="container">
+  <van-notify id="van-notify" />
+  <view class="printer-status">
+    <view  class="status-info">
+      <text style="color: #3ab54a;">打印机状态：</text>
+      <block wx:if="{{backend_status}}">
+        <van-icon style="color: #3ab54a;" name="checked" />
+      </block>
+      <block wx:else>
+        <van-icon style="color: red;" name="clear" />
+      </block>
+    </view>
+  </view>
+  <view class="uploader-container">
+    <van-uploader file-list="{{ fileList }}" 
+    class="uploader"
+    bind:after-read="afterRead" 
+    max-count="1"
+    accept="file"
+    >
+    <button size="mini" 
+    plain="true"
+    type="primary">
+    <van-icon name="description" />
+    选择文件
+    </button>
+    </van-uploader>
+  </view>
+  <view class="upload-file">
+    <view class="van-ellipsis">
+      {{filename_forshow}}
+    </view>
+    <view class="van-hairline--bottom"></view>
+  </view>
+  <view class="page-num">
+    <text class="num-label">页数</text>
+    <view class="pgnum">{{pgnum}}</view>
+  </view>
+  <view class="page-size">
+    <view class="size-label">纸张</view>
+    <picker mode="selector" bindchange="bindSizeChange" 
+      value="{{size_index}}" range="{{size_array}}">
+      <view class="size-picker">{{size_array[size_index]}}</view>
+    </picker>
+  </view>
+  <view class="page-color">
+    <view class="color-label">颜色</view>
+    <picker mode="selector" bindchange="bindColorChange" value="{{color_index}}" range="{{color_array}}">
+    <view class="color-picker">
+      {{color_array[color_index]}}
+    </view>
+    </picker>
+  </view>
+  <view class="page-danshuang">
+    <text class="danshuang-label">单双</text>
+    <picker mode="selector" bindchange="bindDanShuangChange" 
+    value="{{danshuang_index}}" 
+    range="{{danshuang_array}}">
+    <view class="color-picker">
+      {{danshuang_array[danshuang_index]}}
+    </view>
+    </picker>
+  </view>
+  <view class="page-qty">
+    <text class="qty-label">份数</text>
+    <view class="qty-count">
+      <van-toast id="van-toast" />
+      <van-stepper value="{{ qty }}" 
+      max="10" 
+      integer
+      disabled="{{pgnum==0}}"
+      async-change
+      bind:change="onQtyChange"  />
+    </view>
+  </view>
+  <view class="price">
+    <text class="price-label">{{price}}￥</text>
+  </view>
+  <view class="button">
+    <button class="cancel-button" size="mini" type="warn">取消</button>
+    <button class="confirm-button" 
+    size="mini" type="primary"
+    bind:tap="submit"
+    >打印</button>
+  </view>
+</view>
+

@@ -1,0 +1,2 @@
+<!--pages/sharedDocument/sharedDocument.wxml-->
+<van-empty image="error" description="敬请期待！" />

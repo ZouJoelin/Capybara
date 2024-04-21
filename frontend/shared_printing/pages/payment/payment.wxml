@@ -1,0 +1,44 @@
+<view class="container">
+  
+  <view style="text-align: center;">
+  请确认您的打印信息
+  </view>
+
+  <view class="table">
+    <view class="tr">
+      <view class="td_1">文件</view>
+      <view class="td_2">filename.pdf</view>
+    </view>
+
+    <view class="tr">
+      <view class="td_1">页数</view>
+      <view class="td_2">3</view>
+    </view>
+
+    <view class="tr">
+      <view class="td_1">纸张</view>
+      <view class="td_2">A4</view>
+    </view>
+
+    <view class="tr">
+      <view class="td_1">颜色</view>
+      <view class="td_2">黑白</view>
+    </view>
+
+    <view class="tr">
+      <view class="td_1">单双</view>
+      <view class="td_2">单面</view>
+    </view>
+
+    <view class="tr">
+      <view class="td_1">份数</view>
+      <view class="td_2">1</view>
+    </view>
+  </view>
+  <view class="price">￥0.31</view>
+  <view class="btnbox">
+    <button>取消</button>
+    <button>拉起支付</button>
+  </view>
+
+</view>
