@@ -1,6 +1,6 @@
 
 --------------------------------------
-## 查询打印机状态 [POST]
+## 查询打印机状态 [GET]
 ```https://capybara.mynatapp.cc/api/status```
 进入小程序以及每次更换打印机地点，查询打印机状态无异常。
 
@@ -45,7 +45,8 @@ https://warped-spaceship-750669.postman.co/request/33534605-5a030443-3f46-435f-9
 |  ----  | ----  | --- |
 | "initialized"  | "ok" | √ |
 | "error_message"  | "access_token failed!!!" | 授权失败，具体原因在reason字段 |
-| "reason"  |  | 错误码，据此可查微信开发文档 |
+| "errcode"  |  | 错误码，据此可查微信开发文档 |
+| "errmsg"  |  | 冗余信息，与errocde一致 |
 
 #### 错误码
 无

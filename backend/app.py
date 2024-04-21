@@ -94,15 +94,19 @@ def index():
     session["fee"] = None
 
     code = request.args.get('code')
+    if not code:
+        return jsonify({'error_message': 'access_token failed!!!',
+                        'reason': 'no code received'})
     token_url = f'https://api.weixin.qq.com/sns/jscode2session?'\
                 f'appid={APPID}&secret={APP_SECRET}&js_code={code}&grant_type=authorization_code'
     response = requests.get(token_url)
     response = json.loads(response.text)
 
     if response.get("errcode"):
-        print(">>>>>Error:     access_token failed!!!", response.get("errmsg"))
+        print(f">>>>>Error:     access_token failed!!! errcode: {response.get('errcode')} errmsg: {response.get('errmsg')}")
         return jsonify({'error_message': 'access_token failed!!!',
-                        'reason': response.get("errmsg")})
+                        'errcode': response.get("errmsg"),
+                        'errmsg': response.get("errmsg")})
     open_id = response.get("openid")
     session["open_id"] = open_id
 
