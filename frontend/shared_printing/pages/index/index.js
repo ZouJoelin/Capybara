@@ -6,6 +6,7 @@ const app = getApp();
 Page({  
   data: {  
     fileList: [],
+    code : '',
     backend_status: false,
     filename: '',
     filename_forshow: '待上传文件 ( 推荐pdf格式 )',
@@ -99,10 +100,11 @@ Page({
     }
   },
 
-  initialize:function(e){
+  initialize:function(){
+    var that = this
     return new Promise((resolve,reject) => {
       wx.request({
-        url: 'https://capybara.mynatapp.cc/',
+        url: 'https://capybara.mynatapp.cc/?code='+that.data.code,
         method: 'GET',
         success: (res) => {
           // console.log(res);
@@ -159,13 +161,9 @@ Page({
     },400)
    
   },
-   /**
-   * 生命周期函数--监听页面加载
-   */
-  onLoad(options) {
-    // console.log(options);
-    var that = this;
-    //初始化打印机状态
+  
+  getStatus: function(){
+    var that = this
     wx.request({
       url: 'https://capybara.mynatapp.cc/api/status',
       method: 'GET',
@@ -179,7 +177,7 @@ Page({
             backend_status : true
           });
           that.initialize().then((res) => {
-            console.log('初始化会话成功：',res)
+            console.log('初始化会话：',res)
             app.globalData.Cookie = res.cookies[0]
             console.log(app.globalData)
           })
@@ -188,6 +186,30 @@ Page({
           })
         }
       }
+    })
+  },
+  
+   /**
+   * 生命周期函数--监听页面加载
+   */
+  onLoad(options) {
+    // console.log(options);
+    var that = this;
+    wx.login({
+      success: (result) => {
+        console.log(result)
+        that.setData({
+          code : result.code
+        })
+        //console.log(result.code)
+        that.getStatus();
+      },
+      fail: (err) => {
+        console.error(err)
+      },
+      complete: (res) => {
+        //console.log(res)
+      },
     })
   },
 
