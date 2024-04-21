@@ -241,11 +241,12 @@ def order():
             "fee": <int>
     }
     """
+    sides_zh = {"one-sided": "单面打印", "two-sided-long-edge": "双面打印，长边翻转", "two-sided-short-edge": "双面打印，短边翻转"}
     return jsonify({"filename": str(session["filename"]),
                     "pages": int(session["pages"]),
                     "paper_type": str(session["paper_type"]),
                     "color": str(session["color"]),
-                    "sides": str(session["sides"]),
+                    "sides": str(sides_zh[session["sides"]]),
                     "copies": int(session["copies"]),
                     "price": str(f"{session['fee']:.2f}")})
 
