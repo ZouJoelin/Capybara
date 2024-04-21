@@ -1,18 +1,47 @@
-// pages/payment/payment.js
+
+const app = getApp();
 Page({
 
   /**
    * 页面的初始数据
    */
   data: {
-
+    file_name : "filename.pdf",
+    pages : 0,
+    paper_tyoe : "A4",
+    color : "黑白",
+    sides : "单面",
+    copies : 0,
+    price : 0
   },
 
   /**
    * 生命周期函数--监听页面加载
    */
   onLoad(options) {
+    var that = this
     console.log(options)
+    wx.request({
+      url: 'https://capybara.mynatapp.cc/api/order',
+      method: 'GET',
+      header: {
+        'content-type': 'application/json',
+        'Cookie' : app.globalData.Cookie
+      },
+      success (res){
+        console.log(res.data);
+        const info = res.data
+        that.setData({
+          file_name : info.filename,
+          pages : info.pages,
+          paper_tyoe : info.paper_tyoe,
+          color : info.color,
+          sides : info.sides,
+          copies : info.copies,
+          price : info.price
+        })
+      }
+    })
   },
 
   /**
