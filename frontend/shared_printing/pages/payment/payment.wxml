@@ -1,44 +1,46 @@
 <view class="container">
-
-  <view style="text-align: center;">
-  请确认您的打印信息
+  <view class="info">
+  请确认打印信息
   </view>
 
   <view class="table">
-    <view class="tr">
+    <view class="tr_1">
       <view class="td_1">文件</view>
       <view class="td_2">{{file_name}}</view>
     </view>
 
-    <view class="tr">
+    <view class="tr_2">
       <view class="td_1">页数</view>
       <view class="td_2">{{pages}}</view>
     </view>
 
-    <view class="tr">
+    <view class="tr_1">
       <view class="td_1">纸张</view>
       <view class="td_2">{{paper_type}}</view>
     </view>
 
-    <view class="tr">
+    <view class="tr_2">
       <view class="td_1">颜色</view>
       <view class="td_2">{{color}}</view>
     </view>
 
-    <view class="tr">
+    <view class="tr_1">
       <view class="td_1">单双</view>
       <view class="td_2">{{sides}}</view>
     </view>
 
-    <view class="tr">
+    <view class="tr_2">
       <view class="td_1">份数</view>
       <view class="td_2">{{copies}}</view>
     </view>
   </view>
   <view class="price">￥{{price}}</view>
   <view class="btnbox">
-    <button>取消</button>
-    <button>拉起支付</button>
+    <button size="mini" type="warn">取消</button>
+    <button size="mini" 
+    type="primary"
+    bind:tap="pay"
+    >支付</button>
   </view>
 
 </view>

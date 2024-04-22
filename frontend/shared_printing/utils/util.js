@@ -14,6 +14,18 @@ const formatNumber = n => {
   return n[1] ? n : `0${n}`
 }
 
+const strLenOptiize = (len,str) => {
+  let tmp = str
+  let name
+  if (tmp.length < len) {
+    name = tmp
+  }else{
+    name = tmp.substring(0,len)+'...'
+  }
+  return name
+}
+
 module.exports = {
-  formatTime
+  formatTime,
+  strLenOptiize
 }

@@ -1,4 +1,4 @@
-
+const util = require('../../utils/util'); 
 const app = getApp();
 Page({
 
@@ -8,13 +8,32 @@ Page({
   data: {
     file_name : "filename.pdf",
     pages : 0,
-    paper_tyoe : "A4",
+    paper_type : "A4",
     color : "黑白",
     sides : "单面",
     copies : 0,
-    price : 0
+    price : 0,
+    jsapi_sign : {}
   },
-
+  pay: function(){
+    console.log("pay")
+  },
+  prepay: function(){
+    wx.request({
+      url: 'https://capybara.mynatapp.cc/api/pay',
+      method: 'GET',
+      header: {
+        'content-type': 'application/json',
+        'Cookie' : app.globalData.Cookie
+      },
+      success (res){
+        console.log(res);
+      },
+      fail (err){
+        console.error(err);
+      }
+    })
+  },
   /**
    * 生命周期函数--监听页面加载
    */
@@ -31,10 +50,13 @@ Page({
       success (res){
         console.log(res.data);
         const info = res.data
+        that.prepay();
+        let tmpname = info.filename
+        let filename = util.strLenOptiize(6,tmpname)
         that.setData({
-          file_name : info.filename,
+          file_name : filename,
           pages : info.pages,
-          paper_tyoe : info.paper_tyoe,
+          paper_type : info.paper_type,
           color : info.color,
           sides : info.sides,
           copies : info.copies,

@@ -1,16 +1,52 @@
 /* pages/payment/payment.wxss */
+.container{
+  color: #4e514e;
+}
+.info{
+  text-align: center;
+  font-size: large;
+}
 .table{
   display: flex;
   flex-direction: column;
   margin-top: 50rpx;
   margin-bottom: 50rpx;
+  background-color: #f2f2f2;
+  border: 1rpx solid  #cbcbcb;
 }
-.tr{
-  width: 150%;
+.tr_1{
+  width: 500rpx;
   display: flex;
   flex-direction: row;
 }
-
+.tr_2{
+  width: 500rpx;
+  display: flex;
+  flex-direction: row;
+  background-color: white;
+}
+.td_1{
+  position: relative;
+  width: 100rpx;
+  text-align: center;
+  border-right: 1px solid #cbcbcb;
+}
+.td_2{
+  position: relative;
+  left: 100rpx;
+  margin-top: 10rpx;
+}
+.price{
+  font-size: 65rpx;
+  color: #bd3124;
+}
 .btnbox{
   display: flex;
+  margin-top: 30rpx;
+}
+.btnbox button{
+  margin-left: 40rpx;
+}
+.btnbox button:first-child {  
+  margin-left: 0; /* 移除第一个按钮的左边距，以避免多余的间隔 */  
 }

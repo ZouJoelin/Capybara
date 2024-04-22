@@ -2,6 +2,7 @@
 import Toast from '@vant/weapp/toast/toast';
 import Notify from '@vant/weapp/notify/notify';
 
+const util = require('../../utils/util'); 
 const app = getApp();
 Page({  
   data: {  
@@ -28,13 +29,7 @@ Page({
     console.log(e)
     console.log(e.detail.file)
     let tmpName = e.detail.file.name
-    let fileName
-    if(tmpName.length < 20){
-      fileName = tmpName
-    }else{
-      fileName = tmpName.substring(0,20)+'...'
-    }
-    console.log(fileName)
+    let fileName = util.strLenOptiize(15,tmpName)
     this.setData({
       filename_forshow: fileName,
       filename:e.detail.file.name
