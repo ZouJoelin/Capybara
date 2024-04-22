@@ -1,3 +1,4 @@
+<van-dialog id="van-dialog" />
 <view class="container">
   <view class="info">
   请确认打印信息
@@ -36,7 +37,11 @@
   </view>
   <view class="price">￥{{price}}</view>
   <view class="btnbox">
-    <button size="mini" type="warn">取消</button>
+    <button size="mini" 
+    type="warn" 
+    bind:tap="cancel">
+    取消
+    </button>
     <button size="mini" 
     type="primary"
     bind:tap="pay"

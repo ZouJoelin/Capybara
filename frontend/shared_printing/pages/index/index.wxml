@@ -80,7 +80,11 @@
     <text class="price-label">{{price}}￥</text>
   </view>
   <view class="button">
-    <button class="cancel-button" size="mini" type="warn">取消</button>
+    <button class="cancel-button" 
+    size="mini" 
+    type="warn"
+    bind:tap="cancel"
+    >取消</button>
     <button class="confirm-button" 
     size="mini" type="primary"
     bind:tap="submit"

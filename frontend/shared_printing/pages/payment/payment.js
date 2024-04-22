@@ -1,4 +1,4 @@
-const util = require('../../utils/util'); 
+import { strLenOptiize } from '../../utils/util'
 const app = getApp();
 Page({
 
@@ -6,19 +6,50 @@ Page({
    * 页面的初始数据
    */
   data: {
-    file_name : "filename.pdf",
-    pages : 0,
-    paper_type : "A4",
-    color : "黑白",
-    sides : "单面",
-    copies : 0,
-    price : 0,
-    jsapi_sign : {}
+    file_name: "filename.pdf",
+    pages: 0,
+    paper_type: "A4",
+    color: "黑白",
+    sides: "单面",
+    copies: 0,
+    price: 0,
+    jsapi_sign: {},
+    out_trade_no: '' //每个订单在商户后端的唯一标识
+  },
+  
+  cancel: function(){
+    wx.showModal({
+      title: '是否确定取消打印',
+      content: '取消打印将返回首页',
+      success (res) {
+        if (res.confirm) {
+          wx.reLaunch({
+            url: '../index/index'
+          })
+        } else if (res.cancel) {
+          console.log('用户点击取消')
+        }
+      }
+    })
   },
   pay: function(){
-    console.log("pay")
+    const signObj = this.data.jsapi_sign
+    wx.requestPayment({
+      timeStamp: signObj.timeStamp,
+      nonceStr: signObj.nonceStr,
+      package: signObj.package,
+      signType: signObj.signType,
+      paySign: signObj.paySign,
+      success (res) { 
+        console.log(res)
+      },
+      fail (err) {
+        console.error(err)
+       }
+    })
   },
   prepay: function(){
+    var that = this
     wx.request({
       url: 'https://capybara.mynatapp.cc/api/pay',
       method: 'GET',
@@ -27,7 +58,17 @@ Page({
         'Cookie' : app.globalData.Cookie
       },
       success (res){
-        console.log(res);
+        console.log(res.data);
+        const signObj
+        try {
+          signObj = JSON.parse(res.data.jsapi_sign)
+        } catch (error) {
+          console.error('解析JSON失败：',error)
+        }
+        that.setData({
+          jsapi_sign: signObj,
+          out_trade_no: res.data.out_trade_no
+        })
       },
       fail (err){
         console.error(err);
@@ -39,7 +80,6 @@ Page({
    */
   onLoad(options) {
     var that = this
-    console.log(options)
     wx.request({
       url: 'https://capybara.mynatapp.cc/api/order',
       method: 'GET',
@@ -51,8 +91,7 @@ Page({
         console.log(res.data);
         const info = res.data
         that.prepay();
-        let tmpname = info.filename
-        let filename = util.strLenOptiize(6,tmpname)
+        let filename = strLenOptiize(6,info.filename)
         that.setData({
           file_name : filename,
           pages : info.pages,
