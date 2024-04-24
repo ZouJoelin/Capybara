@@ -21,7 +21,7 @@
   flex-direction: row;
 }
 .tr_2{
-  width: 500rpx;
+  width: 550rpx;
   display: flex;
   flex-direction: row;
   background-color: white;

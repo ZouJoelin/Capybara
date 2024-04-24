@@ -84,6 +84,7 @@
     size="mini" 
     type="warn"
     bind:tap="cancel"
+    disabled="{{!isupload}}"
     >取消</button>
     <button class="confirm-button" 
     size="mini" type="primary"

@@ -5,7 +5,8 @@
     "pages/sharedDocument/sharedDocument",
     "pages/community/community",
     "pages/user/user",
-    "pages/payment/payment"
+    "pages/payment/payment",
+    "pages/subpayment/subpayment"
   ],
   "tabBar": {
     "color": "black",

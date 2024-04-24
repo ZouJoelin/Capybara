@@ -10,6 +10,17 @@
     "miniprogram": {
       "list": [
         {
+          "name": "支付完成页面",
+          "pathName": "pages/subpayment/subpayment",
+          "query": "",
+          "launchMode": "default",
+          "scene": null,
+          "partialCompile": {
+            "enabled": true,
+            "pages": []
+          }
+        },
+        {
           "name": "支付页面编译",
           "pathName": "pages/payment/payment",
           "query": "",

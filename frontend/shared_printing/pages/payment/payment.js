@@ -34,17 +34,21 @@ Page({
   },
   pay: function(){
     const signObj = this.data.jsapi_sign
+    var that = this
     wx.requestPayment({
-      timeStamp: signObj.timeStamp,
+      timeStamp: signObj.timestamp,
       nonceStr: signObj.nonceStr,
       package: signObj.package,
       signType: signObj.signType,
       paySign: signObj.paySign,
       success (res) { 
-        console.log(res)
+        console.log('支付成功',res)
+        wx.redirectTo({
+          url: '../subpayment/subpayment?filename='+ that.data.file_name
+        })
       },
       fail (err) {
-        console.error(err)
+        console.error('支付失败',err)
        }
     })
   },
@@ -59,11 +63,11 @@ Page({
       },
       success (res){
         console.log(res.data);
-        const signObj
+        var signObj
         try {
-          signObj = JSON.parse(res.data.jsapi_sign)
+          signObj = res.data.jsapi_sign
         } catch (error) {
-          console.error('解析JSON失败：',error)
+          console.error('调用后端pay接口失败：',error)
         }
         that.setData({
           jsapi_sign: signObj,
@@ -91,7 +95,7 @@ Page({
         console.log(res.data);
         const info = res.data
         that.prepay();
-        let filename = strLenOptiize(6,info.filename)
+        let filename = strLenOptiize(10,info.filename)
         that.setData({
           file_name : filename,
           pages : info.pages,

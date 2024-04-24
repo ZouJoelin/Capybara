@@ -1,0 +1,12 @@
+<!--pages/subpayment/subpayment.wxml-->
+<view class="box">
+  <view class="container">
+  <view class="info">正在打印您的文件</view>
+  <view class="file-name">{{filename}}</view>
+  <view class="info">请及时到{{location}}取走</view>
+  <button type="warn" 
+  size="mini"
+  bind:tap="backHome"
+  >返回主页</button>
+  </view>
+</view>

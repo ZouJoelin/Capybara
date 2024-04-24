@@ -22,7 +22,8 @@ Page({
     color: '黑白',
     qty: 1,
     pgnum: 0,
-    price: 0
+    price: 0,
+    isupload: false
   },  
   afterRead:function(e){
     var that = this
@@ -51,7 +52,8 @@ Page({
         let responseData = JSON.parse(res.data)
         console.log(responseData)
         that.setData({
-          pgnum : responseData.pages
+          pgnum : responseData.pages,
+          isupload : true //更新“取消”按钮禁用状态
         })
         that.updatePgnum();
       }
@@ -86,7 +88,7 @@ Page({
   cancel: function(e){
     console.log(e)
     wx.reLaunch({
-      url: './index.js'
+      url: './index'
     })
   },
   submit:function(){

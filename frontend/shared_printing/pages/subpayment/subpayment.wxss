@@ -1,0 +1,22 @@
+/* pages/subpayment/subpayment.wxss */
+.box{
+  height: 100vh;
+  font-weight: bold;
+  font-size: 40rpx;
+  color: #4e514e;
+}
+.container{
+  display: flex;
+  height: auto;
+  flex-direction: column;
+  align-items: center;
+}
+.file-name{
+  margin-top: 20rpx;
+}
+.info{
+  margin-top: 20rpx;
+}
+button{
+  margin-top: 50rpx;
+}
