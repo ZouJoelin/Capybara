@@ -347,6 +347,31 @@ def polling_query():
     return jsonify({'message': trade_state})  
 
 
+@app.route("/api/notify", methods=['POST'])
+def notify():
+    """API for wx: process wx's callback request.
+    
+    Request:
+        - ["POST"] from wx
+        Response: respone to wx
+    """
+    result = parse_callback(request.headers, request.data)
+    if result:
+        # update sql
+        db.execute("BEGIN TRANSACTION")
+        row = db.execute("SELECT trade_state FROM print_order WHERE out_trade_no = (?)", result["out_trade_no"])
+        if row[0]["trade_state"] == "SUCCESS":
+            return jsonify({'code': 'SUCCESS', 'message': '成功'}), 200
+        db.execute("UPDATE print_order SET trade_state = (?), trade_time = (?) WHERE out_trade_no = (?)", 
+                result["trade_state"], result["trade_time"], result["out_trade_no"])
+        db.execute("COMMIT")
+
+    # make response to wx's callback
+        return jsonify({'code': 'SUCCESS', 'message': '成功'}), 200
+    else:
+        return jsonify({'code': 'FAIL', 'message': '失败'}), 500
+      
+
 
 
 

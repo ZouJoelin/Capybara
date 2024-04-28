@@ -118,18 +118,6 @@ def pay_jsapi(amount, out_trade_no, description, open_id):
     return code, prepay_id
 
 
-# close the trade
-def close(out_trade_no):
-    # print("========== close() ==========")
-    code, message = wxpay.close(out_trade_no=out_trade_no)
-    # print('>>>>>code: %s \n>>>>>message: %s' % (code, message))
-    db.execute("UPDATE print_order SET trade_state = (?) WHERE out_trade_no = (?)", 
-            "CLOSED", out_trade_no)
-    # print("========== end close() ==========")
-
-    return code, message
-
-
 # query for trade state
 def query(out_trade_no):
     # print("========== in query()==========")
@@ -180,3 +168,15 @@ def parse_callback(headers, data):
 
     return None
 
+
+pass
+# close the trade
+def close(out_trade_no):
+    # print("========== close() ==========")
+    code, message = wxpay.close(out_trade_no=out_trade_no)
+    # print('>>>>>code: %s \n>>>>>message: %s' % (code, message))
+    db.execute("UPDATE print_order SET trade_state = (?) WHERE out_trade_no = (?)", 
+            "CLOSED", out_trade_no)
+    # print("========== end close() ==========")
+
+    return code, message
