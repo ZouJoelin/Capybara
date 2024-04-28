@@ -135,7 +135,7 @@ https://warped-spaceship-750669.postman.co/request/33534605-1605e60c-3237-4703-9
 #### 应答参数
 |  key   | value  | 说明 |
 |  ----  | ----  | --- |
-| "file_name"  | str | 文件名 |
+| "filename"  | str | 文件名 |
 | "pages"  | int | 页数 |
 | "paper_type"  | str | 默认“A4” |
 | "color"  | str | 默认“黑白” |
