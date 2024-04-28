@@ -27,8 +27,8 @@ Page({
   },  
   afterRead:function(e){
     var that = this
-    console.log(e)
-    console.log(e.detail.file)
+    // console.log(e)
+    // console.log(e.detail.file)
     let tmpName = e.detail.file.name
     let fileName = strLenOptiize(15,tmpName)
     this.setData({

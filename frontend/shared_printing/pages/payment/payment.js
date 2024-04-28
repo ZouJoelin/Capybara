@@ -85,7 +85,7 @@ Page({
   onLoad(options) {
     var that = this
     wx.request({
-      url: 'https://capybara.mynatapp.cc/api/order',
+      url: 'https://capybara.mynatapp.cc/api/print_order_info',
       method: 'GET',
       header: {
         'content-type': 'application/json',
