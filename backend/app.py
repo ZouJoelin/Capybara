@@ -355,8 +355,7 @@ def close_print_order():
     code, message = close(out_trade_no)
     print(f">>>>>code: {code} \n>>>>>message: {message}")
 
-    return jsonify({'message': message,
-                    'code': code})
+    return jsonify({'message': message, 'code': code})
 
 
 @app.route("/api/notify", methods=['POST'])
@@ -384,6 +383,68 @@ def notify():
         return jsonify({'code': 'FAIL', 'message': '失败'}), 500
       
 
+@app.route("/api/print_file", methods=["GET"])
+@formfilled_required(session)
+def print_file():
+    """execute print command.
+    
+    """
+    # print(">>>>>>>>>> print_file >>>>>>>>>>")
+    out_trade_no = request.args.get("out_trade_no")
+    print_order = db.execute("SELECT filename, trade_state, print_state FROM print_order WHERE out_trade_no = (?)", out_trade_no)
+    # print(">>>>>out_trade_no:     ", out_trade_no)
+    # print(">>>>>print_order:     ", print_order)
+
+    # verify out_trade_no 
+    if not print_order:
+        print(">>>>>Error:     untracked out_pay_no!!!")
+        return jsonify({'error_message': "订单不存在"}), 403
+    
+    print_order = print_order[0]
+    if print_order["trade_state"] == "NOTPAY":
+        print(">>>>>Error:     unpaid out_pay_no!!!")
+        return jsonify({'error_message': "订单未支付，请尝试刷新本页面"}), 403
+    
+    elif print_order["trade_state"] == "CLOSED":
+        print(">>>>>Error:     cloesd out_pay_no!!!")
+        return jsonify({'error_message': "订单已关闭"}), 403
+    
+    else:
+        if print_order["print_state"] == "SUCCESS":
+            # capture cheating
+            print(">>>>>Error:     capture cheating!!!")
+            return jsonify({'error_message': "订单号所对应文件已打印过"}), 403
+        
+    if print_order["filename"] != session["filename"]:
+        print(">>>>>Error:     filename doesn't match!!!")
+        return jsonify({'error_message': "订单号与提交文件不符"}), 403
+
+    # make print command according to session["*"]
+    filepath = os.path.join(app.config["UPLOAD_FOLDER"], session["filename"])
+    print_state = OSprint(filepath=filepath, session=session)
+
+    # post-check printer state
+    """aborted"""
+    # state = printer_state()
+    # if state != "ok":
+    #     print(">>>>>Error:     ", state)
+    #     return apology(state+"<br>出错啦！请联系管理员", 500)
+
+    # update sql's col: print_stateS
+    db.execute("UPDATE print_order SET print_state = (?) WHERE out_trade_no = (?)", 
+                print_state, out_trade_no)
+    
+    if print_state == "FAILED":
+        print(">>>>>Error:     OSprint() failed!!!")
+        return jsonify({'error_message': "打印失败"}), 500
+    else:
+        return jsonify({'message': "正在打印",
+                        'filename': session['filename']})
+
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
 
 
 

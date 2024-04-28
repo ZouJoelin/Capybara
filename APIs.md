@@ -180,7 +180,7 @@ https://warped-spaceship-750669.postman.co/request/33534605-1605e60c-3237-4703-9
 #### 请求参数
 |  key   | value  | 说明 |
 |  ----  | ----  | --- |
-| "out_trade_no"  | str | 每个订单在商户后端的唯一标识，调用/api/pay/接口时获取，据此订单号查询。 |
+| "out_trade_no"  | str | 每个订单在商户后端的唯一标识，调用/api/pay/接口时获取，据此订单号查询 |
 
 #### 应答参数
 |  key   | value  | 说明 |
@@ -211,7 +211,7 @@ https://warped-spaceship-750669.postman.co/request/33534605-1605e60c-3237-4703-9
 #### 请求参数
 |  key   | value  | 说明 |
 |  ----  | ----  | --- |
-| "out_trade_no"  | str | 每个订单在商户后端的唯一标识，调用/api/pay/接口时获取。 |
+| "out_trade_no"  | str | 每个订单在商户后端的唯一标识，调用/api/pay/接口时获取 |
 
 #### 应答参数
 |  key   | value  | 说明 |
@@ -224,6 +224,44 @@ https://capybara.mynatapp.cc/api/close_print_order?out_trade_no=20240423T2243BNP
 
 ##### 应答示例
 {"code":204,"message":""}
+
+
+-------------------------------------------------
+## 执行打印命令 [GET]
+```https://capybara.mynatapp.cc/api/print_file```
+检查违规，并执行打印命令，
+
+#### 请求参数
+|  key   | value  | 说明 |
+|  ----  | ----  | --- |
+| "out_trade_no"  | str | 每个订单在商户后端的唯一标识，调用/api/pay/接口时获取。后端会打印数据库中该订单号所对应的文件 |
+
+
+#### 应答参数
+|  key   | value  | 说明 |
+|  ----  | ----  | --- |
+| "message"  | "正在打印" |  |
+| "filename"  | str | 前端用于渲染“打印中”提示信息 |
+| "error_message"  | "订单不存在" | 非法的out_trade_no |
+|   | "订单未支付，请尝试刷新本页面" | 未支付订单。也可能是后台的问题，建议客户端先刷新试试 |
+|   | "订单已关闭" | 使用的是关闭的订单号 |
+|   | "订单号所对应文件已打印过" | 已打印 |
+|   | "订单号与提交文件不符" |  |
+|   | "打印失败" | 后台执行打印命令时出错 |
+
+##### 请求示例
+1. https://capybara.mynatapp.cc/api/print_file?out_trade_no=20240424T1637RBW
+2. https://capybara.mynatapp.cc/api/print_file?out_trade_no=20240423T2243BNP
+3. https://capybara.mynatapp.cc/api/print_file?out_trade_no=20240428T1816AAA
+
+
+##### 应答示例
+1. {"error_message":	"订单未支付，请尝试刷新本页面"}
+2. {"error_message":	"订单已关闭"}
+3. {"error_message":	"订单不存在"}
+
+
+
 
 
 

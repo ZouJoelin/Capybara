@@ -43,7 +43,6 @@ def printer_status():
             return reason_status[reason]
     
 
-
 # convert filename to secure-format
 def secure_filename(filename):
     # special character repo:
@@ -96,3 +95,23 @@ def formfilled_required(session):
             return func(*args, **kwargs)
         return wrapper
     return decorator
+
+
+def OSprint(filepath, session):
+    # print("========== in OSprint()==========")
+    # -o landscape???
+    option = "-o fit-to-page -o media={} -o sides={} -# {}".format(
+        session["paper_type"], session["sides"], session["copies"])
+    # print(">>>>>option:     ", option)
+    os.system(f"echo RUN:     'lpr {option}' '{filepath}' (pages: {session['pages']})")
+
+    return 'SUCCESS'
+    response_error = os.system(f"lpr {option} '{filepath}' ")
+    # 0: succeeded; !0: failed
+    # print("========== end OSprint() ==========")
+    if response_error == 0:
+        return 'SUCCESS'
+    else:
+        return 'FAILED'
+
+
