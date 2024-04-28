@@ -118,7 +118,6 @@ def pay_jsapi(amount, out_trade_no, description, open_id):
     return code, prepay_id
 
 
-pass
 # close the trade
 def close(out_trade_no):
     # print("========== close() ==========")

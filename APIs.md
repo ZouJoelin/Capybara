@@ -123,6 +123,30 @@ https://warped-spaceship-750669.postman.co/request/33534605-1605e60c-3237-4703-9
 ```{"fee":0.06}```
 
 -------------------------------------------------
+## 获取打印信息 [GET]
+```https://capybara.mynatapp.cc/api/print_info```
+#### 请求参数
+无
+
+#### 应答参数
+|  key   | value  | 说明 |
+|  ----  | ----  | --- |
+| "file_name"  | str | 文件名 |
+| "pages"  | int | 页数 |
+| "paper_type"  | str | 默认“A4” |
+| "color"  | str | 默认“黑白” |
+| "sides"  | str | 单面、双面长边、双面短边 |
+| "copies"  | int | 份数 |
+| "price"  | str/int | 价格 |
+
+##### 请求示例
+无
+
+##### 应答示例
+无
+...
+
+-------------------------------------------------
 ## 小程序下单 [GET]
 ```https://capybara.mynatapp.cc/api/pay```
 小程序统一下单，移动端使用pay_jsapi()，返回wx.requestPayment()需要的参数；PC端使用pay_native()，返回支付二维码url。
@@ -145,28 +169,28 @@ https://warped-spaceship-750669.postman.co/request/33534605-1605e60c-3237-4703-9
 无
 
 -------------------------------------------------
-## 获取打印信息 [GET]
-```https://capybara.mynatapp.cc/api/order```
+## 轮询订单支付状态 [GET]
+```https://capybara.mynatapp.cc/api/polling_query```
+客户端进入支付界面后，轮询该接口，获取当前订单支付状态。如果支付成功，跳转打印页面并执行打印命令。
+
 #### 请求参数
-无
+|  key   | value  | 说明 |
+|  ----  | ----  | --- |
+| "out_trade_no"  | str | 每个订单在商户后端的唯一标识，调用/api/pay/接口时获取，据此订单号查询。 |
 
 #### 应答参数
 |  key   | value  | 说明 |
 |  ----  | ----  | --- |
-| "file_name"  | str | 文件名 |
-| "pages"  | int | 页数 |
-| "paper_type"  | str | 默认“A4” |
-| "color"  | str | 默认“黑白” |
-| "sides"  | str | 单面、双面长边、双面短边 |
-| "copies"  | int | 份数 |
-| "price"  | str/int | 价格 |
+| "message"  | "SUCCESS" | 支付成功 |
+|   | "NOTPAY" | 暂未支付 |
+| "error_message"  | "订单不存在" | 非法的out_trade_no |
+|   | "该订单已关闭， 请重新下单" | 使用已失效的out_trade_no |
 
 ##### 请求示例
-无
+https://capybara.mynatapp.cc/api/polling_query?out_trade_no=20240423T2243BNP
 
 ##### 应答示例
-无
-...
+{"message":"NOTPAY"}
 
 
 

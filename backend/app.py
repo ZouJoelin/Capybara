@@ -228,7 +228,7 @@ def count_fee():
     return jsonify({'fee': f"{session['fee']:.2f}"})
 
 
-@app.route("/api/order", methods=["GET"])
+@app.route("/api/print_info", methods=["GET"])
 @formfilled_required(session)
 def order():
     """generate order info
@@ -304,6 +304,47 @@ def pay():
     }
     return jsonify({"out_trade_no": out_trade_no, 
                     "jsapi_sign": jsapi_sign})
+
+
+@app.route("/api/polling_query", methods=["GET"])
+
+def polling_query():
+    """get print order status.
+    
+    """
+    # print(">>>>>>>>>> polling_query >>>>>>>>>>")
+    out_trade_no = request.args.get("out_trade_no")
+
+    # lookup local sql first to avoid unnecessary network requests
+    print_order = db.execute("SELECT trade_state FROM print_order WHERE out_trade_no = (?)", out_trade_no)
+    # print(">>>>>print_order:     ", print_order)
+
+    if not print_order:
+        print(">>>>>Error:     untracked out_pay_no!!!")
+        return jsonify({'error_message': "订单不存在"}), 403
+
+    print_order = print_order[0]
+    if print_order["trade_state"] == "SUCCESS":
+        # shortcut return
+        # print(">>>>>shortcut return!!!")
+        print(">>>>>trade_state from sql:     ", print_order["trade_state"])
+        return jsonify({'message':  print_order["trade_state"]})  
+        
+    if print_order["trade_state"] in {"CLOSED", "REFUND"}:
+        print(">>>>>trade_state from sql:     ", print_order["trade_state"])
+        print(">>>>>Error:     print_order already closed!!!")
+        return jsonify({'error_message': "该订单已关闭， 请重新下单"}), 403
+
+    # call wxpay.query() according to out_trade_to
+    code, trade_state, trade_time = query(out_trade_no)
+    print(">>>>>trade_state from query():     ", trade_state)
+
+    # update sql
+    if trade_state != "NOTPAY":
+        db.execute("UPDATE print_order SET trade_state = (?), trade_time = (?) WHERE out_trade_no = (?)", 
+                trade_state, trade_time, out_trade_no)
+
+    return jsonify({'message': trade_state})  
 
 
 
