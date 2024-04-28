@@ -169,7 +169,6 @@ def parse_callback(headers, data):
     return None
 
 
-pass
 # close the trade
 def close(out_trade_no):
     # print("========== close() ==========")

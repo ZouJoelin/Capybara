@@ -228,9 +228,9 @@ def count_fee():
     return jsonify({'fee': f"{session['fee']:.2f}"})
 
 
-@app.route("/api/print_info", methods=["GET"])
+@app.route("/api/print_order_info", methods=["GET"])
 @formfilled_required(session)
-def order():
+def print_order_info():
     """generate order info
     
     Request:
@@ -307,7 +307,6 @@ def pay():
 
 
 @app.route("/api/polling_query", methods=["GET"])
-
 def polling_query():
     """get print order status.
     
@@ -345,6 +344,19 @@ def polling_query():
                 trade_state, trade_time, out_trade_no)
 
     return jsonify({'message': trade_state})  
+
+
+@app.route("/api/close_print_order", methods=["GET"])
+def close_print_order():
+    """close out_trade_no.
+    
+    """
+    out_trade_no = request.args.get("out_trade_no")
+    code, message = close(out_trade_no)
+    print(f">>>>>code: {code} \n>>>>>message: {message}")
+
+    return jsonify({'message': message,
+                    'code': code})
 
 
 @app.route("/api/notify", methods=['POST'])

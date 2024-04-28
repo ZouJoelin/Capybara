@@ -30,6 +30,7 @@ https://warped-spaceship-750669.postman.co/request/33534605-5a030443-3f46-435f-9
 ##### 应答示例
 ```{"backend_status":"ok"}```
 
+
 -------------------------------------------------
 ## 初始化当前会话 [GET]
 ```https://capybara.mynatapp.cc/```
@@ -60,6 +61,7 @@ https://warped-spaceship-750669.postman.co/request/33534605-a01c68b7-847d-4dff-8
 ##### 应答示例
 ```{"initialized":"ok"}```
 
+
 -------------------------------------------------
 ## 获取pdf页数 [POST]
 ```https://capybara.mynatapp.cc/api/auto_count/pages```
@@ -88,6 +90,7 @@ https://warped-spaceship-750669.postman.co/request/33534605-a01c68b7-847d-4dff-8
 
 ##### 应答示例
 ```{"pages":2}```
+
 
 -------------------------------------------------
 ## 获取订单价格 [POST]
@@ -122,9 +125,10 @@ https://warped-spaceship-750669.postman.co/request/33534605-1605e60c-3237-4703-9
 ##### 应答示例
 ```{"fee":0.06}```
 
+
 -------------------------------------------------
 ## 获取打印信息 [GET]
-```https://capybara.mynatapp.cc/api/print_info```
+```https://capybara.mynatapp.cc/api/print_order_info```
 #### 请求参数
 无
 
@@ -144,7 +148,7 @@ https://warped-spaceship-750669.postman.co/request/33534605-1605e60c-3237-4703-9
 
 ##### 应答示例
 无
-...
+
 
 -------------------------------------------------
 ## 小程序下单 [GET]
@@ -164,9 +168,9 @@ https://warped-spaceship-750669.postman.co/request/33534605-1605e60c-3237-4703-9
 ##### 请求示例
 无
 
-
 ##### 应答示例
 无
+
 
 -------------------------------------------------
 ## 轮询订单支付状态 [GET]
@@ -187,12 +191,39 @@ https://warped-spaceship-750669.postman.co/request/33534605-1605e60c-3237-4703-9
 |   | "该订单已关闭， 请重新下单" | 使用已失效的out_trade_no |
 
 ##### 请求示例
-https://capybara.mynatapp.cc/api/polling_query?out_trade_no=20240423T2243BNP
+1. https://capybara.mynatapp.cc/api/polling_query?out_trade_no=20240424T1528DAY
+2. https://capybara.mynatapp.cc/api/polling_query?out_trade_no=20240424T1637RBW
+3. https://capybara.mynatapp.cc/api/polling_query?out_trade_no=20240423T2243BNP
+4. https://capybara.mynatapp.cc/api/polling_query?out_trade_no=20240428T1816AAA
 
 ##### 应答示例
-{"message":"NOTPAY"}
+1. {"message":"SUCCESS"}
+2. {"message":"NOTPAY"}
+3. {"error_message":	"该订单已关闭， 请重新下单"}
+4. {"error_message":	"订单不存在"}
 
 
+-------------------------------------------------
+## 关闭订单 [GET]
+```https://capybara.mynatapp.cc/api/close_print_order```
+客户端在支付页面中点击“返回”按钮时，建议关闭当前订单号。
+
+#### 请求参数
+|  key   | value  | 说明 |
+|  ----  | ----  | --- |
+| "out_trade_no"  | str | 每个订单在商户后端的唯一标识，调用/api/pay/接口时获取。 |
+
+#### 应答参数
+|  key   | value  | 说明 |
+|  ----  | ----  | --- |
+| "message"  |  |  |
+| "code"  | 204 | No Content |
+
+##### 请求示例
+https://capybara.mynatapp.cc/api/close_print_order?out_trade_no=20240423T2243BNP
+
+##### 应答示例
+{"code":204,"message":""}
 
 
 
