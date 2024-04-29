@@ -50,7 +50,7 @@ Page({
         // const data = res
         console.log(res)
         let responseData = JSON.parse(res.data)
-        console.log(responseData)
+        // console.log(responseData)
         that.setData({
           pgnum : responseData.pages,
           isupload : true //更新“取消”按钮禁用状态

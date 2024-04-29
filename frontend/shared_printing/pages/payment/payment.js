@@ -17,12 +17,27 @@ Page({
     out_trade_no: '' //每个订单在商户后端的唯一标识
   },
   
-  cancel: function(){
+  cancel: function(){//用户取消打印则调用该函数
+    var that = this
     wx.showModal({
       title: '是否确定取消打印',
       content: '取消打印将返回首页',
       success (res) {
         if (res.confirm) {
+          wx.request({
+            url: 'https://capybara.mynatapp.cc/api/close_print_order?out_trade_no='+that.data.out_trade_no,
+            method: 'GET',
+            header: {
+              'content-type': 'application/json',
+              'Cookie' : app.globalData.Cookie
+            },
+            success (res){
+              console.log('调用关闭订单接口成功',res)
+            },
+            fail (err){
+              console.error('调用关闭订单接口失败',err)
+            }
+          })
           wx.reLaunch({
             url: '../index/index'
           })
@@ -42,9 +57,24 @@ Page({
       signType: signObj.signType,
       paySign: signObj.paySign,
       success (res) { 
+        let out_trade_no = that.data.out_trade_no
         console.log('支付成功',res)
-        wx.redirectTo({
-          url: '../subpayment/subpayment?filename='+ that.data.file_name
+        wx.request({
+          url: 'https://capybara.mynatapp.cc/api/print_file?out_trade_no='+out_trade_no,
+          method: 'GET',
+          header: {
+            'content-type': 'application/json',
+            'Cookie' : app.globalData.Cookie
+          },
+          success (res){
+            console.log('调用打印接口成功',res)
+            wx.redirectTo({
+              url: '../subpayment/subpayment?filename='+ that.data.file_name
+            })
+          },
+          fail (err){
+            console.log('调用打印借口失败',err)
+          }
         })
       },
       fail (err) {
@@ -67,7 +97,7 @@ Page({
         try {
           signObj = res.data.jsapi_sign
         } catch (error) {
-          console.error('调用后端pay接口失败：',error)
+          console.error('调用后端下单pay接口失败：',error)
         }
         that.setData({
           jsapi_sign: signObj,
