@@ -168,7 +168,7 @@ def count_pages():
     print(f">>>>>file: {filename} uploaded successfully!!!")
 
     # MUST save file before calling PdfReader(), otherwise PdfReader will corrupt the file.
-    if not validate_file(file):
+    if not validate_file(file, filename):
         print(">>>>>Error:     wrong file type!!!")
         return jsonify({'error_message': "请上传正确的pdf文件"}), 400
     
@@ -401,19 +401,19 @@ def print_file():
         return jsonify({'error_message': "订单不存在"}), 403
     
     print_order = print_order[0]
-    if print_order["trade_state"] == "NOTPAY":
-        print(">>>>>Error:     unpaid out_pay_no!!!")
-        return jsonify({'error_message': "订单未支付，请尝试刷新本页面"}), 403
+    # if print_order["trade_state"] == "NOTPAY":
+    #     print(">>>>>Error:     unpaid out_pay_no!!!")
+    #     return jsonify({'error_message': "订单未支付，请尝试刷新本页面"}), 403
     
-    elif print_order["trade_state"] == "CLOSED":
-        print(">>>>>Error:     cloesd out_pay_no!!!")
-        return jsonify({'error_message': "订单已关闭"}), 403
+    # elif print_order["trade_state"] == "CLOSED":
+    #     print(">>>>>Error:     cloesd out_pay_no!!!")
+    #     return jsonify({'error_message': "订单已关闭"}), 403
     
-    else:
-        if print_order["print_state"] == "SUCCESS":
-            # capture cheating
-            print(">>>>>Error:     capture cheating!!!")
-            return jsonify({'error_message': "订单号所对应文件已打印过"}), 403
+    # else:
+    #     if print_order["print_state"] == "SUCCESS":
+    #         # capture cheating
+    #         print(">>>>>Error:     capture cheating!!!")
+    #         return jsonify({'error_message': "订单号所对应文件已打印过"}), 403
         
     if print_order["filename"] != session["filename"]:
         print(">>>>>Error:     filename doesn't match!!!")

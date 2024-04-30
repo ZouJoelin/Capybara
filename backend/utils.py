@@ -56,8 +56,8 @@ def secure_filename(filename):
 
 
 # validate file's type
-def validate_file(file):
-    filename = file.filename
+def validate_file(file, filename):
+    # filename = file.filename
 
     if "." in filename and \
     filename.rsplit(".", 1)[1].lower() in ALLOW_EXTENSIONS:
