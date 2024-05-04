@@ -1,7 +1,7 @@
 // index.js
 import Toast from '@vant/weapp/toast/toast';
 import Notify from '@vant/weapp/notify/notify';
-import { strLenOptiize,showErrorMessage } from '../../utils/util'
+import { strLenOptiize,handleErrorMessage } from '../../utils/util'
 
 const app = getApp();
 Page({  
@@ -11,14 +11,15 @@ Page({
     backend_status: false,
     filename: '',
     filename_forshow: '待上传文件 ( pdf格式 )',
+    offlineInfo:'待连接至打印机',
     color_index: 0,  
     size_index: 0,
     danshuang_index: 0,
     color_array: ['黑白'],
     size_array: ['A4'],
-    danshuang_array:['单面','双面长边','双面短边'],
+    danshuang_array:['双面长边','单面','双面短边'],
     paper_type: 'A4',
-    sides: 'one-sided',
+    sides: 'two-sided-long-edge',
     color: '黑白',
     qty: 1,
     pgnum: 0,
@@ -27,7 +28,18 @@ Page({
   }, 
   oversize:function(e){
     console.error('文件太大',e)
+    Notify({ type: 'warning', message: '文件太大（限制50MB以内' })
   } ,
+  beforeRead:function(e){
+    const { file, callback } = e.detail;
+    let name = file.name
+    let fileType = name.slice(-3)
+    if (fileType == 'pdf') {
+      callback(true)
+    }else{
+      Notify({ type: 'warning', message: '当前仅支持pdf格式' })
+    }
+  },
   afterRead:function(e){
     var that = this
     // console.log(e)
@@ -57,7 +69,7 @@ Page({
           取出返回对象中data字段的json
         */
         if (res.statusCode == 400) {
-          showErrorMessage(res.data)
+          handleErrorMessage(res.data)
         }
         let responseData = JSON.parse(res.data)
         // console.log(responseData)
@@ -132,21 +144,31 @@ Page({
   bindColorChange: function(e) {  
     this.setData({  
       color_index: e.detail.value  
-    })  
+    })
+    if (this.data.isupload) {
+      //this.updatePgnum() 因只有黑色，暂不启用
+    }else{
+      Notify({ type: 'primary', message: '未上传文件' })
+    }
   },
   bindSizeChange: function(e){
     this.setData({
       size_index: e.detail.value
     })
+    if (this.data.isupload) {
+      //this.updatePgnum() 因只有A4，暂不启用
+    }else{
+      Notify({ type: 'primary', message: '未上传文件' })
+    }
   },
   bindDanShuangChange: function(e){
     console.log(e.detail)
     let value = e.detail.value
     let tmpSides = ''
     if(value == 0){
-      tmpSides = 'one-sided'
-    }else if(value == 1){
       tmpSides = 'two-sided-long-edge'
+    }else if(value == 1){
+      tmpSides = 'one-sided'
     }else if(value == 2){
       tmpSides = 'two-sided-short-edge'
     }
@@ -155,8 +177,11 @@ Page({
       danshuang_index: value,
       sides : tmpSides
     })
-    this.updatePgnum()
-
+    if (this.data.isupload) {
+      this.updatePgnum()
+    }else{
+      Notify({ type: 'primary', message: '未上传文件' })
+    }
   },
   onQtyChange: function(e){
     var that = this
@@ -183,8 +208,9 @@ Page({
         'content-type': 'application/json' // 默认值
       },
       success (res) {
-        console.log(res.data)
-        if(res.data.backend_status == "ok"){
+        console.log('后端返回数据',res)
+        let status = res.data.backend_status
+        if(status == "ok"){
           that.setData({
             backend_status : true
           });
@@ -195,6 +221,41 @@ Page({
           })
           .catch((error) => {
             console.error('初始化会话失败：',error)
+          })
+        }else if(res.statusCode == 404 && res.data.includes("Tunnel")){
+          that.setData({
+            offlineInfo: '服务器掉线'
+          })
+        }else if(res.statusCode == 503){
+          let info = ''
+          switch(status){
+            case 'door_open':
+              info = '打印机盖未闭合'
+              break
+            case 'out_of_paper':
+              info = '纸张不足'
+              break
+            case 'out_of_toner':
+              info = '墨粉不足'
+              break
+            case 'jam':
+              info = '纸张堵塞'
+              break
+            case 'offline':
+              info = '打印机未连接'
+              break
+            case 'unknown_error':
+              info = '未知错误'
+              break
+            default:
+              console.error('前端未知错误',status)
+          }
+          that.setData({
+            offlineInfo: info
+          })
+        }else{
+          that.setData({
+            offlineInfo: '应用框架异常'
           })
         }
       }

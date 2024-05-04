@@ -8,16 +8,12 @@
   background-color: white;
   align-items: center;
   color: #4e514e;
+  font-size: larger;
 }
 .container > view {  
-  margin-bottom: 40rpx; /* 每个view标签之间的下边距 */  
+  margin-bottom: 35rpx; /* 每个view标签之间的下边距 */  
 } 
-.container > view:last-child {  
-  margin-bottom: 0; /* 最后一个view标签不需要下边距 */  
-} 
-.price > text {  
-  color: #bd3124; /* 价格文字颜色 */  
-}
+
 /* .uploader-container{
   position: relative;
 } */
@@ -26,6 +22,13 @@
 }
 .upload-file{
   position: relative;
+  display: flex;
+  border: 1px dashed #cccccc;
+  border-radius: 8px;
+  justify-content: center;
+  align-items: center;
+  width: 75%;
+  height: 70rpx;
 }
 .uploader-info{
   font-size: smaller;
@@ -33,72 +36,42 @@
 .printer-status{
   display: flex;
   font-size: smaller;
+  width: 100%;
 }
 .status-info{
   position: relative;
-  left: -200rpx;
 }
-.page-num{
+.table-info{
   display: flex;
+  width: 100%;
+  height: 60rpx;
+  padding: 6rpx;
 }
-.num-label{
+.table-label{
   position: relative;
-  left: -250rpx;
+  left: 75rpx;
+  padding: 5rpx;
 }
-.pgnum{
+.table-right{
   position: absolute;
   right: 100rpx;
 }
-.page-danshuang{
-  display: flex;
+.table-beautify{
+  border: 2px solid #3ab54a;
+  border-radius: 6px;
+  padding: 5rpx;
+  color: white;
+  background-color: #3ab54a;
 }
-.danshuang-label{
-  position: relative;
-  left: -250rpx;
-}
-.page-color{
-  display: flex;
-}
-.color-label{
-  position: relative;
-  left: -250rpx;
-}
-.color-picker{
-  position: absolute;
-  right: 100rpx;
-}
-.page-size{
-  display: flex;
-}
-.size-label{
-  position: relative;
-  left: -250rpx;
-}
-.size-picker{
-  position: absolute;
-  right: 100rpx;
-}
-.page-qty{
-  display: flex;
-  margin-top: 20rpx;
-}
-.qty-label{
-  position: relative;
-  left: -250rpx;
-}
-.qty-count{
-  position: absolute;
-  right: 100rpx;
-}
+
 .price{
-  margin-top: 5rpx;
+  color: #bd3124;
 }
 .price-label{
   position: absolute;
   right: 100rpx;
   font-size: larger;
 }
-
 .button{
   margin-top: 40rpx;
 }

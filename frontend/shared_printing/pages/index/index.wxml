@@ -1,22 +1,28 @@
 <!--index.wxml-->
-<van-notice-bar scrollable left-icon="volume-o"
- text="这是一个滚动通知栏" />
+<van-notice-bar scrollable="{{ false }}"
+left-icon="volume-o"
+text="单面￥0.11/面，双面￥0.10/面" />
 <view class="container">
   <van-notify id="van-notify" />
   <view class="printer-status">
     <view  class="status-info">
-      <text style="color: #3ab54a;">打印机状态：</text>
+      <text>打印机状态：</text>
       <block wx:if="{{backend_status}}">
         <van-icon style="color: #3ab54a;" name="checked" />
+        <text style="color: #3ab54a;"> 在线</text>
       </block>
       <block wx:else>
         <van-icon style="color: red;" name="clear" />
+        <text style="color: red;"> {{offlineInfo}}</text>
       </block>
     </view>
   </view>
   <view class="uploader-container">
     <van-uploader file-list="{{ fileList }}" 
     class="uploader"
+    disabled="{{!backend_status}}"
+    use-before-read="true"
+    bind:before-read="beforeRead"
     bind:after-read="afterRead" 
     bind:oversize="oversize"
     max-count="1"
@@ -32,43 +38,42 @@
     </van-uploader>
   </view>
   <view class="upload-file">
-    <view class="van-ellipsis">
-      {{filename_forshow}}
-    </view>
-    <view class="van-hairline--bottom"></view>
+      <view>{{filename_forshow}}</view>
+    <!-- <view class="van-hairline--bottom"></view> -->
   </view>
-  <view class="page-num">
-    <text class="num-label">页数</text>
-    <view class="pgnum">{{pgnum}}</view>
+  <view class="table-info">
+    <text class="table-label">页数</text>
+    <view class="table-right">{{pgnum}}</view>
   </view>
-  <view class="page-size">
-    <view class="size-label">纸张</view>
+  <view class="table-info">
+    <view class="table-label">纸张</view>
     <picker mode="selector" bindchange="bindSizeChange" 
       value="{{size_index}}" range="{{size_array}}">
-      <view class="size-picker">{{size_array[size_index]}}</view>
+      <view class="table-right table-beautify">
+      {{size_array[size_index]}}</view>
     </picker>
   </view>
-  <view class="page-color">
-    <view class="color-label">颜色</view>
+  <view class="table-info">
+    <view class="table-label">颜色</view>
     <picker mode="selector" bindchange="bindColorChange" value="{{color_index}}" range="{{color_array}}">
-    <view class="color-picker">
+    <view class="table-right table-beautify">
       {{color_array[color_index]}}
     </view>
     </picker>
   </view>
-  <view class="page-danshuang">
-    <text class="danshuang-label">单双</text>
-    <picker mode="selector" bindchange="bindDanShuangChange" 
+  <view class="table-info">
+    <text class="table-label">单双</text>
+    <picker mode="selector" bindchange="bindDanShuangChange"
     value="{{danshuang_index}}" 
     range="{{danshuang_array}}">
-    <view class="color-picker">
+    <view class="table-right table-beautify">
       {{danshuang_array[danshuang_index]}}
     </view>
     </picker>
   </view>
-  <view class="page-qty">
-    <text class="qty-label">份数</text>
-    <view class="qty-count">
+  <view class="table-info">
+    <text class="table-label">份数</text>
+    <view class="table-right">
       <van-toast id="van-toast" />
       <van-stepper value="{{ qty }}" 
       max="10" 
