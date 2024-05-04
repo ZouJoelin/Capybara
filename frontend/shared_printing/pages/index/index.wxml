@@ -18,7 +18,9 @@
     <van-uploader file-list="{{ fileList }}" 
     class="uploader"
     bind:after-read="afterRead" 
+    bind:oversize="oversize"
     max-count="1"
+    max-size="52428800"
     accept="file"
     >
     <button size="mini" 

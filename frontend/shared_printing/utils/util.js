@@ -14,6 +14,22 @@ const formatNumber = n => {
   return n[1] ? n : `0${n}`
 }
 
+const showErrorMessage = (data) => {
+  let error_message = JSON.parse(data).error_message
+  wx.showModal({
+    title: '提示',
+    content: error_message,
+    showCancel: false,
+    success: (res) => {
+      if (res.confirm) {
+        wx.reLaunch({
+          url: '/pages/index/index',
+        })
+      }
+    }
+  })
+}
+
 const strLenOptiize = (len,str) => {
   let tmp = str
   let name
@@ -25,7 +41,10 @@ const strLenOptiize = (len,str) => {
   return name
 }
 
+
+
 module.exports = {
   formatTime,
-  strLenOptiize
+  strLenOptiize,
+  showErrorMessage
 }

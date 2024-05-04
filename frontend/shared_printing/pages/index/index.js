@@ -1,7 +1,7 @@
 // index.js
 import Toast from '@vant/weapp/toast/toast';
 import Notify from '@vant/weapp/notify/notify';
-import { strLenOptiize } from '../../utils/util'
+import { strLenOptiize,showErrorMessage } from '../../utils/util'
 
 const app = getApp();
 Page({  
@@ -10,7 +10,7 @@ Page({
     code : '',
     backend_status: false,
     filename: '',
-    filename_forshow: '待上传文件 ( 推荐pdf格式 )',
+    filename_forshow: '待上传文件 ( pdf格式 )',
     color_index: 0,  
     size_index: 0,
     danshuang_index: 0,
@@ -24,11 +24,14 @@ Page({
     pgnum: 0,
     price: 0,
     isupload: false
-  },  
+  }, 
+  oversize:function(e){
+    console.error('文件太大',e)
+  } ,
   afterRead:function(e){
     var that = this
     // console.log(e)
-    // console.log(e.detail.file)
+    console.log(e.detail.file)
     let tmpName = e.detail.file.name
     let fileName = strLenOptiize(15,tmpName)
     this.setData({
@@ -48,7 +51,14 @@ Page({
       }, 
       success (res){
         // const data = res
-        console.log(res)
+        console.log('上传文件成功',res)
+        /*
+          上传文件格式不正确
+          取出返回对象中data字段的json
+        */
+        if (res.statusCode == 400) {
+          showErrorMessage(res.data)
+        }
         let responseData = JSON.parse(res.data)
         // console.log(responseData)
         that.setData({
@@ -77,7 +87,7 @@ Page({
         'Cookie' : app.globalData.Cookie
       },
       success (res){
-        console.log(res.data)
+        console.log('触发updatePgnum',res.data)
         
         that.setData({
           price : res.data.fee
