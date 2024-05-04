@@ -8,12 +8,16 @@ server: ```HostName b11931e194356b82.natapp.cc``` ```User server``` ```Port 3652
 #### git branch
 ```mermaid
 graph LR
-ori( ) --> branch1(web @Capybara) --> gunicorn1[gunicorn端口：8000] --> nginx1[nginx端口：80] --> url1[网址：http://campusprinter.nat300.top/]
-ori --> branch2(miniprogram @Capybara_dev) --> gunicorn2[gunicorn端口：8080] --> nginx2[nginx端口：88] --> url2[网址：https://capybara.mynatapp.cc/]
+ori( ) --> branch0(web @Capybara_web.zip)
+ori( ) --> branch1(miniprogram @Capybara) --> gunicorn1[gunicorn端口：8000] --> nginx1[nginx端口：80] --> url1[网址：https://capybara.mynatapp.cc/]
+ori --> branch2(dev @Capybara_dev) --> gunicorn2[gunicorn端口：8080] --> nginx2[nginx端口：88] --> url2[网址：http://campusprinter.nat300.top/]
+
 ```
-两个分支（对于服务器home下两个目录）
-* web为原有网页版（上线运营中，后续该分支作为上线版本分支）
-* miniprogram为小程序版（开发中，后续仍作为开发版本分支）
+
+三个分支（对于服务器home下两个目录）
+* web为原有网页版（小程序移植完成后，该分支存档，接口让给miniprogram分支）
+* miniprogram为小程序正式版（小程序移植完成后，作为小程序生产环境分支，接口让给dev分支）
+* dev为小程序开发板（作为小程序的开发版分支）
 
 
 ## 工作目录
@@ -55,8 +59,10 @@ ori --> branch2(miniprogram @Capybara_dev) --> gunicorn2[gunicorn端口：8080] 
 
 
 ## To_Do_List
-* 小程序基础功能：上传->支付->打印 （DDL：2024.05.01）
-* 文件上传：本地 + 从聊天记录上传
+* 小程序基础功能：上传->支付->打印（DDL：2024.05.01）
+* 文件上传：本地（移动端&PC端） + 从聊天记录上传（移动端）
+* 补丁：订单支付状态轮调 & 后台校验订单状态（optional）
+* --
 * 注册登录 + 共享文库 (DDL：2024.09.01)
 * 社区/留言板
 * 管理员后台

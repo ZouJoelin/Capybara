@@ -1,8 +1,15 @@
 
 --------------------------------------
-## 查询打印机状态 [GET]
+## 查询后台状态 [GET]
 ```https://capybara.mynatapp.cc/api/status```
-进入小程序以及每次更换打印机地点，查询打印机状态无异常。
+进入小程序以及每次更换打印机地点，查询服务器及打印机状态无异常。
+
+有以下几种异常情况：
+1. 服务器掉线：404，"Tunnel capybara.mynatapp.cc not found"
+2. 应用框架异常：
+    - 502，"{'error_message': 'A Server Error Occurred'}"
+    - 404，"{'error_message': 'Not Found'}"
+3. 打印机状态异常：503，"{'error_message': 'xxxxxxx'}"
 
 #### 请求参数
 无
@@ -10,16 +17,25 @@
 #### 应答参数
 |  key   | value  | 说明 |
 |  ----  | ----  | --- |
-| "backend_status"  | "ok" | √ |
-|   | "door_open" | 打印机盖未闭合 |
-|   | "out_of_paper" | 纸张不足 |
-|   | "out_of_toner" | 墨粉不足 |
-|   | "jam" | 纸张堵塞 |
-|   | "offline" | 打印机未连接 |
-|   | "unknown_error" | 未知错误 |
+| "backend_status"  | "ok" | 200 |
 
 #### 错误码
-无
+* 404：服务器掉线
+"Tunnel capybara.mynatapp.cc not found"
+
+* 502: 应用框架异常
+"{'error_message': 'A Server Error Occurred'}"
+
+* 503：打印机状态异常 
+
+|  key   | value  | 说明 |
+|  ----  | ----  | --- |
+| "error_message"  | "打印机盖未闭合" |  |
+|   | "打印机纸张不足" |  |
+|   | "打印机墨粉不足" |  |
+|   | "打印机有纸张堵塞" |  |
+|   | "打印机未连接" |  |
+|   | "打印机发生未知错误" |  |
 
 ##### 请求示例
 * curl 
@@ -45,12 +61,14 @@ https://warped-spaceship-750669.postman.co/request/33534605-5a030443-3f46-435f-9
 |  key   | value  | 说明 |
 |  ----  | ----  | --- |
 | "initialized"  | "ok" | √ |
-| "error_message"  | "access_token failed!!!" | 授权失败，具体原因在reason字段 |
-| "errcode"  |  | 错误码，据此可查微信开发文档 |
-| "errmsg"  |  | 冗余信息，与errocde一致 |
 
 #### 错误码
-无
+* 401
+|  key   | value  | 说明 |
+|  ----  | ----  | --- |
+| "error_message"  | "access_token failed" | 授权失败，具体原因在reason字段 |
+| "reason"  |  | 错误原因 |
+| "errcode"  |  | 错误码，据此可查微信开发文档 |
 
 ##### 请求示例
 * curl 
@@ -79,10 +97,12 @@ https://warped-spaceship-750669.postman.co/request/33534605-a01c68b7-847d-4dff-8
 |  key   | value  | 说明 |
 |  ----  | ----  | --- |
 | "pages"  | int |  |
-| "error_message"  | "请上传正确的pdf文件" |  |
 
 #### 错误码
-无
+* 400
+|  key   | value  | 说明 |
+|  ----  | ----  | --- |
+| "error_message"  | "请上传正确的pdf文件" |  |
 
 ##### 请求示例
 * postman
@@ -112,6 +132,11 @@ https://warped-spaceship-750669.postman.co/request/33534605-a01c68b7-847d-4dff-8
 |  key   | value  | 说明 |
 |  ----  | ----  | --- |
 | "fee"  | int |  |
+
+#### 错误码
+* 400
+|  key   | value  | 说明 |
+|  ----  | ----  | --- |
 | "error_message"  | "请先上传文件" |  |
 |   | "请输入正确的纸张类型" |  |
 |   | "请输入正确的打印颜色" |  |
@@ -163,6 +188,11 @@ https://warped-spaceship-750669.postman.co/request/33534605-1605e60c-3237-4703-9
 |  ----  | ----  | --- |
 | "out_trade_no"  | str | 每个订单在商户后端的唯一标识，例：20230527T1838XCF (2023.05.27 + 18:38 + 三个随机大写字母组合) |
 | "jsapi_sign"  | json | wx.requestPayment()需要的所有参数字段：appId, timestamp, nonceStr, package, signType, paySign |
+
+#### 错误码
+* 500
+|  key   | value  | 说明 |
+|  ----  | ----  | --- |
 | "error_message"  | "下单失败" |  |
 
 ##### 请求示例
@@ -187,6 +217,11 @@ https://warped-spaceship-750669.postman.co/request/33534605-1605e60c-3237-4703-9
 |  ----  | ----  | --- |
 | "message"  | "SUCCESS" | 支付成功 |
 |   | "NOTPAY" | 暂未支付 |
+
+#### 错误码
+* 403
+|  key   | value  | 说明 |
+|  ----  | ----  | --- |
 | "error_message"  | "订单不存在" | 非法的out_trade_no |
 |   | "该订单已关闭， 请重新下单" | 使用已失效的out_trade_no |
 
@@ -242,6 +277,11 @@ https://capybara.mynatapp.cc/api/close_print_order?out_trade_no=20240423T2243BNP
 |  ----  | ----  | --- |
 | "message"  | "正在打印" |  |
 | "filename"  | str | 前端用于渲染“打印中”提示信息 |
+
+#### 错误码
+* 403
+|  key   | value  | 说明 |
+|  ----  | ----  | --- |
 | "error_message"  | "订单不存在" | 非法的out_trade_no |
 |   | "订单未支付，请尝试刷新本页面" | 未支付订单。也可能是后台的问题，建议客户端先刷新试试 |
 |   | "订单已关闭" | 使用的是关闭的订单号 |

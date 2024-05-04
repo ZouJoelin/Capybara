@@ -20,7 +20,8 @@ from utils import *
 # initialize Flask.app & session & sqlite
 ###############################################
 
-PRICE_PER_PAGE = 0.01
+PRICE_PER_PAGE_ONE = 0.11
+PRICE_PER_PAGE_TWO = 0.10
 UPLOAD_FOLDER = os.getcwd() + "/../files_temp/"
 
 PAPER_TYPE = {"A4"}
@@ -49,6 +50,9 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
+# Logger
+app.logger.setLevel(logging.INFO)
+
 # Configure CS50 Library to use SQLite database
 db = SQL("sqlite:///capybara.db")
 
@@ -68,12 +72,12 @@ def after_request(response):
 
 @app.errorhandler(404)
 def not_found(error):
-    return make_response(jsonify({'error': 'Not found'}), 404)
+    return make_response(jsonify({'error_message': 'Not Found'}), 404)
 
 
 @app.errorhandler(400)
 def not_found(error):
-    return make_response(jsonify({'error': 'Bad Request'}), 404)
+    return make_response(jsonify({'error_message': 'Bad Request'}), 400)
 
 
 ###############################################
@@ -88,25 +92,25 @@ def index():
         - ["GET"] with request.args["code"]
         Response: {"initialized": "ok"}
     """
-
     session["filename"] = None
     session["pages"] = 0
     session["fee"] = None
 
+    # authorize with wx
     code = request.args.get('code')
     if not code:
-        return jsonify({'error_message': 'access_token failed!!!',
-                        'reason': 'no code received'})
+        return jsonify({'error_message': 'access_token failed',
+                        'reason': 'no code received'}), 401
     token_url = f'https://api.weixin.qq.com/sns/jscode2session?'\
                 f'appid={APPID}&secret={APP_SECRET}&js_code={code}&grant_type=authorization_code'
     response = requests.get(token_url)
+    
     response = json.loads(response.text)
-
     if response.get("errcode"):
-        print(f">>>>>Error:     access_token failed!!! errcode: {response.get('errcode')} errmsg: {response.get('errmsg')}")
-        return jsonify({'error_message': 'access_token failed!!!',
-                        'errcode': response.get("errmsg"),
-                        'errmsg': response.get("errmsg")})
+        app.logger.error(f">>>>> Access token failed!!! errcode: {response.get('errcode')} errmsg: {response.get('errmsg')}")
+        return jsonify({'error_message': 'access_token failed',
+                        'reason': response.get("errmsg"),
+                        'errcode': response.get("errcode")}), 401
     open_id = response.get("openid")
     session["open_id"] = open_id
 
@@ -129,8 +133,18 @@ def status():
                             "unknown_error" # 未知错误                    
         }
     """
+    printer_status_dict = {"ok": "ok", 
+                          "door_open": "打印机盖未闭合", 
+                          "out_of_paper": "打印机纸张不足", 
+                          "out_of_toner": "打印机墨粉不足", 
+                          "jam": "打印机有纸张堵塞",
+                          "offline": "打印机未连接",
+                          "unknown_error": "打印机发生未知错误"}
     status = printer_status()
-    return jsonify({"backend_status": status})
+    if status == "ok":
+        return jsonify({"backend_status": printer_status_dict[status]}), 200
+    else:
+        return jsonify({"error_message": printer_status_dict[status]}), 503
 
 
 @app.route("/api/auto_count/pages", methods=["POST"])
@@ -142,20 +156,17 @@ def count_pages():
         Response: {"pages": <int>}
         Exception: {"error_message": <str>}
     """
-    print(">>>>>request:     ", request)
-    print(">>>>>file?:     ", request.files)
-    print(">>>>>form?:     ", request.form)
-    print(">>>>>session:     ", request.headers.get("Cookie"))
+    # print(">>>>>request:     ", request)
+    # print(">>>>>file?:     ", request.files)
+    # print(">>>>>form?:     ", request.form)
+    # print(">>>>>session:     ", request.headers.get("Cookie"))
 
     if not request.files:
         abort(400)
-    print(">>>>>>>>>> received file >>>>>>>>>>")
     file = request.files.get("file")
-    
-
     if not file:
         abort(400)
-    # filename = file.filename
+
     filename = request.form.get("fileName")
     filename = secure_filename(filename)
 
@@ -165,11 +176,10 @@ def count_pages():
     ## save file
     filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
     file.save(filepath)
-    print(f">>>>>file: {filename} uploaded successfully!!!")
 
     # MUST save file before calling PdfReader(), otherwise PdfReader will corrupt the file.
     if not validate_file(file, filename):
-        print(">>>>>Error:     wrong file type!!!")
+        app.logger.warning(">>>>> Wrong file type!!!")
         return jsonify({'error_message': "请上传正确的pdf文件"}), 400
     
     pages = count_pdf_pages(file)
@@ -188,28 +198,30 @@ def count_fee():
         Response: {"fee": <int>}
         Exception: {"error_message": <str>}
     """
-    print(">>>>>request:     ", request)
-    print(">>>>>file?:     ", request.files)
-    print(">>>>>form?:     ", request.form)
-    print(">>>>>session:     ", request.headers.get("Cookie"))
+    # print(">>>>>request:     ", request)
+    # print(">>>>>file?:     ", request.files)
+    # print(">>>>>form?:     ", request.form)
+    # print(">>>>>session:     ", request.headers.get("Cookie"))
+
+    if not session.get("pages"):
+        return jsonify({'error_message': "请先上传文件"}), 400
 
     if not request.form:
         abort(400)
-    # print(">>>>>>>>>> received form >>>>>>>>>>")
     form = request.form
 
     ## validate form and update session["*"]
     if form["paper_type"] not in PAPER_TYPE:
-        print(">>>>>Error:     wrong paper type!!!")
+        app.logger.warning(">>>>> Wrong paper type!!!")
         return jsonify({'error_message': "请输入正确的纸张类型"}), 400
     if form["color"] not in COLOR:
-        print(">>>>>Error:     wrong color choice!!!")
+        app.logger.warning(">>>>> Wrong color choice!!!")
         return jsonify({'error_message': "请输入正确的打印颜色"}), 400
     if form["sides"] not in SIDES:
-        print(">>>>>Error:     wrong sides choice!!!")
+        app.logger.warning(">>>>> Wrong sides choice!!!")
         return jsonify({'error_message': "请选择正确的单双面选项"}), 400
     if (not form["copies"].isdigit()) or (int(form["copies"]) == 0):
-        print(">>>>>Error:     wrong copies input!!!")
+        app.logger.warning(">>>>> Wrong copies input!!!")
         return jsonify({'error_message': "打印份数需为正整数"}), 400
     
     session["paper_type"] = form["paper_type"]
@@ -217,10 +229,13 @@ def count_fee():
     session["sides"] = form["sides"]
     session["copies"] = int(form["copies"])
 
-    ## calculate fee
-    if not session.get("pages"):
-        return jsonify({'error_message': "请先上传文件"}), 400
-    session["fee"] = session["pages"] * session["copies"] * PRICE_PER_PAGE
+    # calculate fee
+    if session["sides"] == "one-sided":
+        session["fee"] = session["pages"] * PRICE_PER_PAGE_ONE * session["copies"]
+    else:
+        residual = session["pages"] % 2
+        session["fee"] = ((session["pages"] - residual) * PRICE_PER_PAGE_TWO + residual * PRICE_PER_PAGE_ONE) * session["copies"]
+
     # print(">>>>>>>>>> session >>>>>>>>>>")
     # for key in session.keys():
     #     print(">>>>>"+ key +":     ", session[key])
@@ -229,7 +244,7 @@ def count_fee():
 
 
 @app.route("/api/print_order_info", methods=["GET"])
-@formfilled_required(session)
+@formfilled_required(session, app.logger)
 def print_order_info():
     """generate order info
     
@@ -245,7 +260,10 @@ def print_order_info():
             "fee": <int>
     }
     """
-    sides_zh = {"one-sided": "单面打印", "two-sided-long-edge": "双面打印，长边翻转", "two-sided-short-edge": "双面打印，短边翻转"}
+    sides_zh = {"one-sided": "单面打印", 
+                "two-sided-long-edge": "双面打印，长边翻转", 
+                "two-sided-short-edge": "双面打印，短边翻转"}
+    
     return jsonify({"filename": str(session["filename"]),
                     "pages": int(session["pages"]),
                     "paper_type": str(session["paper_type"]),
@@ -256,38 +274,37 @@ def print_order_info():
 
 
 @app.route("/api/pay", methods=["GET"])
-@formfilled_required(session)
+@formfilled_required(session, app.logger)
 def pay():
     """generate payment link
 
-    
     """
     # generate trade info
     amount = int(session["fee"] * 100)
-    print(">>>>>amount:     " ,amount)
     out_trade_no = time.strftime("%Y%m%dT%H%M", time.localtime()) + ''.join(sample(ascii_uppercase,3))
-    print(">>>>>out_trade_no:     " ,out_trade_no)
     description = session["filename"]
-    print(">>>>>description:     " ,description)
+    # print(">>>>>amount:     " ,amount)
+    # print(">>>>>out_trade_no:     " ,out_trade_no)
+    # print(">>>>>description:     " ,description)
 
-    print(f'>>>>>print_order:     filename: "{session["filename"]}"  pages: "{session["pages"]}"  copies: "{session["copies"]}"  fee: "{session["fee"]}"  out_trade_no: "{out_trade_no}"')
+    app.logger.info(f'>>>>> print_order:  filename: "{session["filename"]}"; pages: "{session["pages"]}"; copies: "{session["copies"]}"; fee: "{session["fee"]}"; out_trade_no: "{out_trade_no}"')
 
     # print(">>>>>access from mobile!!!")
     code, prepay_id = pay_jsapi(amount, out_trade_no, description, session["open_id"])
 
     if code not in range(200, 300):
-        print(">>>>>Error:     pay_jsapi() failed!!!", code)
-        return jsonify({'error_message': "下单失败"})
+        app.logger.error(">>>>> pay_jsapi() failed!!!", code)
+        return jsonify({'error_message': "下单失败"}), 500
     
     timestamp = str(int(time.time()))
     nonceStr = ''.join(sample(ascii_uppercase + digits, 16))
     package = 'prepay_id=' + prepay_id
     signType = 'RSA'
     paySign = wxpay.sign([APPID, timestamp, nonceStr, package])
-    print(">>>>>timestamp:     ", timestamp)
-    print(">>>>>nonceStr:     ", nonceStr)
-    print(">>>>>package:     ", package) 
-    print(">>>>>paysign:     ", paySign)
+    # print(">>>>>timestamp:     ", timestamp)
+    # print(">>>>>nonceStr:     ", nonceStr)
+    # print(">>>>>package:     ", package) 
+    # print(">>>>>paysign:     ", paySign)
 
     # log into sql
     db.execute("INSERT INTO print_order (id, filename, pages, paper_type, color, sides, copies, fee, out_trade_no, trade_type) VALUES((SELECT MAX(id) + 1 FROM print_order), ?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -316,28 +333,26 @@ def polling_query():
 
     # lookup local sql first to avoid unnecessary network requests
     print_order = db.execute("SELECT trade_state FROM print_order WHERE out_trade_no = (?)", out_trade_no)
-    # print(">>>>>print_order:     ", print_order)
+    app.logger.info(">>>>> print_order:     ", print_order)
 
     if not print_order:
-        print(">>>>>Error:     untracked out_pay_no!!!")
+        app.logger.warning(">>>>> Untracked out_trade_no!!!")
         return jsonify({'error_message': "订单不存在"}), 403
 
     print_order = print_order[0]
     if print_order["trade_state"] == "SUCCESS":
         # shortcut return
-        # print(">>>>>shortcut return!!!")
-        print(">>>>>trade_state from sql:     ", print_order["trade_state"])
+        app.logger.info(f">>>>> trade_state from sql(shortcut): {print_order['trade_state']}")
         return jsonify({'message':  print_order["trade_state"]})  
         
     if print_order["trade_state"] in {"CLOSED", "REFUND"}:
-        print(">>>>>trade_state from sql:     ", print_order["trade_state"])
-        print(">>>>>Error:     print_order already closed!!!")
+        app.logger.warning(">>>>> print_order already closed!!!")
         return jsonify({'error_message': "该订单已关闭， 请重新下单"}), 403
 
     # call wxpay.query() according to out_trade_to
     code, trade_state, trade_time = query(out_trade_no)
-    print(">>>>>trade_state from query():     ", trade_state)
-
+    app.logger.info(f">>>>> trade_state from wx.query: {trade_state}")
+    
     # update sql
     if trade_state != "NOTPAY":
         db.execute("UPDATE print_order SET trade_state = (?), trade_time = (?) WHERE out_trade_no = (?)", 
@@ -353,7 +368,7 @@ def close_print_order():
     """
     out_trade_no = request.args.get("out_trade_no")
     code, message = close(out_trade_no)
-    print(f">>>>>code: {code} \n>>>>>message: {message}")
+    # app.logger.info(f">>>>> code: {code}; message: {message}")
 
     return jsonify({'message': message, 'code': code})
 
@@ -384,12 +399,11 @@ def notify():
       
 
 @app.route("/api/print_file", methods=["GET"])
-@formfilled_required(session)
+@formfilled_required(session, app.logger)
 def print_file():
     """execute print command.
     
     """
-    # print(">>>>>>>>>> print_file >>>>>>>>>>")
     out_trade_no = request.args.get("out_trade_no")
     print_order = db.execute("SELECT filename, trade_state, print_state FROM print_order WHERE out_trade_no = (?)", out_trade_no)
     # print(">>>>>out_trade_no:     ", out_trade_no)
@@ -397,37 +411,37 @@ def print_file():
 
     # verify out_trade_no 
     if not print_order:
-        print(">>>>>Error:     untracked out_pay_no!!!")
+        app.logger.warning(">>>>> Untracked out_pay_no!!!")
         return jsonify({'error_message': "订单不存在"}), 403
     
     print_order = print_order[0]
     # if print_order["trade_state"] == "NOTPAY":
-    #     print(">>>>>Error:     unpaid out_pay_no!!!")
+    #     app.logger.warning(">>>>> Unpaid out_pay_no!!!")
     #     return jsonify({'error_message': "订单未支付，请尝试刷新本页面"}), 403
     
     # elif print_order["trade_state"] == "CLOSED":
-    #     print(">>>>>Error:     cloesd out_pay_no!!!")
+    #     app.logger.warning(">>>>> Cloesd out_pay_no!!!")
     #     return jsonify({'error_message': "订单已关闭"}), 403
     
     # else:
     #     if print_order["print_state"] == "SUCCESS":
     #         # capture cheating
-    #         print(">>>>>Error:     capture cheating!!!")
+    #         app.logger.warning(">>>>> Capture cheating!!!")
     #         return jsonify({'error_message': "订单号所对应文件已打印过"}), 403
         
     if print_order["filename"] != session["filename"]:
-        print(">>>>>Error:     filename doesn't match!!!")
+        app.logger.warning(">>>>> Filename doesn't match!!!")
         return jsonify({'error_message': "订单号与提交文件不符"}), 403
 
     # make print command according to session["*"]
     filepath = os.path.join(app.config["UPLOAD_FOLDER"], session["filename"])
-    print_state = OSprint(filepath=filepath, session=session)
+    print_state = OSprint(filepath=filepath, session=session, logger=app.logger)
 
     # post-check printer state
     """aborted"""
     # state = printer_state()
     # if state != "ok":
-    #     print(">>>>>Error:     ", state)
+    #     app.logger.error(">>>>> {state}")
     #     return apology(state+"<br>出错啦！请联系管理员", 500)
 
     # update sql's col: print_stateS
@@ -435,12 +449,11 @@ def print_file():
                 print_state, out_trade_no)
     
     if print_state == "FAILED":
-        print(">>>>>Error:     OSprint() failed!!!")
+        app.logger.error(">>>>> OSprint() failed!!!")
         return jsonify({'error_message': "打印失败"}), 500
     else:
         return jsonify({'message': "正在打印",
                         'filename': session['filename']})
-
 
 
 if __name__ == "__main__":

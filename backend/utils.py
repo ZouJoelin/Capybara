@@ -8,9 +8,7 @@ from PyPDF2 import PdfReader, errors
 import cups
 
 
-
 ALLOW_EXTENSIONS = {"pdf"}
-
 
 
 # detect printer status
@@ -58,7 +56,6 @@ def secure_filename(filename):
 # validate file's type
 def validate_file(file, filename):
     # filename = file.filename
-
     if "." in filename and \
     filename.rsplit(".", 1)[1].lower() in ALLOW_EXTENSIONS:
         try:
@@ -76,7 +73,7 @@ def count_pdf_pages(file):
     return pages
 
 
-def formfilled_required(session):
+def formfilled_required(session, logger):
     """
     Decorate routes to require formfilled. see below:
     https://www.liaoxuefeng.com/wiki/1016959663602400/1017451662295584
@@ -90,25 +87,24 @@ def formfilled_required(session):
             for key in session.keys():
                 # print(">>>>>"+ key +":     ", session[key])
                 if session[key] is None:
-                    print(">>>>>Error:     form unfilled as required!!!")
+                    logger.warning(">>>>>Error:     form unfilled as required!!!")
                     return jsonify({'error_message': "支付并打印前请完成表格信息"}), 400
             return func(*args, **kwargs)
         return wrapper
     return decorator
 
 
-def OSprint(filepath, session):
-    # print("========== in OSprint()==========")
+def OSprint(filepath, session, logger):
     # -o landscape???
     option = "-o fit-to-page -o media={} -o sides={} -# {}".format(
         session["paper_type"], session["sides"], session["copies"])
     # print(">>>>>option:     ", option)
-    os.system(f"echo RUN:     'lpr {option}' '{filepath}' (pages: {session['pages']})")
+    
+    logger.info(f"RUN:  lpr {option}' '{filepath}' (pages: {session['pages']})")
 
-    return 'SUCCESS'
     response_error = os.system(f"lpr {option} '{filepath}' ")
     # 0: succeeded; !0: failed
-    # print("========== end OSprint() ==========")
+
     if response_error == 0:
         return 'SUCCESS'
     else:
