@@ -19,7 +19,7 @@ max_requests = 0                                   #自动重启前最大http请
 
 # debug
 daemon = False                                        #是否后台运行
-reload = False                                         #当代码有修改时，自动重启workers。适用于开发环境。
+reload = True                                         #当代码有修改时，自动重启workers。适用于开发环境。
 
 
 #log
