@@ -6,7 +6,7 @@
 
 
 # basic
-bind = '127.0.0.1:8080'                             #绑定监听ip和端口号
+bind = '127.0.0.1:8000'                             #绑定监听ip和端口号
 workers = 1 #multiprocessing.cpu_count() * 2 + 1       #同时执行的进程数，推荐为当前CPU个数*2+1
 worker_class = 'gevent'                               #sync, gevent,meinheld   #工作模式选择，默认为sync，这里设定为gevent异步
 worker_connections = 1000
