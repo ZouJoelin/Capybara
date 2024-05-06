@@ -3,7 +3,7 @@
   "projectname": "shared_printing",
   "setting": {
     "compileHotReLoad": true,
-    "urlCheck": true
+    "urlCheck": false
   },
   "libVersion": "3.4.2",
   "condition": {
