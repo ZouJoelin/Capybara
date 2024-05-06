@@ -12,25 +12,25 @@ Page({
     filename: '',
     filename_forshow: '待上传文件 ( pdf格式 )',
     offlineInfo:'待连接至打印机',
-    color_index: 0,  
+    color_index: 0, //下标用于前端展示，通过bind函数修改color属性
     size_index: 0,
     danshuang_index: 0,
     color_array: ['黑白'],
     size_array: ['A4'],
     danshuang_array:['双面长边','单面','双面短边'],
     paper_type: 'A4',
-    sides: 'two-sided-long-edge',
+    sides: 'two-sided-long-edge',//传给后端主要是用sides属性
     color: '黑白',
     qty: 1,
-    pgnum: 0,
+    pgnum: 0,//页数
     price: 0,
     isupload: false
   }, 
-  oversize:function(e){
+  oversize:function(e){//文件太大
     console.error('文件太大',e)
     Notify({ type: 'warning', message: '文件太大（限制50MB以内' })
   } ,
-  beforeRead:function(e){
+  beforeRead:function(e){//文件上传前校验
     const { file, callback } = e.detail;
     let name = file.name
     let fileType = name.slice(-3)
@@ -82,7 +82,7 @@ Page({
     })
   },
 
-  updatePgnum:function(){
+  updatePgnum:function(){//该函数调用获取费用借口
     var that = this
     wx.request({
       url: 'https://capybara.mynatapp.cc/api/auto_count/fee',
