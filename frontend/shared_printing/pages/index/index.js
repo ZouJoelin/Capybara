@@ -4,8 +4,23 @@ import Notify from '@vant/weapp/notify/notify';
 import { strLenOptiize,handleErrorMessage } from '../../utils/util'
 
 const app = getApp();
+const curDomain = app.globalData.domain //配置当前页面使用域名
 Page({  
-  data: {  
+  data: {
+    btnList:[
+      {
+        id: '0',
+        text: '单面',
+      },
+      {
+        id: '1',
+        text: '双面长边',
+      },
+      {
+        id: '2',
+        text: '双面短边',
+      },
+    ],  
     fileList: [],
     code : '',
     backend_status: false,
@@ -14,10 +29,10 @@ Page({
     offlineInfo:'待连接至打印机',
     color_index: 0,  
     size_index: 0,
-    danshuang_index: 0,
+    // danshuang_index: 0,
     color_array: ['黑白'],
     size_array: ['A4'],
-    danshuang_array:['双面长边','单面','双面短边'],
+    // danshuang_array:['双面长边','单面','双面短边'],
     paper_type: 'A4',
     sides: 'two-sided-long-edge',
     color: '黑白',
@@ -45,7 +60,7 @@ Page({
     // console.log(e)
     console.log(e.detail.file)
     let tmpName = e.detail.file.name
-    let fileName = strLenOptiize(15,tmpName)
+    let fileName = strLenOptiize(18,tmpName)
     this.setData({
       filename_forshow: fileName,
       filename:e.detail.file.name
@@ -53,7 +68,7 @@ Page({
     wx.uploadFile({
       filePath: e.detail.file.url,
       name: 'file',
-      url: 'https://capybara.mynatapp.cc/api/auto_count/pages',
+      url: curDomain+'api/auto_count/pages',
       formData:{
         'fileName' : e.detail.file.name
       },
@@ -82,10 +97,17 @@ Page({
     })
   },
 
+  localSubmit:function(e){
+    console.log('本地上传',e)
+    wx.navigateTo({
+      url: '/pages/localSubmit/localSubmit',
+    })
+  },
+
   updatePgnum:function(){
     var that = this
     wx.request({
-      url: 'https://capybara.mynatapp.cc/api/auto_count/fee',
+      url: curDomain+'api/auto_count/fee',
       method: 'POST',
       data:{
         "pages" : that.data.pgnum,
@@ -124,11 +146,11 @@ Page({
     }
   },
 
-  initialize:function(){
+  initialize:function(){ //在getStatus重用于初始化
     var that = this
     return new Promise((resolve,reject) => {
       wx.request({
-        url: 'https://capybara.mynatapp.cc/?code='+that.data.code,
+        url: curDomain+'?code='+that.data.code,
         method: 'GET',
         success: (res) => {
           // console.log(res);
@@ -161,21 +183,44 @@ Page({
       Notify({ type: 'primary', message: '未上传文件' })
     }
   },
-  bindDanShuangChange: function(e){
-    console.log(e.detail)
-    let value = e.detail.value
+  // bindDanShuangChange: function(e){
+  //   console.log(e.detail)
+  //   let value = e.detail.value
+  //   let tmpSides = ''
+  //   if(value == 0){
+  //     tmpSides = 'two-sided-long-edge'
+  //   }else if(value == 1){
+  //     tmpSides = 'one-sided'
+  //   }else if(value == 2){
+  //     tmpSides = 'two-sided-short-edge'
+  //   }
+  //   console.log(tmpSides)
+  //   this.setData({
+  //     danshuang_index: value,
+  //     sides : tmpSides
+  //   })
+  //   if (this.data.isupload) {
+  //     this.updatePgnum()
+  //   }else{
+  //     Notify({ type: 'primary', message: '未上传文件' })
+  //   }
+  // },
+
+  handleBtnEvent(e){
+    // 按钮组点击触发，接收子组件传过来的数据，进行操作
+    //console.log('handleBtnEvent：',e.detail)
+    let currentId = e.detail.currentId
     let tmpSides = ''
-    if(value == 0){
-      tmpSides = 'two-sided-long-edge'
-    }else if(value == 1){
+    if(currentId === "0"){
       tmpSides = 'one-sided'
-    }else if(value == 2){
+    }else if(currentId === "1"){
+      tmpSides = 'two-sided-long-edge'
+    }else if(currentId === "2"){
       tmpSides = 'two-sided-short-edge'
     }
     console.log(tmpSides)
     this.setData({
-      danshuang_index: value,
-      sides : tmpSides
+      sides: tmpSides
     })
     if (this.data.isupload) {
       this.updatePgnum()
@@ -183,6 +228,7 @@ Page({
       Notify({ type: 'primary', message: '未上传文件' })
     }
   },
+
   onQtyChange: function(e){
     var that = this
     console.log(e.detail);
@@ -199,16 +245,16 @@ Page({
    
   },
   
-  getStatus: function(){
+  getStatus: function(){ //获取打印机状态
     var that = this
     wx.request({
-      url: 'https://capybara.mynatapp.cc/api/status',
+      url: curDomain+'api/status',
       method: 'GET',
       header: {
         'content-type': 'application/json' // 默认值
       },
       success (res) {
-        console.log('后端返回数据',res)
+        console.log('获取打印机状态：',res)
         let status = res.data.backend_status
         if(status == "ok"){
           that.setData({
@@ -217,7 +263,7 @@ Page({
           that.initialize().then((res) => {
             console.log('初始化会话：',res)
             app.globalData.Cookie = res.cookies[0]
-            console.log(app.globalData)
+            // console.log(app.globalData)
           })
           .catch((error) => {
             console.error('初始化会话失败：',error)
@@ -270,10 +316,11 @@ Page({
     var that = this;
     wx.login({
       success: (result) => {
-        console.log(result)
+        console.log('wx.login success',result)
         that.setData({
           code : result.code
         })
+        app.globalData.code = result.code
         //console.log(result.code)
         that.getStatus();
       },
@@ -290,7 +337,7 @@ Page({
    * 生命周期函数--监听页面初次渲染完成
    */
   onReady() {
-
+    this.btnGroup = this.selectComponent("#btn-group")
   },
 
   /**

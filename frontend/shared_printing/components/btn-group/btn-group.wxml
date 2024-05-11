@@ -1,0 +1,14 @@
+<!--components/btn-group/btn-group.wxml-->
+<view class="btn-group-wrap">
+  <view wx:for="{{dataList}}" 
+  wx:for-item="item" wx:for-index="index" wx:key="index" 
+  class="btn-item {{currentId===item.id? 'select' : ''}} {{dataList.length===1?'only-btn':''}}"
+  data-id="{{item.id}}"
+  bind:tap="switchBtn"
+  >
+    <!-- 可在这加icon -->
+    <text wx:if="{{item.text}}" class="btn-text">{{item.text}}</text>
+    <text wx:if="{{!item.text}}" class="btn-text">按钮{{index+1}}</text>
+    <!-- 没有设置list中的text值时，默认命名：按钮xxx -->
+  </view>
+</view>

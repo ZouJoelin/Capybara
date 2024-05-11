@@ -1,0 +1,42 @@
+/* components/btn-group/btn-group.wxss */
+.btn-group-wrap {
+  box-sizing: border-box;
+  width: 100%;
+  height: auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.btn-item {
+  font-weight: medium;
+  color: #3ab54a;
+  flex: 1;
+  align-items: center;
+  line-height: 60rpx;
+  height: 60rpx;
+  font-size: medium;
+  text-align: center;
+  border: 1px solid #bbb;
+  border-right: 0;
+  background-color: #fff;
+}
+.btn-item:first-child {
+  border-radius: 6px 0 0 6px;
+}
+.btn-item:last-child {
+  border-radius: 0 6px 6px 0;
+  border-right: 1px solid #bbb;
+}
+.btn-text {
+  display: inline-block;
+  padding: 0 5rpx;
+  text-align: center;
+}
+.only-btn {
+  border-radius: 30rpx!important;
+}
+.select{
+  background-color: #3ab54a;
+  color: white;
+  border-color: #3ab54a;
+}

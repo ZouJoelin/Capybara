@@ -125,7 +125,7 @@ Page({
         console.log(res.data);
         const info = res.data
         that.prepay();
-        let filename = strLenOptiize(10,info.filename)
+        let filename = strLenOptiize(12,info.filename)
         that.setData({
           file_name : filename,
           pages : info.pages,
