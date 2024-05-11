@@ -20,18 +20,30 @@ Page({
         id: '2',
         text: '双面短边',
       },
-    ],  
+    ],
+    colorList:[
+      {
+        id: '0',
+        text: '黑白'
+      }
+    ],
+    sizeList:[
+      {
+        id: '0',
+        text: 'A4'
+      }
+    ],
     fileList: [],
     code : '',
     backend_status: false,
     filename: '',
     filename_forshow: '待上传文件 ( pdf格式 )',
     offlineInfo:'待连接至打印机',
-    color_index: 0,  
-    size_index: 0,
+    // color_index: 0,  
+    // size_index: 0,
     // danshuang_index: 0,
-    color_array: ['黑白'],
-    size_array: ['A4'],
+    // color_array: ['黑白'],
+    // size_array: ['A4'],
     // danshuang_array:['双面长边','单面','双面短边'],
     paper_type: 'A4',
     sides: 'two-sided-long-edge',

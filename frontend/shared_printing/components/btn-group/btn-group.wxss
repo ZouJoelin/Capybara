@@ -16,7 +16,7 @@
   height: 60rpx;
   font-size: medium;
   text-align: center;
-  border: 1px solid #bbb;
+  border: 1px solid #3ab54a;
   border-right: 0;
   background-color: #fff;
 }
@@ -33,7 +33,7 @@
   text-align: center;
 }
 .only-btn {
-  border-radius: 30rpx!important;
+  border-radius: 6rpx!important;
 }
 .select{
   background-color: #3ab54a;

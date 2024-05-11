@@ -63,20 +63,26 @@ text="单面￥0.11/面，双面￥0.10/面" />
 
   <view class="table-info">
     <view class="table-label">纸张</view>
-    <picker mode="selector" bindchange="bindSizeChange" 
+    <!-- <picker mode="selector" bindchange="bindSizeChange" 
       value="{{size_index}}" range="{{size_array}}">
       <view class="table-right table-beautify">
       {{size_array[size_index]}}</view>
-    </picker>
+    </picker> -->
+    <btn-group class="table-right single-btn"
+    currentId='0' dataList="{{sizeList}}"
+    bind:btnEvent=""></btn-group>
   </view>
 
   <view class="table-info">
     <view class="table-label">颜色</view>
-    <picker mode="selector" bindchange="bindColorChange" value="{{color_index}}" range="{{color_array}}">
+    <!-- <picker mode="selector" bindchange="bindColorChange" value="{{color_index}}" range="{{color_array}}">
     <view class="table-right table-beautify">
       {{color_array[color_index]}}
     </view>
-    </picker>
+    </picker> -->
+    <btn-group class="table-right single-btn"
+    currentId='0' dataList="{{colorList}}"
+    bind:btnEvent=""></btn-group>
   </view>
 
   <view class="table-info">
