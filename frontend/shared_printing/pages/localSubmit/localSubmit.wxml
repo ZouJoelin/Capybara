@@ -1,2 +1,9 @@
 <!--pages/localSubmit/localSubmit.wxml-->
-<web-view src="campusprinter.nat300.top/?"/>
+<view class="container">
+  <web-view 
+  src="{{webUrl}}"
+  bindmessage="getMessage"
+  bindload="getLoad"
+  binderror="getError"
+  ></web-view>
+</view>

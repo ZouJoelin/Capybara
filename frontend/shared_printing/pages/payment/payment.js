@@ -1,5 +1,6 @@
 import { strLenOptiize } from '../../utils/util'
 const app = getApp();
+const curDomain = app.globalData.devDomain //配置当前页面使用域名
 Page({
 
   /**
@@ -25,7 +26,7 @@ Page({
       success (res) {
         if (res.confirm) {
           wx.request({
-            url: 'https://capybara.mynatapp.cc/api/close_print_order?out_trade_no='+that.data.out_trade_no,
+            url: curDomain+'api/close_print_order?out_trade_no='+that.data.out_trade_no,
             method: 'GET',
             header: {
               'content-type': 'application/json',
@@ -60,7 +61,7 @@ Page({
         let out_trade_no = that.data.out_trade_no
         console.log('支付成功',res)
         wx.request({
-          url: 'https://capybara.mynatapp.cc/api/print_file?out_trade_no='+out_trade_no,
+          url: curDomain+'api/print_file?out_trade_no='+out_trade_no,
           method: 'GET',
           header: {
             'content-type': 'application/json',
@@ -85,7 +86,7 @@ Page({
   prepay: function(){
     var that = this
     wx.request({
-      url: 'https://capybara.mynatapp.cc/api/pay',
+      url: curDomain+'api/pay',
       method: 'GET',
       header: {
         'content-type': 'application/json',
@@ -115,7 +116,7 @@ Page({
   onLoad(options) {
     var that = this
     wx.request({
-      url: 'https://capybara.mynatapp.cc/api/print_order_info',
+      url: curDomain+'api/print_order_info',
       method: 'GET',
       header: {
         'content-type': 'application/json',

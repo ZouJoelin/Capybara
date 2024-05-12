@@ -4,7 +4,7 @@ import Notify from '@vant/weapp/notify/notify';
 import { strLenOptiize,handleErrorMessage } from '../../utils/util'
 
 const app = getApp();
-const curDomain = app.globalData.domain //配置当前页面使用域名
+const curDomain = app.globalData.devDomain //配置当前页面使用域名
 Page({  
   data: {
     btnList:[
@@ -49,9 +49,10 @@ Page({
     sides: 'two-sided-long-edge',
     color: '黑白',
     qty: 1,
-    pgnum: 0,
+    pgnum: 0, //页数
     price: 0,
-    isupload: false
+    isupload: false,
+    islocal: false
   }, 
   oversize:function(e){
     console.error('文件太大',e)
@@ -111,6 +112,16 @@ Page({
 
   localSubmit:function(e){
     console.log('本地上传',e)
+    // let input = app.globalData.Cookie
+    // const pattern = /session=([^;]+)/; //正则表达式
+    // const match = input.match(pattern);
+    // let Cookie = ''
+    // if (match && match[1]) {
+    //   Cookie = match[1];
+    // } else {
+    //   console.log('No match found');
+    // }
+    // app.globalData.session=curDomain+'local_upload?Cookie='+ Cookie
     wx.navigateTo({
       url: '/pages/localSubmit/localSubmit',
     })
@@ -175,26 +186,26 @@ Page({
       });
     });
   },
-  bindColorChange: function(e) {  
-    this.setData({  
-      color_index: e.detail.value  
-    })
-    if (this.data.isupload) {
-      //this.updatePgnum() 因只有黑色，暂不启用
-    }else{
-      Notify({ type: 'primary', message: '未上传文件' })
-    }
-  },
-  bindSizeChange: function(e){
-    this.setData({
-      size_index: e.detail.value
-    })
-    if (this.data.isupload) {
-      //this.updatePgnum() 因只有A4，暂不启用
-    }else{
-      Notify({ type: 'primary', message: '未上传文件' })
-    }
-  },
+  // bindColorChange: function(e) {  
+  //   this.setData({  
+  //     color_index: e.detail.value  
+  //   })
+  //   if (this.data.isupload) {
+  //     //this.updatePgnum() 因只有黑色，暂不启用
+  //   }else{
+  //     Notify({ type: 'primary', message: '未上传文件' })
+  //   }
+  // },
+  // bindSizeChange: function(e){
+  //   this.setData({
+  //     size_index: e.detail.value
+  //   })
+  //   if (this.data.isupload) {
+  //     //this.updatePgnum() 因只有A4，暂不启用
+  //   }else{
+  //     Notify({ type: 'primary', message: '未上传文件' })
+  //   }
+  // },
   // bindDanShuangChange: function(e){
   //   console.log(e.detail)
   //   let value = e.detail.value
@@ -243,7 +254,7 @@ Page({
 
   onQtyChange: function(e){
     var that = this
-    console.log(e.detail);
+    // console.log(e.detail);
     Toast.loading({
       message: '加载中...',
       forbidClick:true});
@@ -319,12 +330,33 @@ Page({
       }
     })
   },
+
+  localPost: function(){ //本地上传
+    var that = this
+    //console.log(that.data.filename,that.data.pgnum)
+    wx.request({
+      url: curDomain+'local_upload',
+      method: 'POST',
+      data:{
+        "fileName" : that.data.filename,
+        "pages" : that.data.pgnum 
+      },
+      header : {
+        'content-type': 'application/x-www-form-urlencoded',
+        'Cookie' : app.globalData.Cookie 
+      },
+      success(res){
+        console.log('触发localPost：',res)
+        that.updatePgnum()
+      }
+    })
+  },
   
    /**
    * 生命周期函数--监听页面加载
    */
   onLoad(options) {
-    // console.log(options);
+    console.log(curDomain)
     var that = this;
     wx.login({
       success: (result) => {
@@ -356,6 +388,10 @@ Page({
    * 生命周期函数--监听页面显示
    */
   onShow() {
-
+    console.log('onShow: ',app.globalData.Cookie)
+    if(this.data.islocal){
+      this.localPost();
+      //本地上传的，先传cookie在获取打印费用
+    }
   },
 })
