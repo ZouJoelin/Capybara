@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- get Bootstrap -->
+    <link href="https://cdn.staticfile.org/twitter-bootstrap/5.1.1/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/5.1.1/js/bootstrap.bundle.min.js"></script>
+
+    <script type="text/javascript" src="https://res.wx.qq.com/open/js/jweixin-1.4.0.js"></script>
+    <title>本地上传</title>
+</head>
+
+<body>
+    <main class="container py-4">
+        <br><br><br><br><br>
+
+        <!-- capybara!!! -->
+        <div class="d-flex flex-column" id="capybara">
+            <div class="mx-auto" id="capybara_body">
+                <!-- 作者：大象ROV -->
+                <img src="/static/capybara1_1.png" srcset="" width="175">
+            </div>
+            <div class="text-center py-4 mx-auto">
+                <p>出于兼容考虑，暂仅支持上传<span class="text-primary">pdf</span>格式文件</p>
+            </div>
+        </div>
+
+        <div class="d-flex flex-column align-items-center">
+            <input class="" type="file" id="file" name="file" accept=".pdf" required hidden>
+            <button class="btn btn-success" id="choose-btn">选择本地文件</button>
+        </div>
+    </main>
+
+
+    <script>
+        const MAX_SIZE = 50 * 1024 * 1024; // x * 1MB
+
+        let chooseBtn = document.getElementById("choose-btn");
+        let file = document.getElementById("file");
+
+        chooseBtn.addEventListener('click', function () {
+            file.click();
+        });
+
+        file.addEventListener('change', async function (event) {
+            try {
+                let uploadFile = event.target.files[0];
+
+                // constrain file size
+                // Max~50MB; nomarl-max~30MB;
+                if (uploadFile.size > MAX_SIZE) {
+                    alert('文件大小不能超过 50MB');
+                    // event.preventDefault();
+                    return;
+                }
+
+                let formData = new FormData();
+                formData.append('file', uploadFile);
+                formData.append('fileName', uploadFile.name);
+
+                let response = await fetch('/api/auto_count/pages', {
+                    method: 'POST',
+                    body: formData
+                });
+                // console.log(response);
+
+                if (!response.ok) {
+                    let errorJSON = await response.json();
+                    throw errorJSON;
+                }
+                let parsedJSON = await response.json();
+                let fileName = parsedJSON.fileName;
+                let pages = parsedJSON.pages;
+                // console.log(pages);
+                // alert(`文件上传成功，共计 ${pages} 页`);
+
+                wx.miniProgram.postMessage({
+                    data: {
+                        fileName: fileName,
+                        pages: pages
+                    }
+                });
+                setTimeout(wx.miniProgram.navigateBack(), 500);
+
+            } catch (errorJSON) {
+                let error_message = errorJSON.error_message;
+                alert(error_message);
+            }
+        });
+    </script>
+
+</body>
+
+</html>
