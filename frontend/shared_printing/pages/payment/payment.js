@@ -1,6 +1,6 @@
 import { strLenOptiize } from '../../utils/util'
 const app = getApp();
-const curDomain = app.globalData.devDomain //配置当前页面使用域名
+const curDomain = app.globalData.domain //配置当前页面使用域名
 Page({
 
   /**

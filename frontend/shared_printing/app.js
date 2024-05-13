@@ -21,7 +21,6 @@ App({
     userInfo: null,
     code: '',//登录凭证,在index.js中获取
     Cookie: null,
-    session: '',
     devDomain: 'http://campusprinter.nat300.top/',
     domain: 'https://capybara.mynatapp.cc/'
   }

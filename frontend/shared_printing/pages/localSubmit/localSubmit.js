@@ -1,6 +1,6 @@
 import { strLenOptiize } from '../../utils/util'
 const app = getApp();
-const curDomain = app.globalData.devDomain //配置当前页面使用域名
+const curDomain = app.globalData.domain //配置当前页面使用域名
 Page({
 
   /**
@@ -38,11 +38,7 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad(options) {
-    // console.log(app.globalData.session)
-    // this.setData({
-    //   webUrl : curDomain+'local_upload?Cookie='+app.globalData.Cookie
-    // })
-    // console.log(this.data.webUrl)
+    
   },
 
   /**

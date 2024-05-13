@@ -4,7 +4,7 @@ import Notify from '@vant/weapp/notify/notify';
 import { strLenOptiize,handleErrorMessage } from '../../utils/util'
 
 const app = getApp();
-const curDomain = app.globalData.devDomain //配置当前页面使用域名
+const curDomain = app.globalData.domain //配置当前页面使用域名
 Page({  
   data: {
     btnList:[
@@ -112,16 +112,6 @@ Page({
 
   localSubmit:function(e){
     console.log('本地上传',e)
-    // let input = app.globalData.Cookie
-    // const pattern = /session=([^;]+)/; //正则表达式
-    // const match = input.match(pattern);
-    // let Cookie = ''
-    // if (match && match[1]) {
-    //   Cookie = match[1];
-    // } else {
-    //   console.log('No match found');
-    // }
-    // app.globalData.session=curDomain+'local_upload?Cookie='+ Cookie
     wx.navigateTo({
       url: '/pages/localSubmit/localSubmit',
     })
@@ -388,7 +378,7 @@ Page({
    * 生命周期函数--监听页面显示
    */
   onShow() {
-    console.log('onShow: ',app.globalData.Cookie)
+    //console.log('onShow: ',app.globalData.Cookie)
     if(this.data.islocal){
       this.localPost();
       //本地上传的，先传cookie在获取打印费用
