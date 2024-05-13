@@ -1,7 +1,9 @@
 <!--index.wxml-->
 <van-notice-bar scrollable="{{ false }}"
 left-icon="volume-o"
+mode="closeable"
 text="单面￥0.11/面，双面￥0.10/面" />
+
 <view class="container">
   <van-notify id="van-notify" />
   <view class="printer-status">
@@ -18,8 +20,16 @@ text="单面￥0.11/面，双面￥0.10/面" />
     </view>
   </view>
   <view class="uploader-container">
+    <button
+    bind:tap="localSubmit"
+    class="local-uploader"
+    plain="true"
+    size="mini"
+    type="primary"
+    >
+    <text class="uploader-text">本地上传</text>
+    </button>
     <van-uploader file-list="{{ fileList }}" 
-    class="uploader"
     disabled="{{!backend_status}}"
     use-before-read="true"
     bind:before-read="beforeRead"
@@ -29,48 +39,66 @@ text="单面￥0.11/面，双面￥0.10/面" />
     max-size="52428800"
     accept="file"
     >
-    <button size="mini" 
+    <button
+    class="weixin-uploader"
+    size="mini"
     plain="true"
-    type="primary">
-    <van-icon name="description" />
-    选择文件
+    type="primary"
+    >
+    
+    <text class="uploader-text">微信上传</text>
     </button>
+
     </van-uploader>
   </view>
   <view class="upload-file">
       <view>{{filename_forshow}}</view>
     <!-- <view class="van-hairline--bottom"></view> -->
   </view>
+
   <view class="table-info">
     <text class="table-label">页数</text>
     <view class="table-right">{{pgnum}}</view>
   </view>
+
   <view class="table-info">
     <view class="table-label">纸张</view>
-    <picker mode="selector" bindchange="bindSizeChange" 
+    <!-- <picker mode="selector" bindchange="bindSizeChange" 
       value="{{size_index}}" range="{{size_array}}">
       <view class="table-right table-beautify">
       {{size_array[size_index]}}</view>
-    </picker>
+    </picker> -->
+    <btn-group class="table-right single-btn"
+    currentId='0' dataList="{{sizeList}}"
+    bind:btnEvent=""></btn-group>
   </view>
+
   <view class="table-info">
     <view class="table-label">颜色</view>
-    <picker mode="selector" bindchange="bindColorChange" value="{{color_index}}" range="{{color_array}}">
+    <!-- <picker mode="selector" bindchange="bindColorChange" value="{{color_index}}" range="{{color_array}}">
     <view class="table-right table-beautify">
       {{color_array[color_index]}}
     </view>
-    </picker>
+    </picker> -->
+    <btn-group class="table-right single-btn"
+    currentId='0' dataList="{{colorList}}"
+    bind:btnEvent=""></btn-group>
   </view>
+
   <view class="table-info">
     <text class="table-label">单双</text>
-    <picker mode="selector" bindchange="bindDanShuangChange"
+    <!-- <picker mode="selector" bindchange="bindDanShuangChange"
     value="{{danshuang_index}}" 
     range="{{danshuang_array}}">
     <view class="table-right table-beautify">
       {{danshuang_array[danshuang_index]}}
     </view>
-    </picker>
+    </picker> -->
+    <btn-group class="table-right btn-group"
+    currentId='1' dataList="{{btnList}}"
+    bind:btnEvent="handleBtnEvent"></btn-group>
   </view>
+
   <view class="table-info">
     <text class="table-label">份数</text>
     <view class="table-right">
@@ -83,6 +111,7 @@ text="单面￥0.11/面，双面￥0.10/面" />
       bind:change="onQtyChange"  />
     </view>
   </view>
+
   <view class="price">
     <text class="price-label">{{price}}￥</text>
   </view>
@@ -92,11 +121,15 @@ text="单面￥0.11/面，双面￥0.10/面" />
     type="warn"
     bind:tap="cancel"
     disabled="{{!isupload}}"
-    >取消</button>
+    >
+    <text class="btn-text">取消</text>
+    </button>
     <button class="confirm-button" 
     size="mini" type="primary"
     bind:tap="submit"
-    >打印</button>
+    >
+    <text class="btn-text">打印</text>
+    </button>
   </view>
 </view>
 

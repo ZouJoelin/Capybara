@@ -1,0 +1,9 @@
+<!--pages/localSubmit/localSubmit.wxml-->
+<view class="container">
+  <web-view 
+  src="{{webUrl}}"
+  bindmessage="getMessage"
+  bindload="getLoad"
+  binderror="getError"
+  ></web-view>
+</view>

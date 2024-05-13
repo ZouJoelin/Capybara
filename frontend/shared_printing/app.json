@@ -6,7 +6,8 @@
     "pages/community/community",
     "pages/user/user",
     "pages/payment/payment",
-    "pages/subpayment/subpayment"
+    "pages/subpayment/subpayment",
+    "pages/localSubmit/localSubmit"
   ],
   "tabBar": {
     "color": "black",

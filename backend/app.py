@@ -5,7 +5,7 @@ import time
 from random import sample
 from string import ascii_uppercase, digits
 
-from flask import Flask, session, request, jsonify, abort, make_response
+from flask import Flask, session, request, jsonify, abort, make_response, render_template
 from flask_session import Session
 import requests
 
@@ -147,6 +147,28 @@ def status():
         return jsonify({"error_message": printer_status_dict[status]}), 503
 
 
+@app.route("/local_upload", methods=["POST", "GET"])
+def local_upload():
+    """upload local file to server.
+    
+    Request:
+        - ["GET"] 
+        - ["POST"] with request.form["fileName"], request.form["pages"]
+
+    """
+    if request.method == "GET":
+        return render_template("localUpload.html")
+    else:
+        if (not request.form.get("fileName")) or (not request.form.get("pages")):
+            return jsonify({'error_message': "fileName&pages required to set session"}), 400
+    
+        session["filename"] = request.form.get("fileName")
+        session["pages"] = int(request.form.get("pages"))
+
+        return jsonify({'fileName': session["filename"],
+                        'pages': session["pages"]})
+
+
 @app.route("/api/auto_count/pages", methods=["POST"])
 def count_pages():
     """auto count .pdf pages and save .pdf file 
@@ -186,7 +208,8 @@ def count_pages():
     session["filename"] = filename
     session["pages"] = int(pages)
 
-    return jsonify({'pages': session["pages"]})
+    return jsonify({'fileName': session["filename"],
+                    'pages': session["pages"]})
     
 
 @app.route("/api/auto_count/fee", methods=["POST"])
@@ -436,6 +459,7 @@ def print_file():
     # make print command according to session["*"]
     filepath = os.path.join(app.config["UPLOAD_FOLDER"], session["filename"])
     print_state = OSprint(filepath=filepath, session=session, logger=app.logger)
+    # print_state = "SUCCESS"
 
     # post-check printer state
     """aborted"""

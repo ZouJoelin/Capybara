@@ -96,6 +96,7 @@ https://warped-spaceship-750669.postman.co/request/33534605-a01c68b7-847d-4dff-8
 #### 应答参数
 |  key   | value  | 说明 |
 |  ----  | ----  | --- |
+| "fileName"  | str | 安全处理过的文件名 |
 | "pages"  | int |  |
 
 #### 错误码

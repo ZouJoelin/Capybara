@@ -5,6 +5,7 @@
     "van-notice-bar": "/miniprogram_npm/@vant/weapp/notice-bar/index",
     "van-notify": "@vant/weapp/notify/index",
     "van-icon": "@vant/weapp/icon/index",
-    "van-toast": "@vant/weapp/toast/index"
+    "van-toast": "@vant/weapp/toast/index",
+    "btn-group": "/components/btn-group/btn-group"
   }
 }

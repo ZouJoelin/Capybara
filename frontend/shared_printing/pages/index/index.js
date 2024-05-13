@@ -1,69 +1,97 @@
 // index.js
 import Toast from '@vant/weapp/toast/toast';
 import Notify from '@vant/weapp/notify/notify';
-import { strLenOptiize,handleErrorMessage } from '../../utils/util'
+import { strLenOptiize, handleErrorMessage } from '../../utils/util'
 
 const app = getApp();
-Page({  
-  data: {  
+const curDomain = app.globalData.domain //配置当前页面使用域名
+Page({
+  data: {
+    btnList: [
+      {
+        id: '0',
+        text: '单面',
+      },
+      {
+        id: '1',
+        text: '双面长边',
+      },
+      {
+        id: '2',
+        text: '双面短边',
+      },
+    ],
+    colorList: [
+      {
+        id: '0',
+        text: '黑白'
+      }
+    ],
+    sizeList: [
+      {
+        id: '0',
+        text: 'A4'
+      }
+    ],
     fileList: [],
-    code : '',
+    code: '',
     backend_status: false,
     filename: '',
     filename_forshow: '待上传文件 ( pdf格式 )',
-    offlineInfo:'待连接至打印机',
-    color_index: 0, //下标用于前端展示，通过bind函数修改color属性
-    size_index: 0,
-    danshuang_index: 0,
-    color_array: ['黑白'],
-    size_array: ['A4'],
-    danshuang_array:['双面长边','单面','双面短边'],
+    offlineInfo: '待连接至打印机',
+    // color_index: 0,  
+    // size_index: 0,
+    // danshuang_index: 0,
+    // color_array: ['黑白'],
+    // size_array: ['A4'],
+    // danshuang_array:['双面长边','单面','双面短边'],
     paper_type: 'A4',
     sides: 'two-sided-long-edge',//传给后端主要是用sides属性
     color: '黑白',
     qty: 1,
-    pgnum: 0,//页数
+    pgnum: 0, //页数
     price: 0,
-    isupload: false
-  }, 
-  oversize:function(e){//文件太大
-    console.error('文件太大',e)
+    isupload: false,
+    islocal: false
+  },
+  oversize: function (e) {//文件太大
+    console.error('文件太大', e)
     Notify({ type: 'warning', message: '文件太大（限制50MB以内' })
-  } ,
-  beforeRead:function(e){//文件上传前校验
+  },
+  beforeRead: function (e) {//文件上传前校验
     const { file, callback } = e.detail;
     let name = file.name
     let fileType = name.slice(-3)
     if (fileType == 'pdf') {
       callback(true)
-    }else{
+    } else {
       Notify({ type: 'warning', message: '当前仅支持pdf格式' })
     }
   },
-  afterRead:function(e){
+  afterRead: function (e) {
     var that = this
     // console.log(e)
     console.log(e.detail.file)
     let tmpName = e.detail.file.name
-    let fileName = strLenOptiize(15,tmpName)
+    let fileName = strLenOptiize(18, tmpName)
     this.setData({
       filename_forshow: fileName,
-      filename:e.detail.file.name
+      filename: e.detail.file.name
     })
     wx.uploadFile({
       filePath: e.detail.file.url,
       name: 'file',
-      url: 'https://capybara.mynatapp.cc/api/auto_count/pages',
-      formData:{
-        'fileName' : e.detail.file.name
+      url: curDomain + 'api/auto_count/pages',
+      formData: {
+        'fileName': e.detail.file.name
       },
-      header: {  
+      header: {
         'content-type': 'multipart/form-data',
-        'Cookie' : app.globalData.Cookie  
-      }, 
-      success (res){
+        'Cookie': app.globalData.Cookie
+      },
+      success(res) {
         // const data = res
-        console.log('上传文件成功',res)
+        console.log('上传文件成功', res)
         /*
           上传文件格式不正确
           取出返回对象中data字段的json
@@ -74,61 +102,68 @@ Page({
         let responseData = JSON.parse(res.data)
         // console.log(responseData)
         that.setData({
-          pgnum : responseData.pages,
-          isupload : true //更新“取消”按钮禁用状态
+          pgnum: responseData.pages,
+          isupload: true //更新“取消”按钮禁用状态
         })
         that.updatePgnum();
       }
     })
   },
 
-  updatePgnum:function(){//该函数调用获取费用借口
+  localSubmit: function (e) {
+    console.log('本地上传', e)
+    wx.navigateTo({
+      url: '/pages/localSubmit/localSubmit',
+    })
+  },
+
+  updatePgnum: function () {
     var that = this
     wx.request({
-      url: 'https://capybara.mynatapp.cc/api/auto_count/fee',
+      url: curDomain + 'api/auto_count/fee',
       method: 'POST',
-      data:{
-        "pages" : that.data.pgnum,
-        "paper_type" : that.data.paper_type,
-        "color" : that.data.color,
-        "sides" : that.data.sides,
-        "copies" : that.data.qty
+      data: {
+        "pages": that.data.pgnum,
+        "paper_type": that.data.paper_type,
+        "color": that.data.color,
+        "sides": that.data.sides,
+        "copies": that.data.qty
       },
-      header : {
+      header: {
         'content-type': 'application/x-www-form-urlencoded',
-        'Cookie' : app.globalData.Cookie
+        'Cookie': app.globalData.Cookie
       },
-      success (res){
-        console.log('触发updatePgnum',res.data)
-        
+      success(res) {
+        console.log('触发updatePgnum', res.data)
+
         that.setData({
-          price : res.data.fee
+          price: res.data.fee
         })
       }
     })
   },
-  cancel: function(e){
+  cancel: function (e) {
     console.log(e)
     wx.reLaunch({
       url: './index'
     })
   },
-  submit:function(){
-    if(this.data.pgnum == 0){
+  submit: function () {
+    if (this.data.pgnum == 0) {
       Notify({ type: 'primary', message: '未上传文件' })
-    }else{
-      var url = '/pages/payment/payment?price='+this.data.price
+    } else {
+      var url = '/pages/payment/payment?price=' + this.data.price
       wx.navigateTo({
-      url: url,
+        url: url,
       })
     }
   },
 
-  initialize:function(){
+  initialize: function () { //在getStatus重用于初始化
     var that = this
-    return new Promise((resolve,reject) => {
+    return new Promise((resolve, reject) => {
       wx.request({
-        url: 'https://capybara.mynatapp.cc/?code='+that.data.code,
+        url: curDomain + '?code=' + that.data.code,
         method: 'GET',
         success: (res) => {
           // console.log(res);
@@ -141,94 +176,119 @@ Page({
       });
     });
   },
-  bindColorChange: function(e) {  
-    this.setData({  
-      color_index: e.detail.value  
-    })
-    if (this.data.isupload) {
-      //this.updatePgnum() 因只有黑色，暂不启用
-    }else{
-      Notify({ type: 'primary', message: '未上传文件' })
-    }
-  },
-  bindSizeChange: function(e){
-    this.setData({
-      size_index: e.detail.value
-    })
-    if (this.data.isupload) {
-      //this.updatePgnum() 因只有A4，暂不启用
-    }else{
-      Notify({ type: 'primary', message: '未上传文件' })
-    }
-  },
-  bindDanShuangChange: function(e){
-    console.log(e.detail)
-    let value = e.detail.value
+  // bindColorChange: function(e) {  
+  //   this.setData({  
+  //     color_index: e.detail.value  
+  //   })
+  //   if (this.data.isupload) {
+  //     //this.updatePgnum() 因只有黑色，暂不启用
+  //   }else{
+  //     Notify({ type: 'primary', message: '未上传文件' })
+  //   }
+  // },
+  // bindSizeChange: function(e){
+  //   this.setData({
+  //     size_index: e.detail.value
+  //   })
+  //   if (this.data.isupload) {
+  //     //this.updatePgnum() 因只有A4，暂不启用
+  //   }else{
+  //     Notify({ type: 'primary', message: '未上传文件' })
+  //   }
+  // },
+  // bindDanShuangChange: function(e){
+  //   console.log(e.detail)
+  //   let value = e.detail.value
+  //   let tmpSides = ''
+  //   if(value == 0){
+  //     tmpSides = 'two-sided-long-edge'
+  //   }else if(value == 1){
+  //     tmpSides = 'one-sided'
+  //   }else if(value == 2){
+  //     tmpSides = 'two-sided-short-edge'
+  //   }
+  //   console.log(tmpSides)
+  //   this.setData({
+  //     danshuang_index: value,
+  //     sides : tmpSides
+  //   })
+  //   if (this.data.isupload) {
+  //     this.updatePgnum()
+  //   }else{
+  //     Notify({ type: 'primary', message: '未上传文件' })
+  //   }
+  // },
+
+  handleBtnEvent(e) {
+    // 按钮组点击触发，接收子组件传过来的数据，进行操作
+    //console.log('handleBtnEvent：',e.detail)
+    let currentId = e.detail.currentId
     let tmpSides = ''
-    if(value == 0){
-      tmpSides = 'two-sided-long-edge'
-    }else if(value == 1){
+    if (currentId === "0") {
       tmpSides = 'one-sided'
-    }else if(value == 2){
+    } else if (currentId === "1") {
+      tmpSides = 'two-sided-long-edge'
+    } else if (currentId === "2") {
       tmpSides = 'two-sided-short-edge'
     }
     console.log(tmpSides)
     this.setData({
-      danshuang_index: value,
-      sides : tmpSides
+      sides: tmpSides
     })
     if (this.data.isupload) {
       this.updatePgnum()
-    }else{
+    } else {
       Notify({ type: 'primary', message: '未上传文件' })
     }
   },
-  onQtyChange: function(e){
+
+  onQtyChange: function (e) {
     var that = this
-    console.log(e.detail);
+    // console.log(e.detail);
     Toast.loading({
       message: '加载中...',
-      forbidClick:true});
-    setTimeout(()=>{
+      forbidClick: true
+    });
+    setTimeout(() => {
       Toast.clear();
       this.setData({
         qty: e.detail
       })
       that.updatePgnum();
-    },400)
-   
+    }, 400)
+
   },
-  
-  getStatus: function(){
+
+  getStatus: function () { //获取打印机状态
     var that = this
     wx.request({
-      url: 'https://capybara.mynatapp.cc/api/status',
+      url: curDomain + 'api/status',
       method: 'GET',
       header: {
         'content-type': 'application/json' // 默认值
       },
-      success (res) {
-        console.log('后端返回数据',res)
+      success(res) {
+        console.log('获取打印机状态：', res)
         let status = res.data.backend_status
-        if(status == "ok"){
+        if (status == "ok") {
           that.setData({
-            backend_status : true
+            backend_status: true
           });
           that.initialize().then((res) => {
-            console.log('初始化会话：',res)
+            console.log('初始化会话：', res)
             app.globalData.Cookie = res.cookies[0]
-            console.log(app.globalData)
+            // console.log(app.globalData)
           })
-          .catch((error) => {
-            console.error('初始化会话失败：',error)
-          })
-        }else if(res.statusCode == 404 && res.data.includes("Tunnel")){
+            .catch((error) => {
+              console.error('初始化会话失败：', error)
+            })
+        } else if (res.statusCode == 404 && res.data.includes("Tunnel")) {
           that.setData({
             offlineInfo: '服务器掉线'
           })
-        }else if(res.statusCode == 503){
+        } else if (res.statusCode == 503) {
           let info = ''
-          switch(status){
+          switch (status) {
             case 'door_open':
               info = '打印机盖未闭合'
               break
@@ -248,12 +308,12 @@ Page({
               info = '未知错误'
               break
             default:
-              console.error('前端未知错误',status)
+              console.error('前端未知错误', status)
           }
           that.setData({
             offlineInfo: info
           })
-        }else{
+        } else {
           that.setData({
             offlineInfo: '应用框架异常'
           })
@@ -261,19 +321,41 @@ Page({
       }
     })
   },
-  
-   /**
-   * 生命周期函数--监听页面加载
-   */
+
+  localPost: function () { //本地上传
+    var that = this
+    //console.log(that.data.filename,that.data.pgnum)
+    wx.request({
+      url: curDomain + 'local_upload',
+      method: 'POST',
+      data: {
+        "fileName": that.data.filename,
+        "pages": that.data.pgnum
+      },
+      header: {
+        'content-type': 'application/x-www-form-urlencoded',
+        'Cookie': app.globalData.Cookie
+      },
+      success(res) {
+        console.log('触发localPost：', res)
+        that.updatePgnum()
+      }
+    })
+  },
+
+  /**
+  * 生命周期函数--监听页面加载
+  */
   onLoad(options) {
-    // console.log(options);
+    console.log(curDomain)
     var that = this;
     wx.login({
       success: (result) => {
-        console.log(result)
+        console.log('wx.login success', result)
         that.setData({
-          code : result.code
+          code: result.code
         })
+        app.globalData.code = result.code
         //console.log(result.code)
         that.getStatus();
       },
@@ -290,13 +372,17 @@ Page({
    * 生命周期函数--监听页面初次渲染完成
    */
   onReady() {
-
+    this.btnGroup = this.selectComponent("#btn-group")
   },
 
   /**
    * 生命周期函数--监听页面显示
    */
   onShow() {
-
+    //console.log('onShow: ',app.globalData.Cookie)
+    if (this.data.islocal) {
+      this.localPost();
+      //本地上传的，先传cookie在获取打印费用
+    }
   },
 })
