@@ -389,6 +389,8 @@ def close_print_order():
     """close out_trade_no.
     
     """
+    if not request.args.get("out_trade_no"):
+        return jsonify({'error_message': "out_trade_no required"}), 400
     out_trade_no = request.args.get("out_trade_no")
     code, message = close(out_trade_no)
     # app.logger.info(f">>>>> code: {code}; message: {message}")
