@@ -1,13 +1,14 @@
 import { strLenOptiize } from '../../utils/util'
+import Toast from '@vant/weapp/toast/toast';
 const app = getApp();
-const curDomain = app.globalData.domain //配置当前页面使用域名
+const curDomain = app.globalData.devDomain //配置当前页面使用域名
 Page({
 
   /**
    * 页面的初始数据
    */
   data: {
-    file_name: "filename.pdf",
+    file_name: "文件名加载中……",
     pages: 0,
     paper_type: "A4",
     color: "黑白",
@@ -68,13 +69,13 @@ Page({
             'Cookie' : app.globalData.Cookie
           },
           success (res){
-            console.log('调用打印接口成功',res)
+            console.log('调用打印接口成功>>>',res)
             wx.redirectTo({
               url: '../subpayment/subpayment?filename='+ that.data.file_name
             })
           },
           fail (err){
-            console.log('调用打印借口失败',err)
+            console.log('调用打印接口失败>>>',err)
           }
         })
       },
@@ -93,20 +94,16 @@ Page({
         'Cookie' : app.globalData.Cookie
       },
       success (res){
-        console.log(res.data);
-        var signObj
-        try {
-          signObj = res.data.jsapi_sign
-        } catch (error) {
-          console.error('调用后端下单pay接口失败：',error)
-        }
+        console.log('api/pay success >>>',res.data);
+        var signObj = res.data.jsapi_sign
         that.setData({
           jsapi_sign: signObj,
           out_trade_no: res.data.out_trade_no
         })
       },
       fail (err){
-        console.error(err);
+        console.error('api/pay error >>>',err);
+        Toast.fail('支付信息异常');
       }
     })
   },
@@ -123,7 +120,7 @@ Page({
         'Cookie' : app.globalData.Cookie
       },
       success (res){
-        console.log(res.data);
+        console.log('后端输出打印信息>>>',res.data);
         const info = res.data
         that.prepay();
         let filename = strLenOptiize(12,info.filename)

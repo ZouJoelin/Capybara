@@ -1,13 +1,13 @@
 import { strLenOptiize } from '../../utils/util'
 const app = getApp();
-const curDomain = app.globalData.domain //配置当前页面使用域名
+const curDomain = app.globalData.devDomain //配置当前页面使用域名
 Page({
 
   /**
    * 页面的初始数据
    */
   data: {
-    webUrl: curDomain+'local_upload'
+    webUrl: curDomain + 'local_upload'
   },
 
   getMessage:function(e){

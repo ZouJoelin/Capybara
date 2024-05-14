@@ -5,7 +5,7 @@ Page({
    * 页面的初始数据
    */
   data: {
-    filename: 'filename.pdf',
+    filename: '文件名加载中……',
     location: '东校慎思园6号文化室'
   },
 

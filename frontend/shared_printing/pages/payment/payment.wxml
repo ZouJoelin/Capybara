@@ -1,4 +1,4 @@
-
+<van-toast id="van-toast" />
 <view class="container">
   <view class="info">
   请确认打印信息
