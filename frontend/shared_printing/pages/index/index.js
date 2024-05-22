@@ -4,7 +4,7 @@ import Notify from '@vant/weapp/notify/notify';
 import { strLenOptiize,handleErrorMessage } from '../../utils/util'
 
 const app = getApp();
-const curDomain = app.globalData.domain //配置当前页面使用域名
+const curDomain = app.globalData.devDomain //配置当前页面使用域名
 Page({  
   data: {
     btnList:[
@@ -143,7 +143,7 @@ Page({
     })
   },
   cancel: function(e){
-    console.log(e)
+    //console.log(e)
     wx.reLaunch({
       url: './index'
     })
@@ -244,7 +244,6 @@ Page({
 
   onQtyChange: function(e){
     var that = this
-    // console.log(e.detail);
     Toast.loading({
       message: '加载中...',
       forbidClick:true});
@@ -276,7 +275,6 @@ Page({
           that.initialize().then((res) => {
             console.log('初始化会话：',res)
             app.globalData.Cookie = res.cookies[0]
-            // console.log(app.globalData)
           })
           .catch((error) => {
             console.error('初始化会话失败：',error)
@@ -323,7 +321,6 @@ Page({
 
   localPost: function(){ //本地上传
     var that = this
-    //console.log(that.data.filename,that.data.pgnum)
     wx.request({
       url: curDomain+'local_upload',
       method: 'POST',
@@ -381,7 +378,7 @@ Page({
     //console.log('onShow: ',app.globalData.Cookie)
     if(this.data.islocal){
       this.localPost();
-      //本地上传的，先传cookie在获取打印费用
+      //本地上传的，先传cookie再获取打印费用
     }
   },
 })
