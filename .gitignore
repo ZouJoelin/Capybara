@@ -2,6 +2,7 @@
 /flask_session
 /files_temp/*
 /log/*
+*.log
 !/log/logrotate.conf
 
 backend/__pycache__/

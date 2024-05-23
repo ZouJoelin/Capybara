@@ -398,7 +398,7 @@ def close_print_order():
     return jsonify({'message': message, 'code': code})
 
 
-@app.route("/api/notify", methods=['POST'])
+@app.route("/notify", methods=['POST'])
 def notify():
     """API for wx: process wx's callback request.
     
