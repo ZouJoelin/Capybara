@@ -61,9 +61,11 @@ https://warped-spaceship-750669.postman.co/request/33534605-5a030443-3f46-435f-9
 |  key   | value  | 说明 |
 |  ----  | ----  | --- |
 | "initialized"  | "ok" | √ |
+| "notification"  | "新通知" | 默认None |
 
 #### 错误码
 * 401
+
 |  key   | value  | 说明 |
 |  ----  | ----  | --- |
 | "error_message"  | "access_token failed" | 授权失败，具体原因在reason字段 |
@@ -101,6 +103,7 @@ https://warped-spaceship-750669.postman.co/request/33534605-a01c68b7-847d-4dff-8
 
 #### 错误码
 * 400
+
 |  key   | value  | 说明 |
 |  ----  | ----  | --- |
 | "error_message"  | "请上传正确的pdf文件" |  |
@@ -128,6 +131,7 @@ https://warped-spaceship-750669.postman.co/request/33534605-a01c68b7-847d-4dff-8
 | "color"  | str | 默认"黑白" |
 | "sides"  | str | "one-sided", "two-sided-long-edge", "two-sided-short-edge"  |
 | "copies"  | int | 必填 |
+| "coins"  | int | 默认 0 |
 
 #### 应答参数
 |  key   | value  | 说明 |
@@ -136,6 +140,7 @@ https://warped-spaceship-750669.postman.co/request/33534605-a01c68b7-847d-4dff-8
 
 #### 错误码
 * 400
+
 |  key   | value  | 说明 |
 |  ----  | ----  | --- |
 | "error_message"  | "请先上传文件" |  |
@@ -192,6 +197,7 @@ https://warped-spaceship-750669.postman.co/request/33534605-1605e60c-3237-4703-9
 
 #### 错误码
 * 500
+
 |  key   | value  | 说明 |
 |  ----  | ----  | --- |
 | "error_message"  | "下单失败" |  |
@@ -221,6 +227,7 @@ https://warped-spaceship-750669.postman.co/request/33534605-1605e60c-3237-4703-9
 
 #### 错误码
 * 403
+
 |  key   | value  | 说明 |
 |  ----  | ----  | --- |
 | "error_message"  | "订单不存在" | 非法的out_trade_no |
@@ -265,13 +272,12 @@ https://capybara.mynatapp.cc/api/close_print_order?out_trade_no=20240423T2243BNP
 -------------------------------------------------
 ## 执行打印命令 [GET]
 ```https://capybara.mynatapp.cc/api/print_file```
-检查违规，并执行打印命令，
+检查违规，并执行打印命令。
 
 #### 请求参数
 |  key   | value  | 说明 |
 |  ----  | ----  | --- |
 | "out_trade_no"  | str | 每个订单在商户后端的唯一标识，调用/api/pay/接口时获取。后端会打印数据库中该订单号所对应的文件 |
-
 
 #### 应答参数
 |  key   | value  | 说明 |
@@ -281,6 +287,7 @@ https://capybara.mynatapp.cc/api/close_print_order?out_trade_no=20240423T2243BNP
 
 #### 错误码
 * 403
+
 |  key   | value  | 说明 |
 |  ----  | ----  | --- |
 | "error_message"  | "订单不存在" | 非法的out_trade_no |
@@ -295,15 +302,78 @@ https://capybara.mynatapp.cc/api/close_print_order?out_trade_no=20240423T2243BNP
 2. https://capybara.mynatapp.cc/api/print_file?out_trade_no=20240423T2243BNP
 3. https://capybara.mynatapp.cc/api/print_file?out_trade_no=20240428T1816AAA
 
-
 ##### 应答示例
 1. {"error_message":	"订单未支付，请尝试刷新本页面"}
 2. {"error_message":	"订单已关闭"}
 3. {"error_message":	"订单不存在"}
 
 
+-------------------------------------------------
+## 获取用户信息 [GET]
+```https://capybara.mynatapp.cc/api/get_user_info```
+用open_id换取数据库中用户个人信息。
+
+#### 请求参数
+|  key   | value  | 说明 |
+|  ----  | ----  | --- |
+| "open_id"  | str |  |
+
+#### 应答参数
+|  key   | value  | 说明 |
+|  ----  | ----  | --- |
+| "nickname"  | str | 黄毛鸭头 |
+| "student_name"  | int | 邹家林 |
+| "student_id"  | str | 19333091 |
+| "university_region_school"  | str | 中山大学-东校区-生命科学学院 |
+| "dormitory"  | str | 慎思园六号 |
+| "coins"  | int | 3 |
+
+#### 错误码
+* 403
+
+|  key   | value  | 说明 |
+|  ----  | ----  | --- |
+| "error_message"  | "用户信息未完善" | 跳转至 /complete_user_info 接口 |
+
+##### 请求示例
+
+##### 应答示例
 
 
+-------------------------------------------------
+## 完善用户信息 [POST]
+```https://capybara.mynatapp.cc/api/complete_user_info```
+完善数据库中open_id所指向的用户的个人信息。
+
+#### 请求参数
+* Body (form-data)
+
+|  key   | value  | 说明 |
+|  ----  | ----  | --- |
+| "open_id"  | str |  |
+| "nickname"  | str | 黄毛鸭头 |
+| "student_name"  | int | 邹家林 |
+| "student_id"  | str | 19333091 |
+| "university"  | str | 中山大学 |
+| "region"  | str | 东校区 |
+| "school"  | str | 生命科学学院 |
+| "dormitory"  | str | 慎思园六号 |
+
+#### 应答参数
+|  key   | value  | 说明 |
+|  ----  | ----  | --- |
+| "complete_user_info"  | "ok" |  |
+
+#### 错误码
+* 400
+
+|  key   | value  | 说明 |
+|  ----  | ----  | --- |
+| "error_message"  | "错误的用户信息" | 非法的字段，让用户重新填写 |
+
+##### 请求示例
+
+##### 应答示例
 
 
 
