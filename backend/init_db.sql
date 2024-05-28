@@ -1,15 +1,28 @@
-CREATE TABLE print_order (id INTEGER NOT NULL, user_id INTEGER, 
+
+-- ALTER TABLE print_order ADD COLUMN device TEXT NOT NULL DEFAULT "unknown";
+-- ALTER TABLE print_order rename to print_order_bkp;
+
+
+CREATE TABLE print_order (user_open_id TEXT, 
 filename TEXT NOT NULL, pages INTEGER NOT NULL, paper_type TEXT NOT NULL, color TEXT NOT NULL, sides TEXT NOT NULL, copies INTEGER NOT NULL, fee REAL NOT NULL, 
-out_trade_no TEXT NOT NULL PRIMARY KEY, trade_type TEXT NOT NULL, device TEXT NOT NULL,
-trade_state TEXT DEFAULT "NOTPAY", trade_time TEXT, print_state TEXT,
-FOREIGN KEY(user_id) REFERENCES users(id));
+out_trade_no TEXT NOT NULL PRIMARY KEY, device TEXT NOT NULL, trade_type TEXT NOT NULL, trade_state TEXT NOT NULL DEFAULT "NOTPAY", trade_time TEXT, print_state TEXT,
+FOREIGN KEY(user_open_id) REFERENCES users(open_id));
 
-CREATE UNIQUE INDEX out_trade_no ON print_order (out_trade_no);
+CREATE UNIQUE INDEX print_order_index ON print_order (out_trade_no);
+CREATE INDEX print_user_index ON print_order (user_open_id);
 
-CREATE TABLE users (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL, password_hash TEXT NOT NULL, student_id NUMBER NOT NULL, school TEXT NOT NULL, credits INTEGER NOT NULL DEFAULT 3);
 
-CREATE UNIQUE INDEX student_id ON users (student_id);
+-- INSERT INTO print_order SELECT id, user_id, filename, pages, paper_type, color, sides, copies, fee, out_trade_no, device, trade_type, trade_state, trade_time, print_state FROM print_order_bkp;
+-- DROP TABLE print_order_bkp;
+-- DROP TABLE users;
+
+
+CREATE TABLE users (open_id TEXT NOT NULL PRIMARY KEY, nickname TEXT NOT NULL, student_name TEXT NOT NULL, student_id NUMERIC NOT NULL, university TEXT NOT NULL, region TEXT NOT NULL, school TEXT NOT NULL, dormitory TEXT NOT NULL, coins INTEGER NOT NULL DEFAULT 3);
+CREATE UNIQUE INDEX user_index ON users (open_id);
+
 
 
 -- initialize TABLE print_order...
-INSERT INTO print_order (id, filename, pages, paper_type, color, sides, copies, fee, out_trade_no, trade_type) VALUES(0, 'test.pdf', 2, 'A4', '黑白', 'two-sided-long-edge', 1, 0.02, '20230420T0043KLP', 'NATIVE');
+-- INSERT INTO print_order (id, filename, pages, paper_type, color, sides, copies, fee, out_trade_no, trade_type, device) VALUES(0, 'test.pdf', 2, 'A4', '黑白', 'two-sided-long-edge', 1, 0.02, '20230420T0043KLP', 'NATIVE', 'PC');
+
+

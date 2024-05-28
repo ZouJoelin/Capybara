@@ -61,6 +61,7 @@ https://warped-spaceship-750669.postman.co/request/33534605-5a030443-3f46-435f-9
 |  key   | value  | 说明 |
 |  ----  | ----  | --- |
 | "initialized"  | "ok" | √ |
+| "open_id"  |  |  |
 | "notification"  | "新通知" | 默认None |
 
 #### 错误码

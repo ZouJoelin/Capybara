@@ -115,6 +115,7 @@ def index():
     session["open_id"] = open_id
 
     return jsonify({'initialized': 'ok',
+                    'open_id': session["open_id"],
                     'notification': '新通知'})
 
 
@@ -329,12 +330,12 @@ def pay():
     # print(">>>>>package:     ", package) 
     # print(">>>>>paysign:     ", paySign)
 
-    device = "mobile" if request.mobile else "pc"
+    device = "MOBILE" if request.mobile else "PC"
 
     # log into sql
-    db.execute("INSERT INTO print_order (id, filename, pages, paper_type, color, sides, copies, fee, out_trade_no, trade_type, device) VALUES((SELECT MAX(id) + 1 FROM print_order), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                session["filename"], session["pages"], session["paper_type"], session["color"], session["sides"], session["copies"], session["fee"],
-                out_trade_no, "JSAPI", device)
+    db.execute("INSERT INTO print_order (user_open_id, filename, pages, paper_type, color, sides, copies, fee, out_trade_no, device, trade_type) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                session["open_id"], session["filename"], session["pages"], session["paper_type"], session["color"], session["sides"], session["copies"], session["fee"],
+                out_trade_no, device, "JSAPI")
 
     jsapi_sign = {
         "appId": APPID,
