@@ -114,7 +114,8 @@ def index():
     open_id = response.get("openid")
     session["open_id"] = open_id
 
-    return jsonify({'initialized': 'ok'})
+    return jsonify({'initialized': 'ok',
+                    'notification': '新通知'})
 
 
 @app.route("/api/status", methods=["GET"])
@@ -305,7 +306,7 @@ def pay():
     # generate trade info
     amount = int(session["fee"] * 100)
     out_trade_no = time.strftime("%Y%m%dT%H%M", time.localtime()) + ''.join(sample(ascii_uppercase,3))
-    description = session["filename"]
+    description = f"{session['filename']}（{session['pages']}页-{session['sides']}）"
     # print(">>>>>amount:     " ,amount)
     # print(">>>>>out_trade_no:     " ,out_trade_no)
     # print(">>>>>description:     " ,description)
@@ -314,7 +315,6 @@ def pay():
 
     # print(">>>>>access from mobile!!!")
     code, prepay_id = pay_jsapi(amount, out_trade_no, description, session["open_id"])
-
     if code not in range(200, 300):
         app.logger.error(">>>>> pay_jsapi() failed!!!", code)
         return jsonify({'error_message': "下单失败"}), 500
@@ -329,10 +329,12 @@ def pay():
     # print(">>>>>package:     ", package) 
     # print(">>>>>paysign:     ", paySign)
 
+    device = "mobile" if request.mobile else "pc"
+
     # log into sql
-    db.execute("INSERT INTO print_order (id, filename, pages, paper_type, color, sides, copies, fee, out_trade_no, trade_type) VALUES((SELECT MAX(id) + 1 FROM print_order), ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    db.execute("INSERT INTO print_order (id, filename, pages, paper_type, color, sides, copies, fee, out_trade_no, trade_type, device) VALUES((SELECT MAX(id) + 1 FROM print_order), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 session["filename"], session["pages"], session["paper_type"], session["color"], session["sides"], session["copies"], session["fee"],
-                out_trade_no, "JSAPI")
+                out_trade_no, "JSAPI", device)
 
     jsapi_sign = {
         "appId": APPID,
