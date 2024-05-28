@@ -17,12 +17,11 @@ CREATE INDEX print_user_index ON print_order (user_open_id);
 -- DROP TABLE users;
 
 
-CREATE TABLE users (open_id TEXT NOT NULL PRIMARY KEY, nickname TEXT NOT NULL, student_name TEXT NOT NULL, student_id NUMERIC NOT NULL, university TEXT NOT NULL, region TEXT NOT NULL, school TEXT NOT NULL, dormitory TEXT NOT NULL, coins INTEGER NOT NULL DEFAULT 3);
+CREATE TABLE users (open_id TEXT NOT NULL PRIMARY KEY, nickname TEXT NOT NULL, student_name TEXT NOT NULL, student_id TEXT NOT NULL, university TEXT NOT NULL, region TEXT NOT NULL, school TEXT NOT NULL, dormitory TEXT NOT NULL, coins INTEGER NOT NULL DEFAULT 3);
 CREATE UNIQUE INDEX user_index ON users (open_id);
 
 
 
 -- initialize TABLE print_order...
 -- INSERT INTO print_order (id, filename, pages, paper_type, color, sides, copies, fee, out_trade_no, trade_type, device) VALUES(0, 'test.pdf', 2, 'A4', '黑白', 'two-sided-long-edge', 1, 0.02, '20230420T0043KLP', 'NATIVE', 'PC');
-
-
+-- INSERT INTO users (open_id, nickname, student_name, student_id, university, region, school, dormitory, coins) VALUES('h9adb30cjwq', '黄毛鸭头', '邹家林', '19333091', '中山大学', '东校区', '生命科学学院', '慎思园六号', 3);

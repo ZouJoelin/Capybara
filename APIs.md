@@ -137,7 +137,7 @@ https://warped-spaceship-750669.postman.co/request/33534605-a01c68b7-847d-4dff-8
 #### 应答参数
 |  key   | value  | 说明 |
 |  ----  | ----  | --- |
-| "fee"  | int |  |
+| "fee"  | str |  |
 
 #### 错误码
 * 400
@@ -173,7 +173,7 @@ https://warped-spaceship-750669.postman.co/request/33534605-1605e60c-3237-4703-9
 | "color"  | str | 默认“黑白” |
 | "sides"  | str | 单面、双面长边、双面短边 |
 | "copies"  | int | 份数 |
-| "price"  | str/int | 价格 |
+| "price"  | str | 价格 |
 
 ##### 请求示例
 无
@@ -323,7 +323,7 @@ https://capybara.mynatapp.cc/api/close_print_order?out_trade_no=20240423T2243BNP
 |  key   | value  | 说明 |
 |  ----  | ----  | --- |
 | "nickname"  | str | 黄毛鸭头 |
-| "student_name"  | int | 邹家林 |
+| "student_name"  | str | 邹家林 |
 | "student_id"  | str | 19333091 |
 | "university_region_school"  | str | 中山大学-东校区-生命科学学院 |
 | "dormitory"  | str | 慎思园六号 |
@@ -334,7 +334,9 @@ https://capybara.mynatapp.cc/api/close_print_order?out_trade_no=20240423T2243BNP
 
 |  key   | value  | 说明 |
 |  ----  | ----  | --- |
-| "error_message"  | "用户信息未完善" | 跳转至 /complete_user_info 接口 |
+| "error_message" | "open_id不匹配" | session["open_id"]与请求的open_id不符 |
+|  | "用户不存在" | 跳转至 /complete_user_info 接口 |
+
 
 ##### 请求示例
 
@@ -353,7 +355,7 @@ https://capybara.mynatapp.cc/api/close_print_order?out_trade_no=20240423T2243BNP
 |  ----  | ----  | --- |
 | "open_id"  | str |  |
 | "nickname"  | str | 黄毛鸭头 |
-| "student_name"  | int | 邹家林 |
+| "student_name"  | str | 邹家林 |
 | "student_id"  | str | 19333091 |
 | "university"  | str | 中山大学 |
 | "region"  | str | 东校区 |
@@ -363,7 +365,7 @@ https://capybara.mynatapp.cc/api/close_print_order?out_trade_no=20240423T2243BNP
 #### 应答参数
 |  key   | value  | 说明 |
 |  ----  | ----  | --- |
-| "complete_user_info"  | "ok" |  |
+| "message"  | "register completed" |  |
 
 #### 错误码
 * 400

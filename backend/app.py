@@ -81,7 +81,7 @@ def not_found(error):
 
 
 ###############################################
-# API
+# Basic Printing
 ###############################################
 
 @app.route("/", methods=["GET"])
@@ -481,6 +481,54 @@ def print_file():
     else:
         return jsonify({'message': "正在打印",
                         'filename': session['filename']})
+
+        
+###############################################
+# User module
+###############################################
+
+@app.route("/api/get_user_info", methods=["GET"])
+def get_user_info():
+    """exchange user info by open_id from database.
+    
+    """
+    open_id = request.args.get("open_id")
+    if not open_id == session["open_id"]:
+        return jsonify({'error_message': "open_id不匹配"}), 403
+
+    user_info = db.execute("SELECT * FROM user WHERE open_id = (?)", open_id)
+    if not user_info:
+        return jsonify({'error_message': "用户不存在"}), 403
+
+    user_info = user_info[0]
+
+    return jsonify({"nickname": user_info["nickname"],
+                    "student_name": user_info["student_name"],
+                    "student_id": user_info["student_id"],
+                    "university_region_school": f"{user_info['university']}-{user_info['region']}-{user_info['school']}",
+                    "dormitory": user_info["dormitory"],
+                    "coins": user_info["coins"]})
+
+
+@app.route("/api/complete_user_info", methods=["POST"])
+def complete_user_info():
+    """register user info in database.
+    
+    """
+    if not request.form:
+        abort(400)
+    form = request.form
+
+    # validate user_info form
+    if not form["student_id"].isdigit():
+        return jsonify({'error_message': "请输入正确学号"}), 400
+
+    # insert user_info into database
+    db.execute("INSERT INTO users (open_id, nickname, student_name, student_id, university, region, school, dormitory) VALUES(?, ?, ?, ?, ?, ?, ?, ?)",
+                form["open_id"], form["nickname"], form["student_name"], form["student_id"], form["university"], form["region"], form["school"], form["dormitory"])
+
+    return jsonify({'message': "register completed"})
+
 
 
 if __name__ == "__main__":
