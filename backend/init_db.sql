@@ -4,7 +4,7 @@
 
 
 CREATE TABLE print_order (user_open_id TEXT, 
-filename TEXT NOT NULL, pages INTEGER NOT NULL, paper_type TEXT NOT NULL, color TEXT NOT NULL, sides TEXT NOT NULL, copies INTEGER NOT NULL, fee REAL NOT NULL, 
+filename TEXT NOT NULL, pages INTEGER NOT NULL, paper_type TEXT NOT NULL, color TEXT NOT NULL, sides TEXT NOT NULL, copies INTEGER NOT NULL, spend_coins INTEGER NOT NULL DEFAULT 0, fee REAL NOT NULL,
 out_trade_no TEXT NOT NULL PRIMARY KEY, device TEXT NOT NULL, trade_type TEXT NOT NULL, trade_state TEXT NOT NULL DEFAULT "NOTPAY", trade_time TEXT, print_state TEXT,
 FOREIGN KEY(user_open_id) REFERENCES users(open_id));
 

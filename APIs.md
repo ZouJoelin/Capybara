@@ -137,7 +137,8 @@ https://warped-spaceship-750669.postman.co/request/33534605-a01c68b7-847d-4dff-8
 #### 应答参数
 |  key   | value  | 说明 |
 |  ----  | ----  | --- |
-| "fee"  | str |  |
+| "fee"  | str | 扣除印币后价格，最低0.01象征性收费 |
+| "spend_coins"  | int | 用户允许用掉的印币数 |
 
 #### 错误码
 * 400
@@ -173,6 +174,7 @@ https://warped-spaceship-750669.postman.co/request/33534605-1605e60c-3237-4703-9
 | "color"  | str | 默认“黑白” |
 | "sides"  | str | 单面、双面长边、双面短边 |
 | "copies"  | int | 份数 |
+| "spend_coins"  | int | 用户此单使用的印币数 |
 | "price"  | str | 价格 |
 
 ##### 请求示例

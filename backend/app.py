@@ -7,6 +7,7 @@ from string import ascii_uppercase, digits
 
 from flask import Flask, session, request, jsonify, abort, make_response, render_template
 from flask_session import Session
+from flask_mobility import Mobility
 import requests
 
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -22,7 +23,11 @@ from utils import *
 
 PRICE_PER_PAGE_ONE = 0.01
 PRICE_PER_PAGE_TWO = 0.01
+DISCOUNT_PER_COIN = 0.01
 UPLOAD_FOLDER = os.getcwd() + "/../files_temp/"
+sides_zh = {"one-sided": "单面打印", 
+            "two-sided-long-edge": "双面打印，长边翻转", 
+            "two-sided-short-edge": "双面打印，短边翻转"}
 
 PAPER_TYPE = {"A4"}
 COLOR = {"黑白"}
@@ -49,6 +54,8 @@ app.config["ALLOW_EXTENSIONS"] = ALLOW_EXTENSIONS
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
+
+Mobility(app)
 
 # Logger
 app.logger.setLevel(logging.INFO)
@@ -248,11 +255,16 @@ def count_fee():
     if (not form["copies"].isdigit()) or (int(form["copies"]) == 0):
         app.logger.warning(">>>>> Wrong copies input!!!")
         return jsonify({'error_message': "打印份数需为正整数"}), 400
-    
+    have_coins = db.execute("SELECT coins FROM users WHERE open_id = (?)", session["open_id"])
+    if form["spend_coins"] > have_coins:
+        app.logger.warning(">>>>> Not enough coins!!!")
+        return jsonify({'error_message': "您的印币不足"}), 400
+
     session["paper_type"] = form["paper_type"]
     session["color"] = form["color"]
     session["sides"] = form["sides"]
     session["copies"] = int(form["copies"])
+    session["spend_coins"] = int(form["spend_coins"])
 
     # calculate fee
     if session["sides"] == "one-sided":
@@ -261,11 +273,17 @@ def count_fee():
         residual = session["pages"] % 2
         session["fee"] = ((session["pages"] - residual) * PRICE_PER_PAGE_TWO + residual * PRICE_PER_PAGE_ONE) * session["copies"]
 
+    # discount
+    discount = round(min(session["spend_coins"]*DISCOUNT_PER_COIN, session["fee"]), 2)
+    session["spend_coins"] = round(discount/DISCOUNT_PER_COIN)
+    session["fee"] = max(session["fee"]-discount, 0.01)
+
     # print(">>>>>>>>>> session >>>>>>>>>>")
     # for key in session.keys():
     #     print(">>>>>"+ key +":     ", session[key])
 
-    return jsonify({'fee': f"{session['fee']:.2f}"})
+    return jsonify({'fee': f"{session['fee']:.2f}",
+                    'spend_coins': session["spend_coins"]})
 
 
 @app.route("/api/print_order_info", methods=["GET"])
@@ -285,9 +303,6 @@ def print_order_info():
             "fee": <int>
     }
     """
-    sides_zh = {"one-sided": "单面打印", 
-                "two-sided-long-edge": "双面打印，长边翻转", 
-                "two-sided-short-edge": "双面打印，短边翻转"}
     
     return jsonify({"filename": str(session["filename"]),
                     "pages": int(session["pages"]),
@@ -295,6 +310,7 @@ def print_order_info():
                     "color": str(session["color"]),
                     "sides": str(sides_zh[session["sides"]]),
                     "copies": int(session["copies"]),
+                    "spend_coins": int(session["spend_coins"]),
                     "price": str(f"{session['fee']:.2f}")})
 
 
@@ -307,12 +323,12 @@ def pay():
     # generate trade info
     amount = int(session["fee"] * 100)
     out_trade_no = time.strftime("%Y%m%dT%H%M", time.localtime()) + ''.join(sample(ascii_uppercase,3))
-    description = f"{session['filename']}（{session['pages']}页-{session['sides']}）"
+    description = f"{session['filename']}（{session['pages']}页-{sides_zh[session['sides']][:2]}-{session['copies']}份）"
     # print(">>>>>amount:     " ,amount)
     # print(">>>>>out_trade_no:     " ,out_trade_no)
     # print(">>>>>description:     " ,description)
 
-    app.logger.info(f'>>>>> print_order:  filename: "{session["filename"]}"; pages: "{session["pages"]}"; copies: "{session["copies"]}"; fee: "{session["fee"]}"; out_trade_no: "{out_trade_no}"')
+    app.logger.info(f'>>>>> print_order:  filename: "{session["filename"]}"; pages: "{session["pages"]}"; copies: "{session["copies"]}"; spend_coins: "{session["spend_coins"]}"; fee: "{session["fee"]}"; out_trade_no: "{out_trade_no}"')
 
     # print(">>>>>access from mobile!!!")
     code, prepay_id = pay_jsapi(amount, out_trade_no, description, session["open_id"])
@@ -333,8 +349,8 @@ def pay():
     device = "MOBILE" if request.mobile else "PC"
 
     # log into sql
-    db.execute("INSERT INTO print_order (user_open_id, filename, pages, paper_type, color, sides, copies, fee, out_trade_no, device, trade_type) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                session["open_id"], session["filename"], session["pages"], session["paper_type"], session["color"], session["sides"], session["copies"], session["fee"],
+    db.execute("INSERT INTO print_order (user_open_id, filename, pages, paper_type, color, sides, copies, spend_coins, fee, out_trade_no, device, trade_type) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                session["open_id"], session["filename"], session["pages"], session["paper_type"], session["color"], session["sides"], session["copies"], session["spend_coins"], session["fee"],
                 out_trade_no, device, "JSAPI")
 
     jsapi_sign = {
@@ -459,6 +475,10 @@ def print_file():
         app.logger.warning(">>>>> Filename doesn't match!!!")
         return jsonify({'error_message': "订单号与提交文件不符"}), 403
 
+    # update user's coins
+    if session["spend_coins"] > 0:
+        db.execute("UPDATE users SET coins = coins - (?) WHERE open_id = (?)", session["spend_coins"], session["open_id"])
+
     # make print command according to session["*"]
     filepath = os.path.join(app.config["UPLOAD_FOLDER"], session["filename"])
     # print_state = OSprint(filepath=filepath, session=session, logger=app.logger)
@@ -496,7 +516,7 @@ def get_user_info():
     if not open_id == session["open_id"]:
         return jsonify({'error_message': "open_id不匹配"}), 403
 
-    user_info = db.execute("SELECT * FROM user WHERE open_id = (?)", open_id)
+    user_info = db.execute("SELECT * FROM users WHERE open_id = (?)", open_id)
     if not user_info:
         return jsonify({'error_message': "用户不存在"}), 403
 
