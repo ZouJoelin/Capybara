@@ -555,6 +555,59 @@ def complete_user_info():
     return jsonify({'message': "register completed"})
 
 
+def add_user_coin(open_id, coins: int):
+    """add coins to user's account.
+    
+    """
+    db.execute("UPDATE users SET coins = coins + (?) WHERE open_id = (?)", coins, open_id)
+
+
+@app.route("/api/get_today_share_times", methods=["GET"])
+def get_today_share_times():
+    """get user's today share times.
+    
+    """
+    open_id = request.args.get("open_id")
+    if not session.get("open_id"):
+        return jsonify({'error_message': "请先初始化"}), 403
+    if not open_id == session["open_id"]:
+        return jsonify({'error_message': "open_id不匹配"}), 403
+
+    date = time.strftime("%Y-%m-%d", time.localtime())
+    share_times = db.execute("SELECT share_times FROM share WHERE user_open_id = (?) AND share_date = (?)", open_id, date)
+    
+    if len(share_times) == 0:
+        return jsonify({"share_times": 0})
+    else:
+        return jsonify({"share_times": share_times[0]["share_times"]})
+
+
+@app.route("/api/share_incentive", methods=["GET"])
+def share_incentive():
+    """share incentive.
+    
+    """
+    open_id = request.args.get("open_id")
+    incentive = int(request.args.get("incentive"))
+    
+    if not session.get("open_id"):
+        return jsonify({'error_message': "请先初始化"}), 403
+    if not open_id == session["open_id"]:
+        return jsonify({'error_message': "open_id不匹配"}), 403
+
+    date = time.strftime("%Y-%m-%d", time.localtime())
+    share_times = db.execute("SELECT share_times FROM share WHERE user_open_id = (?) AND share_date = (?)", open_id, date)
+    
+    if len(share_times) == 0:
+        db.execute("INSERT INTO share (user_open_id, share_date, share_times) VALUES(?, ?, ?)", open_id, date, 0)
+        add_user_coin(open_id, incentive)
+    else:
+        db.execute("UPDATE share SET share_times = share_times + 1 WHERE user_open_id = (?) AND share_date = (?)", open_id, date)
+        add_user_coin(open_id, incentive)
+
+    return jsonify({"message": "分享成功"})
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
