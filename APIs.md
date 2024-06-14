@@ -132,7 +132,7 @@ https://warped-spaceship-750669.postman.co/request/33534605-a01c68b7-847d-4dff-8
 | "color"  | str | 默认"黑白" |
 | "sides"  | str | "one-sided", "two-sided-long-edge", "two-sided-short-edge"  |
 | "copies"  | int | 必填 |
-| "coins"  | int | 默认 0 |
+| "spend_coins"  | int | 默认 0 |
 
 #### 应答参数
 |  key   | value  | 说明 |
@@ -381,8 +381,61 @@ https://capybara.mynatapp.cc/api/close_print_order?out_trade_no=20240423T2243BNP
 ##### 应答示例
 
 
+-------------------------------------------------
+## 获取用户今日转发次数 [GET]
+```https://capybara.mynatapp.cc/api/get_today_share_times```
+用open_id换取数据库中用户今天转发次数。
+
+#### 请求参数
+|  key   | value  | 说明 |
+|  ----  | ----  | --- |
+| "open_id"  | str |  |
+
+#### 应答参数
+|  key   | value  | 说明 |
+|  ----  | ----  | --- |
+| "share_times"  | int | 3 |
+
+#### 错误码
+* 403
+
+|  key   | value  | 说明 |
+|  ----  | ----  | --- |
+| "error_message" | "open_id不匹配" | session["open_id"]与请求的open_id不符 |
 
 
+##### 请求示例
+
+##### 应答示例
+
+
+-------------------------------------------------
+## 转发成功送印币 [GET]
+```https://capybara.mynatapp.cc/api/share_incentive```
+转发激励：记录此次转发 & 数据库中增加印币。
+
+#### 请求参数
+|  key   | value  | 说明 |
+|  ----  | ----  | --- |
+| "open_id"  | str |  |
+| "incentive"  | int | 送印币个数 |
+
+#### 应答参数
+|  key   | value  | 说明 |
+|  ----  | ----  | --- |
+| "message"  | “分享成功 |  |
+
+#### 错误码
+* 403
+
+|  key   | value  | 说明 |
+|  ----  | ----  | --- |
+| "error_message" | "open_id不匹配" | session["open_id"]与请求的open_id不符 |
+
+
+##### 请求示例
+
+##### 应答示例
 
 
 

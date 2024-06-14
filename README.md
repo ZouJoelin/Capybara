@@ -10,7 +10,7 @@ server: ```HostName b11931e194356b82.natapp.cc``` ```User server``` ```Port 3652
 graph LR
 ori( ) --> branch0(web @Capybara_web.zip)
 ori( ) --> branch1(miniprogram @Capybara) --> gunicorn1[gunicorn端口：8000] --> nginx1[nginx端口：80] --> url1[网址：https://capybara.mynatapp.cc/]
-ori --> branch2(dev @Capybara_dev) --> gunicorn2[gunicorn端口：8080] --> nginx2[nginx端口：88] --> url2[网址：http://campusprinter.nat300.top/]
+ori --> branch2(dev @Capybara_dev) --> gunicorn2[gunicorn端口：8080] --> nginx2[nginx端口：88] --> url2[网址：https://capybara-dev.mynatapp.cc/]
 
 ```
 
