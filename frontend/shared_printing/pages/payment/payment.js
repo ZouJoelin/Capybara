@@ -15,7 +15,8 @@ Page({
     copies: 0,
     price: 0,
     jsapi_sign: {},
-    out_trade_no: '' //每个订单在商户后端的唯一标识
+    out_trade_no: '', //每个订单在商户后端的唯一标识
+    isOK: true //判断是否能从后端获取支付信息，默认为true
   },
   
   cancel: function(){//用户取消打印则调用该函数
@@ -48,65 +49,109 @@ Page({
       }
     })
   },
-  pay: function(){
-    const signObj = this.data.jsapi_sign
+
+  print: function(){
     var that = this
-    wx.requestPayment({
-      timeStamp: signObj.timestamp,
-      nonceStr: signObj.nonceStr,
-      package: signObj.package,
-      signType: signObj.signType,
-      paySign: signObj.paySign,
-      success (res) { 
-        let out_trade_no = that.data.out_trade_no
-        console.log('支付成功',res)
-        wx.request({
-          url: curDomain+'api/print_file?out_trade_no='+out_trade_no,
-          method: 'GET',
-          header: {
-            'content-type': 'application/json',
-            'Cookie' : app.globalData.Cookie
-          },
-          success (res){
-            console.log('调用打印接口成功',res)
-            wx.redirectTo({
-              url: '../subpayment/subpayment?filename='+ that.data.file_name
-            })
-          },
-          fail (err){
-            console.log('调用打印借口失败',err)
-          }
-        })
-      },
-      fail (err) {
-        console.error('支付失败',err)
-       }
-    })
-  },
-  prepay: function(){
-    var that = this
+    let out_trade_no = that.data.out_trade_no
     wx.request({
-      url: curDomain+'api/pay',
+      url: curDomain+'api/print_file?out_trade_no='+out_trade_no,
       method: 'GET',
       header: {
         'content-type': 'application/json',
         'Cookie' : app.globalData.Cookie
       },
       success (res){
-        console.log(res.data);
-        var signObj
-        try {
-          signObj = res.data.jsapi_sign
-        } catch (error) {
-          console.error('调用后端下单pay接口失败：',error)
-        }
+        console.log('调用打印接口成功',res)
+        that.setData({
+          isOK : true
+        })
+        wx.redirectTo({
+          url: '../subpayment/subpayment?filename='+ that.data.file_name
+        })
+      },
+      fail (err){
+        console.log('调用打印接口失败',err)
+      }
+    })
+  },
+
+  pay: function(){
+    const signObj = this.data.jsapi_sign
+    var that = this
+    if(this.data.isOK){
+      wx.requestPayment({
+        timeStamp: signObj.timestamp,
+        nonceStr: signObj.nonceStr,
+        package: signObj.package,
+        signType: signObj.signType,
+        paySign: signObj.paySign,
+        success (res) { 
+          console.log('支付成功',res)
+          that.print()
+        },
+        fail (err) {
+          console.error('支付失败',err)
+         }
+      })
+    }else{
+      wx.showToast({
+        title: '支付信息错误',
+      })
+    }
+  },
+
+  prepay: function(){// 获取调取支付需要的参数字段
+    var that = this
+    wx.request({
+      url: curDomain+'api/pay?out_trade_no='+this.data.out_trade_no,
+      method: 'GET',
+      header: {
+        'content-type': 'application/json',
+        'Cookie' : app.globalData.Cookie
+      },
+      success (res){
+        console.log("api/pay GET success >>>",res.data);
+        var signObj = res.data.jsapi_sign
         that.setData({
           jsapi_sign: signObj,
           out_trade_no: res.data.out_trade_no
         })
       },
-      fail (err){
-        console.error(err);
+      fail (err){//支付信息获取异常
+        console.error("api/pay GET error >>>",err);
+        this.setData({
+          isOK : false
+        })
+        wx.showModal({
+          title: '域名解析异常',
+          content: '点击确认即可免费打印',
+          showCancel: false,
+          complete: (res) => {
+            if (res.confirm) {
+              console.log('用户点击确认')
+              that.print()
+            }
+          }
+        })
+      }
+    })
+  },
+
+  getTradeInfo: function(){ //获取支付需要的打印订单和支付信息，用于onload
+    var that = this
+    wx.request({
+      url: curDomain+'api/pay',
+      method: 'POST',
+      header: {
+        'content-type': 'application/json',
+        'Cookie' : app.globalData.Cookie
+      },
+      success (res){
+        console.log('getTradeInfo success >>>',res.data);
+        that.setData({
+          out_trade_no : res.data.out_trade_no
+        })
+        that.prepay();
       }
     })
   },
@@ -115,6 +160,7 @@ Page({
    */
   onLoad(options) {
     var that = this
+    
     wx.request({
       url: curDomain+'api/print_order_info',
       method: 'GET',
@@ -125,7 +171,8 @@ Page({
       success (res){
         console.log(res.data);
         const info = res.data
-        that.prepay();
+        that.getTradeInfo();//获取预信息
+        //that.prepay();
         let filename = strLenOptiize(12,info.filename)
         that.setData({
           file_name : filename,
