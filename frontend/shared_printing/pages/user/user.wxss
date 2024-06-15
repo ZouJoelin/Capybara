@@ -1,1 +1,86 @@
 /* pages/user/user.wxss */
+.container{
+  color: #4e514e;
+  display: flex;
+  width: 750rpx;
+  height: 100vh;
+  flex-direction: column;
+}
+
+.user-profile{
+  position: absolute;
+  top: 50rpx;
+  border-radius: 20rpx;
+  border: 5px double #3ab54a;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 90%;
+  height: 150rpx;
+  font-size: 35rpx;
+}
+
+.profile-img{
+  width: 80rpx;
+  height: 80rpx;
+  margin-left: 30rpx;
+  margin-right:30rpx;
+}
+
+.profile-text{
+  text-align: center;
+  font-size: larger;
+  font-weight: bold;
+  color: #4e514e;
+}
+
+.user-info-table{
+  width: 90%;
+  position: absolute;
+  top: 250rpx;
+}
+
+.table-item{
+  height: 50rpx;
+  font-size: 32rpx;
+  font-weight: bold;
+  display: flex;
+  border-bottom: 2px dashed #3ab54a;
+  padding: 10rpx;
+  margin-bottom: 10rpx;
+}
+
+.coin-ui{
+  height: 50rpx;
+  width: 30rpx;
+  position: absolute;
+  right: 15rpx;
+}
+
+.user-btn{
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+}
+
+.user-login-btn{
+  background-color: #3ab54a;
+  font-size: larger;
+  font-weight: bold;
+  color: whitesmoke;
+  text-align: center;
+  width: 100%;
+  line-height: 100rpx;
+  height: 100rpx;
+}
+
+.user-contactAdmin-btn{
+  background-color: #bd3124;
+  font-weight: bold;
+  font-size: larger;
+  color: whitesmoke;
+  text-align: center;
+  width: 100%;
+  line-height: 100rpx;
+  height: 100rpx;
+}

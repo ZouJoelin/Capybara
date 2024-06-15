@@ -34,6 +34,11 @@
       <view class="td_1">份数</view>
       <view class="td_2">{{copies}}</view>
     </view>
+
+    <view class="tr_1">
+      <view class="td_1">印币</view>
+      <view class="td_2">实际使用了 {{spend_coins}} 枚</view>
+    </view>
   </view>
   <view class="price">￥{{price}}</view>
   <view class="btnbox">

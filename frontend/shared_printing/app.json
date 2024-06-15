@@ -7,7 +7,10 @@
     "pages/user/user",
     "pages/payment/payment",
     "pages/subpayment/subpayment",
-    "pages/localSubmit/localSubmit"
+    "pages/localSubmit/localSubmit",
+    "pages/contactAdmin/contactAdmin",
+    "pages/userRegister/userRegister",
+    "pages/coinRuleInfo/coinRuleInfo"
   ],
   "tabBar": {
     "color": "black",

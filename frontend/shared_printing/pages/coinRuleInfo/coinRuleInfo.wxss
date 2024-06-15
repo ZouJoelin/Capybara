@@ -1,0 +1,22 @@
+/* pages/coinRuleInfo/coinRuleInfo.wxss */
+.container{
+  display: flex;
+  align-items: center;
+  height: 100vh;
+}
+
+.title{
+  font-size: larger;
+  font-weight: bold;
+  position: absolute;
+  top: 50rpx;
+}
+
+.info{
+  font-size: large;
+  margin-top: 20rpx;
+  margin-bottom: 10rpx;
+  position: absolute;
+  top: 100rpx;
+  padding: 20rpx;
+}

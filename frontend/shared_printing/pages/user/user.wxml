@@ -1,2 +1,51 @@
-<!--pages/user/user.wxml-->
-<van-empty image="error" description="敬请期待！" />
+<!-- <van-empty image="error" description="敬请期待！" /> -->
+<view class="container">
+  <view class="user-profile">
+    <image class="profile-img" src="../../images/user.png" mode="aspectFit"/>
+    <view class="profile-text" wx:if="{{!isLogin}}">未登录</view>
+    <view class="profile-text" wx:else>{{userInfo.nickname}}</view>
+  </view>
+
+  <view class="user-info-table" wx:if="{{isLogin}}" >
+
+    <view class="table-item">
+      <view>姓名：</view>
+      <view>{{userInfo.student_name}}</view>
+    </view>
+
+    <view class="table-item">
+      <view>学号：</view>
+      <view>{{userInfo.student_id}}</view>
+    </view>
+
+    <view class="table-item">
+      <view>单位：</view>
+      <view>{{userInfo.university_region_school}}</view>
+    </view>
+
+    <view class="table-item">
+      <view>宿舍：</view>
+      <view>{{userInfo.dormitory}}</view>
+    </view>
+
+    <view class="table-item" bind:tap="handleUserCoin">
+      <view>印币：</view>
+      <view>{{userInfo.coins}}</view>
+      <image class="coin-ui" src="../../images/right.png" mode="aspectFit"/>
+    </view>
+
+  </view>
+
+<view class="user-btn">
+  <view class="user-login-btn"
+  bind:tap="userLogin"
+  wx:if="{{!isLogin}}"
+  >点击登录</view>
+
+  <view class="user-contactAdmin-btn"
+  bind:tap="contactAdmin"
+  >联系管理员</view>
+</view>
+
+</view>
+

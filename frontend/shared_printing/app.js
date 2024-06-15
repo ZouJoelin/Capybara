@@ -16,12 +16,16 @@ App({
   /*
   miniprogram分支使用网址：https://capybara.mynatapp.cc/
   dev分支使用网址：https://campusprinter.nat300.top/
+  devDomain: 'http://campusprinter.nat300.top/',
+  https://capybara-dev.mynatapp.cc/
+  domain: 'https://capybara.mynatapp.cc/',
   */
   globalData: {
     userInfo: null,
+    isLogin: false, //用户是否已注册
+    openid: '',
     code: '',//登录凭证,在index.js中获取
     Cookie: null,
-    devDomain: 'http://campusprinter.nat300.top/',
-    domain: 'https://capybara.mynatapp.cc/'
+    curDomain: 'https://capybara-dev.mynatapp.cc/'
   }
 })

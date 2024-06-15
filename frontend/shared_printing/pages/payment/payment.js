@@ -1,7 +1,7 @@
 import { strLenOptiize } from '../../utils/util'
 import Toast from '@vant/weapp/toast/toast';
 const app = getApp();
-const curDomain = app.globalData.devDomain //配置当前页面使用域名
+const curDomain = app.globalData.curDomain //配置当前页面使用域名
 Page({
 
   /**
@@ -15,8 +15,10 @@ Page({
     sides: "单面",
     copies: 0,
     price: 0,
+    spend_coins: 0,
     jsapi_sign: {},
-    out_trade_no: '' //每个订单在商户后端的唯一标识
+    out_trade_no: '', //每个订单在商户后端的唯一标识
+    //isOK : true //判断jsapi是否获取到，默认为true
   },
   
   cancel: function(){//用户取消打印则调用该函数
@@ -94,7 +96,13 @@ Page({
         'Cookie' : app.globalData.Cookie
       },
       success (res){
-        console.log('api/pay success >>>',res.data);
+        console.log('api/pay >>>',res.data);
+        if(res.data.jsapi_sign == undefined){
+          Toast.fail('支付异常');
+          // that.setData({
+          //   isOK : false
+          // })
+        }
         var signObj = res.data.jsapi_sign
         that.setData({
           jsapi_sign: signObj,
@@ -103,7 +111,6 @@ Page({
       },
       fail (err){
         console.error('api/pay error >>>',err);
-        Toast.fail('支付信息异常');
       }
     })
   },
@@ -131,7 +138,8 @@ Page({
           color : info.color,
           sides : info.sides,
           copies : info.copies,
-          price : info.price
+          price : info.price,
+          spend_coins : info.spend_coins
         })
       }
     })
