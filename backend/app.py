@@ -8,6 +8,7 @@ from string import ascii_uppercase, digits
 from flask import Flask, session, request, jsonify, abort, make_response, render_template
 from flask_session import Session
 import requests
+import concurrent.futures
 
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -296,54 +297,90 @@ def print_order_info():
                     "price": str(f"{session['fee']:.2f}")})
 
 
-@app.route("/api/pay", methods=["GET"])
+@app.route("/api/pay", methods=["GET", "POST"])
 @formfilled_required(session, app.logger)
 def pay():
     """generate payment link
 
+    Request:
+        - ["GET"]
+        Response: {'out_trade_no': <str>}
+        - ["POST"]
+        Response: {
+            "out_trade_no": <str>,
+            "jsapi_sign": {
+                "appId": <str>,
+                "timestamp": <str>,
+                "nonceStr": <str>,
+                "package": <str>,
+                "signType": <str>,
+                "paySign": <str>
+            }
+        }
     """
-    # generate trade info
-    amount = int(session["fee"] * 100)
-    out_trade_no = time.strftime("%Y%m%dT%H%M", time.localtime()) + ''.join(sample(ascii_uppercase,3))
-    description = session["filename"]
-    # print(">>>>>amount:     " ,amount)
-    # print(">>>>>out_trade_no:     " ,out_trade_no)
-    # print(">>>>>description:     " ,description)
-
-    app.logger.info(f'>>>>> print_order:  filename: "{session["filename"]}"; pages: "{session["pages"]}"; copies: "{session["copies"]}"; fee: "{session["fee"]}"; out_trade_no: "{out_trade_no}"')
-
-    # print(">>>>>access from mobile!!!")
-    code, prepay_id = pay_jsapi(amount, out_trade_no, description, session["open_id"])
-
-    if code not in range(200, 300):
-        app.logger.error(">>>>> pay_jsapi() failed!!!", code)
-        return jsonify({'error_message': "下单失败"}), 500
+    # generate out_trade_no
+    if request.method == "POST":
+        out_trade_no = time.strftime("%Y%m%dT%H%M", time.localtime()) + ''.join(sample(ascii_uppercase,3))
+        return jsonify({'out_trade_no': out_trade_no})
     
-    timestamp = str(int(time.time()))
-    nonceStr = ''.join(sample(ascii_uppercase + digits, 16))
-    package = 'prepay_id=' + prepay_id
-    signType = 'RSA'
-    paySign = wxpay.sign([APPID, timestamp, nonceStr, package])
-    # print(">>>>>timestamp:     ", timestamp)
-    # print(">>>>>nonceStr:     ", nonceStr)
-    # print(">>>>>package:     ", package) 
-    # print(">>>>>paysign:     ", paySign)
+    # generate payment link
+    else:
+        if not request.args.get("out_trade_no"):
+            return jsonify({'error_message': "out_trade_no required"}), 400
+        out_trade_no = request.args.get("out_trade_no")
+        amount = int(session["fee"] * 100)
+        description = session["filename"]
+        # print(">>>>>amount:     " ,amount)
+        # print(">>>>>out_trade_no:     " ,out_trade_no)
+        # print(">>>>>description:     " ,description)
 
-    # log into sql
-    db.execute("INSERT INTO print_order (id, filename, pages, paper_type, color, sides, copies, fee, out_trade_no, trade_type) VALUES((SELECT MAX(id) + 1 FROM print_order), ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                session["filename"], session["pages"], session["paper_type"], session["color"], session["sides"], session["copies"], session["fee"],
-                out_trade_no, "JSAPI")
+        app.logger.info(f'>>>>> print_order:  filename: "{session["filename"]}"; pages: "{session["pages"]}"; copies: "{session["copies"]}"; fee: "{session["fee"]}"; out_trade_no: "{out_trade_no}"')
 
-    jsapi_sign = {
-        "appId": APPID,
-        "timestamp": timestamp,
-        "nonceStr": nonceStr,
-        "package" : package,
-        "signType": signType,
-        "paySign": paySign
-    }
-    return jsonify({"out_trade_no": out_trade_no, 
-                    "jsapi_sign": jsapi_sign})
+        # log into sql
+        db.execute("INSERT INTO print_order (id, filename, pages, paper_type, color, sides, copies, fee, out_trade_no, trade_type) VALUES((SELECT MAX(id) + 1 FROM print_order), ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    session["filename"], session["pages"], session["paper_type"], session["color"], session["sides"], session["copies"], session["fee"],
+                    out_trade_no, "JSAPI")
+
+        # print(">>>>>access from mobile!!!")
+        # code, prepay_id = pay_jsapi(amount, out_trade_no, description, session["open_id"])
+        try:
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                future = executor.submit(pay_jsapi, amount, out_trade_no, description, session["open_id"])
+                code, prepay_id = future.result(timeout=3)  # 设置超时时间
+        except concurrent.futures.TimeoutError:
+            app.logger.error(">>>>> pay_jsapi() timed out!!!")
+            return jsonify({'error_message': "下单超时"}), 500
+        except Exception as e:
+            app.logger.error(f">>>>> pay_jsapi() failed with exception: {e}")
+            return jsonify({'error_message': "下单失败"}), 500
+
+        if code not in range(200, 300):
+            app.logger.error(">>>>> pay_jsapi() failed!!!", code)
+            return jsonify({'error_message': "下单失败"}), 500
+        
+        app.logger.info(f">>>>>code:     {code} >>>>>filename:    {session['filename']}")
+        timestamp = str(int(time.time()))
+        app.logger.info(f">>>>>timestamp:     {timestamp}")
+        nonceStr = ''.join(sample(ascii_uppercase + digits, 16))
+        app.logger.info(f">>>>>nonceStr:     {nonceStr}")
+        package = 'prepay_id=' + prepay_id
+        app.logger.info(f">>>>>package:     {package}") 
+        signType = 'RSA'
+        paySign = wxpay.sign([APPID, timestamp, nonceStr, package])
+        app.logger.info(f">>>>>paysign:     {paySign}")
+
+        jsapi_sign = {
+            "appId": APPID,
+            "timestamp": timestamp,
+            "nonceStr": nonceStr,
+            "package" : package,
+            "signType": signType,
+            "paySign": paySign
+        }
+        app.logger.info(f">>>>>jaspi_sign: {jsapi_sign}")
+
+        return jsonify({"out_trade_no": out_trade_no, 
+                        "jsapi_sign": jsapi_sign})
 
 
 @app.route("/api/polling_query", methods=["GET"])
@@ -484,22 +521,5 @@ def print_file():
 
 if __name__ == "__main__":
     app.run(debug=True)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

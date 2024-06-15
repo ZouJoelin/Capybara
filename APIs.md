@@ -177,10 +177,11 @@ https://warped-spaceship-750669.postman.co/request/33534605-1605e60c-3237-4703-9
 
 
 -------------------------------------------------
-## 小程序下单 [GET]
+## 小程序下单 [GET/POST]
 ```https://capybara.mynatapp.cc/api/pay```
 小程序统一下单，移动端使用pay_jsapi()，返回wx.requestPayment()需要的参数；PC端使用pay_native()，返回支付二维码url。
 
+[POST]
 #### 请求参数
 无
 
@@ -188,12 +189,24 @@ https://warped-spaceship-750669.postman.co/request/33534605-1605e60c-3237-4703-9
 |  key   | value  | 说明 |
 |  ----  | ----  | --- |
 | "out_trade_no"  | str | 每个订单在商户后端的唯一标识，例：20230527T1838XCF (2023.05.27 + 18:38 + 三个随机大写字母组合) |
+
+[GET]
+#### 请求参数
+|  key   | value  | 说明 |
+|  ----  | ----  | --- |
+| "out_trade_no"  | str | 每个订单在商户后端的唯一标识，调用/api/pay/接口时获取，据此订单号查询 |
+
+#### 应答参数
+|  key   | value  | 说明 |
+|  ----  | ----  | --- |
+| "out_trade_no"  | str |  |
 | "jsapi_sign"  | json | wx.requestPayment()需要的所有参数字段：appId, timestamp, nonceStr, package, signType, paySign |
 
 #### 错误码
 * 500
 |  key   | value  | 说明 |
 |  ----  | ----  | --- |
+| "error_message"  | "下单超时" |  |
 | "error_message"  | "下单失败" |  |
 
 ##### 请求示例
