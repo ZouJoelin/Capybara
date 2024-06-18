@@ -51,6 +51,28 @@ Page({
       }
     })
   },
+
+  print:function(){
+    let out_trade_no = that.data.out_trade_no
+    wx.request({
+      url: curDomain+'api/print_file?out_trade_no='+out_trade_no,
+      method: 'GET',
+      header: {
+        'content-type': 'application/json',
+        'Cookie' : app.globalData.Cookie
+      },
+      success (res){
+        console.log('api/print_file SUCCESS >>>',res)
+        wx.redirectTo({
+          url: '../subpayment/subpayment?filename='+ that.data.file_name
+        })
+      },
+      fail (err){
+        console.log('api/print_file ERROR >>>',err)
+      }
+    })
+  },
+
   pay: function(){
     const signObj = this.data.jsapi_sign
     var that = this
@@ -61,25 +83,8 @@ Page({
       signType: signObj.signType,
       paySign: signObj.paySign,
       success (res) { 
-        let out_trade_no = that.data.out_trade_no
         console.log('支付成功',res)
-        wx.request({
-          url: curDomain+'api/print_file?out_trade_no='+out_trade_no,
-          method: 'GET',
-          header: {
-            'content-type': 'application/json',
-            'Cookie' : app.globalData.Cookie
-          },
-          success (res){
-            console.log('调用打印接口成功>>>',res)
-            wx.redirectTo({
-              url: '../subpayment/subpayment?filename='+ that.data.file_name
-            })
-          },
-          fail (err){
-            console.log('调用打印接口失败>>>',err)
-          }
-        })
+        that.print()
       },
       fail (err) {
         console.error('支付失败',err)
