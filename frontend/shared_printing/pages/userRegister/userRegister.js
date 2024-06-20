@@ -1,4 +1,5 @@
 // pages/userRegister/userRegister.js
+import Notify from '@vant/weapp/notify/notify';
 const app = getApp();
 const curDomain = app.globalData.curDomain //配置当前页面使用域名
 
@@ -69,7 +70,7 @@ Page({
       }
     })
     let userInfo = this.data.userInfo
-    console.log(userInfo)
+    console.log('用户提交的信息',userInfo)
     wx.request({
       url: curDomain+'api/complete_user_info',
       method: 'POST',
@@ -91,26 +92,36 @@ Page({
         console.log('触发postConvertInfo',res.data)
         if(res.statusCode == 200){//注册成功
           that.completeUserRegister()
+        }else if(res.statusCode == 400){
+          Notify('学号仅支持数字喔');
         }
+      },
+      fail (err){
+        console.log(err)
       }
     })
   },
 
   onSubmit: function(e){
     let tableInfo = e.detail.value
+    //console.log(tableInfo)
     var that = this
-    wx.showModal({
-      title: '请确认用户信息',
-      content: '提交成功后无法再修改',
-      success (res) {
-        if (res.confirm) {
-          that.postConvertInfo(tableInfo)
-        } else if (res.cancel) {
-          console.log('用户点击取消')
+    if(tableInfo.nickname == "" || tableInfo.student_name == ""){//用户漏填昵称或姓名
+      Notify({ type: 'primary', message: '昵称或姓名未填' });
+    }else{
+      wx.showModal({
+        title: '请确认用户信息',
+        content: '提交成功后无法再修改',
+        success (res) {
+          if (res.confirm) {
+            that.postConvertInfo(tableInfo)
+          } else if (res.cancel) {
+            console.log('用户点击取消')
+          }
         }
-      }
-    })
-    // console.log(tableInfo)
+      })
+    }
+    
   },
 
   onReset: function(){
@@ -150,7 +161,7 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad(options) {
-    if(app.globalData.isLogin == false){
+    if(app.globalData.isLogin == false){ //若用户未注册，则激活提交按钮
       this.setData({
         isdisabled:false
       })
@@ -168,7 +179,7 @@ Page({
    * 生命周期函数--监听页面显示
    */
   onShow() {
-    
+
   },
 
   /**

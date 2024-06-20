@@ -1,23 +1,24 @@
 
 <view class="container">
+  <van-notify id="van-notify" />
   <view class="info">请完善用户信息</view>
   <form bindsubmit="onSubmit" bindreset="onReset">
     <view class="nickname table-item">
       <view>昵称：</view>
-      <input type="nickname" name="nickname" class="input-ui"
-      placeholder="请输入昵称"/>
+      <input type="nickname" name="nickname" maxlength="10" class="input-ui"
+      placeholder="最大输入长度为10"/>
     </view>
 
     <view class="student-name table-item">
       <view>姓名：</view>
-      <input type="text" name='student_name' class="input-ui"
-      placeholder="请输入姓名"/>
+      <input type="text" name='student_name' maxlength="10" class="input-ui"
+      placeholder="最大输入长度为10"/>
     </view>
 
     <view class="student-id table-item">
       <view>学号：</view>
-      <input type="text" name='student_id' class="input-ui"
-      placeholder="请输入学号"/>
+      <input type="number" name='student_id' class="input-ui"
+      placeholder="仅支持数字"/>
     </view>
 
     <view class="university table-item">

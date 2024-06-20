@@ -17,6 +17,13 @@
           "scene": null
         },
         {
+          "name": "用户注册页面",
+          "pathName": "pages/userRegister/userRegister",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
           "name": "我的页面",
           "pathName": "pages/user/user",
           "query": "",

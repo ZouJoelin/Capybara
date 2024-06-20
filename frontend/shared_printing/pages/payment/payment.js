@@ -18,7 +18,7 @@ Page({
     spend_coins: 0,
     jsapi_sign: {},
     out_trade_no: '', //每个订单在商户后端的唯一标识
-    //isOK : true //判断jsapi是否获取到，默认为true
+    isOK: true //判断是否能从后端获取支付信息，默认为true
   },
   
   cancel: function(){//用户取消打印则调用该函数
@@ -52,7 +52,8 @@ Page({
     })
   },
 
-  print:function(){
+  print: function(){
+    var that = this
     let out_trade_no = that.data.out_trade_no
     wx.request({
       url: curDomain+'api/print_file?out_trade_no='+out_trade_no,
@@ -63,6 +64,9 @@ Page({
       },
       success (res){
         console.log('api/print_file SUCCESS >>>',res)
+        that.setData({
+          isOK : true
+        })
         wx.redirectTo({
           url: '../subpayment/subpayment?filename='+ that.data.file_name
         })
@@ -76,46 +80,80 @@ Page({
   pay: function(){
     const signObj = this.data.jsapi_sign
     var that = this
-    wx.requestPayment({
-      timeStamp: signObj.timestamp,
-      nonceStr: signObj.nonceStr,
-      package: signObj.package,
-      signType: signObj.signType,
-      paySign: signObj.paySign,
-      success (res) { 
-        console.log('支付成功',res)
-        that.print()
-      },
-      fail (err) {
-        console.error('支付失败',err)
-       }
-    })
+    if(this.data.isOK){
+      wx.requestPayment({
+        timeStamp: signObj.timestamp,
+        nonceStr: signObj.nonceStr,
+        package: signObj.package,
+        signType: signObj.signType,
+        paySign: signObj.paySign,
+        success (res) { 
+          console.log('支付成功',res)
+          that.print()
+        },
+        fail (err) {
+          console.error('支付失败',err)
+         }
+      })
+    }else{
+      wx.showToast({
+        title: '支付信息错误',
+      })
+    }
   },
-  prepay: function(){
+
+  prepay: function(){// 获取调取支付需要的参数字段
     var that = this
     wx.request({
-      url: curDomain+'api/pay',
+      url: curDomain+'api/pay?out_trade_no='+this.data.out_trade_no,
       method: 'GET',
       header: {
         'content-type': 'application/json',
         'Cookie' : app.globalData.Cookie
       },
       success (res){
-        console.log('api/pay >>>',res.data);
-        if(res.data.jsapi_sign == undefined){
-          Toast.fail('支付异常');
-          // that.setData({
-          //   isOK : false
-          // })
-        }
+        console.log("api/pay GET success >>>",res.data);
         var signObj = res.data.jsapi_sign
         that.setData({
           jsapi_sign: signObj,
           out_trade_no: res.data.out_trade_no
         })
       },
-      fail (err){
-        console.error('api/pay error >>>',err);
+      fail (err){//支付信息获取异常
+        console.error("api/pay GET error >>>",err);
+        this.setData({
+          isOK : false
+        })
+        wx.showModal({
+          title: '域名解析异常',
+          content: '点击确认即可免费打印',
+          showCancel: false,
+          complete: (res) => {
+            if (res.confirm) {
+              console.log('用户点击确认')
+              that.print()
+            }
+          }
+        })
+      }
+    })
+  },
+
+  getTradeInfo: function(){ //获取支付需要的打印订单和支付信息，用于onload
+    var that = this
+    wx.request({
+      url: curDomain+'api/pay',
+      method: 'POST',
+      header: {
+        'content-type': 'application/json',
+        'Cookie' : app.globalData.Cookie
+      },
+      success (res){
+        console.log('getTradeInfo success >>>',res.data);
+        that.setData({
+          out_trade_no : res.data.out_trade_no
+        })
+        that.prepay();
       }
     })
   },
@@ -134,8 +172,9 @@ Page({
       success (res){
         console.log('后端输出打印信息>>>',res.data);
         const info = res.data
-        that.prepay();
-        let filename = strLenOptiize(12,info.filename)
+        that.getTradeInfo();//获取预信息
+        //that.prepay();
+        let filename = strLenOptiize(15,info.filename)
         that.setData({
           file_name : filename,
           pages : info.pages,

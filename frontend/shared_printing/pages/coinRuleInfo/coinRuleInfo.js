@@ -5,7 +5,7 @@ Page({
    * 页面的初始数据
    */
   data: {
-
+    info: '<p><span style="color: #4e514e;;">&nbsp;&nbsp;&nbsp;&nbsp;印币是一种“代金券”，可以抵消打印费用。目前对于新注册的用户我们都会赠送3枚印币。</span></p><p><span style="color: #4e514e;;"><br/></span></p><p><span style="color: #4e514e;;">&nbsp;&nbsp;&nbsp;&nbsp;在打印价格内，每枚印币抵扣0.10元。若价格抵消为0，需象征性收取0.01元</span></p><p><span style="color:  #4e514e;;"><br/></span></p><p><span style="color: #4e514e;;">&nbsp;&nbsp;&nbsp;&nbsp;例如打印费用为0.50元，输入6个印币，则实际扣除印币5枚，最终打印费用为0.01元</span></p><p><br/></p>'
   },
 
   /**

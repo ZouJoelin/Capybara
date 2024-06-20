@@ -9,9 +9,10 @@
 
 .user-profile{
   position: absolute;
-  top: 50rpx;
-  border-radius: 20rpx;
-  border: 5px double #3ab54a;
+  top: 30rpx;
+  border-bottom: 2px dashed #4e514e;
+  /* border-radius: 20rpx;
+  border: 5px double #3ab54a; */
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -21,10 +22,9 @@
 }
 
 .profile-img{
-  width: 80rpx;
-  height: 80rpx;
-  margin-left: 30rpx;
-  margin-right:30rpx;
+  width: 135rpx;
+  height: 135rpx;
+  margin-right: 10rpx;
 }
 
 .profile-text{
@@ -42,19 +42,20 @@
 
 .table-item{
   height: 50rpx;
-  font-size: 32rpx;
-  font-weight: bold;
+  font-size: 30rpx;
+  font-weight: normal;
   display: flex;
-  border-bottom: 2px dashed #3ab54a;
+  border-bottom: 2px dashed #4e514e;
   padding: 10rpx;
-  margin-bottom: 10rpx;
+  margin-bottom: 15rpx;
 }
 
 .coin-ui{
   height: 50rpx;
+  line-height: 50rpx;
   width: 30rpx;
   position: absolute;
-  right: 15rpx;
+  right: 5rpx;
 }
 
 .user-btn{
@@ -65,22 +66,22 @@
 
 .user-login-btn{
   background-color: #3ab54a;
-  font-size: larger;
-  font-weight: bold;
+  font-size: large;
+  font-weight: normal;
   color: whitesmoke;
   text-align: center;
   width: 100%;
-  line-height: 100rpx;
-  height: 100rpx;
+  line-height: 75rpx;
+  height: 75rpx;
 }
 
 .user-contactAdmin-btn{
   background-color: #bd3124;
-  font-weight: bold;
-  font-size: larger;
+  font-weight: normal;
+  font-size: large;
   color: whitesmoke;
   text-align: center;
   width: 100%;
-  line-height: 100rpx;
-  height: 100rpx;
+  line-height: 75rpx;
+  height: 75rpx;
 }

@@ -9,7 +9,7 @@ Page({
    */
   data: {
     userInfo: null,
-    isLogin : false
+    isLogin : false //默认为false，从app文件中更新
   },
 
 
@@ -21,37 +21,17 @@ Page({
   },
 
   userLogin:function(){
-    wx.navigateTo({
-      url: '/pages/userRegister/userRegister',
-    })
+    setTimeout(()=>{
+      wx.navigateTo({
+        url: '/pages/userRegister/userRegister',
+      })
+    },500)
   },
 
   handleUserCoin:function(){
     wx.navigateTo({
       url: '/pages/coinRuleInfo/coinRuleInfo',
     })
-  },
-
-  getUserInfo: function(){ //向后台获取用户信息
-    wx.request({
-      url: curDomain+'api/get_user_info?open_id='+app.globalData.openid,
-      method: 'GET',
-      header : {
-        'Cookie' : app.globalData.Cookie
-      },
-      success: (res) => {
-        if(res.statusCode == 403){
-          console.log('getUserInfo>>>',res.data.error_message)
-        }else if(res.statusCode == 200){
-          console.log('当前用户已注册',res.data)
-          app.globalData.isLogin = true
-          app.globalData.userInfo= res.data
-        }
-      },
-      fail: (error) => {
-        console.error(error)
-      }
-    });
   },
 
   updateUserStatus:function(){//从app.js中维护更新用户登录状态和用户信息
@@ -66,8 +46,7 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad(options) {
-    this.getUserInfo();
-    // this.updateUserStatus()
+    
   },
 
   /**

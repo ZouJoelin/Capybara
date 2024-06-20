@@ -4,39 +4,47 @@
 }
 .info{
   text-align: center;
-  font-size: large;
+  font-size: larger;
   font-weight: bold;
 }
 .table{
   display: flex;
   flex-direction: column;
-  margin-top: 50rpx;
-  margin-bottom: 50rpx;
+  margin-top: 30rpx;
+  margin-bottom: 30rpx;
   background-color: #f2f2f2;
   border: 1rpx solid  #cbcbcb;
 }
+/* 表格的奇数行 */
 .tr_1{
-  width: 500rpx;
+  width: 550rpx;
+  height: 60rpx;
   display: flex;
   flex-direction: row;
 }
+
+/* 表格的偶数行 */
 .tr_2{
   width: 550rpx;
+  height: 60rpx;
   display: flex;
   flex-direction: row;
   background-color: white;
 }
+/* 表格第一列 */
 .td_1{
   position: relative;
   width: 100rpx;
+  line-height: 60rpx;
   text-align: center;
   font-weight: bold;
   border-right: 1px solid #cbcbcb;
 }
+/* 表格第二列 */
 .td_2{
   position: relative;
-  left: 100rpx;
-  margin-top: 10rpx;
+  left: 35rpx;
+  line-height: 60rpx;
 }
 .price{
   font-size: 65rpx;

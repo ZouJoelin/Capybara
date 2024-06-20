@@ -1,7 +1,7 @@
 // index.js
 import Toast from '@vant/weapp/toast/toast';
 import Notify from '@vant/weapp/notify/notify';
-import { strLenOptiize,handleErrorMessage } from '../../utils/util'
+import { strLenOptiize,handleErrorMessage,getUserInfoUtil } from '../../utils/util'
 
 const app = getApp();
 const curDomain = app.globalData.curDomain //配置当前页面使用域名
@@ -256,30 +256,18 @@ Page({
   },
   
   getUserInfo: function(){ //向后台获取用户信息
-    //console.log(app.globalData.Cookie)
     var that = this
-    wx.request({
-      url: curDomain+'api/get_user_info?open_id='+app.globalData.openid,
-      method: 'GET',
-      header : {
-        'Cookie' : app.globalData.Cookie
-      },
-      success: (res) => {
-        if(res.statusCode == 403){
-          console.log(res.data.error_message)
-        }else if(res.statusCode == 200){
-          console.log('当前用户已注册',res.data)
-          app.globalData.isLogin = true
-          app.globalData.userInfo= res.data
-          that.setData({
-            coins:res.data.coins
-          })
-        }
-      },
-      fail: (error) => {
-        console.error(error)
-      }
-    });
+    getUserInfoUtil().then((data) => {
+      //console.log('Received user data:', data)
+      // 在这里处理接收到的用户数据
+      that.setData({
+        coins : data.coins
+      })
+    }).catch((error) => {
+      console.error('Failed to get user data:', error);
+      // 在这里处理错误
+    })
+
   },
 
   getStatus: function(){ //获取打印机状态

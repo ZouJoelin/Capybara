@@ -1,7 +1,7 @@
 <!-- <van-empty image="error" description="敬请期待！" /> -->
 <view class="container">
   <view class="user-profile">
-    <image class="profile-img" src="../../images/user.png" mode="aspectFit"/>
+    <image class="profile-img" src="../../images/头像默认.png" mode="aspectFit"/>
     <view class="profile-text" wx:if="{{!isLogin}}">未登录</view>
     <view class="profile-text" wx:else>{{userInfo.nickname}}</view>
   </view>
