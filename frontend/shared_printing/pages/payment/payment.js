@@ -18,7 +18,7 @@ Page({
     spend_coins: 0,
     jsapi_sign: {},
     out_trade_no: '', //每个订单在商户后端的唯一标识
-    isOK: true //判断是否能从后端获取支付信息，默认为true
+    isdisabled : true //用于禁用支付按钮
   },
   
   cancel: function(){//用户取消打印则调用该函数
@@ -64,9 +64,6 @@ Page({
       },
       success (res){
         console.log('api/print_file SUCCESS >>>',res)
-        that.setData({
-          isOK : true
-        })
         wx.redirectTo({
           url: '../subpayment/subpayment?filename='+ that.data.file_name
         })
@@ -80,26 +77,20 @@ Page({
   pay: function(){
     const signObj = this.data.jsapi_sign
     var that = this
-    if(this.data.isOK){
-      wx.requestPayment({
-        timeStamp: signObj.timestamp,
-        nonceStr: signObj.nonceStr,
-        package: signObj.package,
-        signType: signObj.signType,
-        paySign: signObj.paySign,
-        success (res) { 
-          console.log('支付成功',res)
-          that.print()
-        },
-        fail (err) {
-          console.error('支付失败',err)
-         }
-      })
-    }else{
-      wx.showToast({
-        title: '支付信息错误',
-      })
-    }
+    wx.requestPayment({
+      timeStamp: signObj.timestamp,
+      nonceStr: signObj.nonceStr,
+      package: signObj.package,
+      signType: signObj.signType,
+      paySign: signObj.paySign,
+      success (res) { 
+        console.log('支付成功',res)
+        that.print()
+      },
+      fail (err) {
+        console.error('支付失败',err)
+        }
+    })
   },
 
   prepay: function(){// 获取调取支付需要的参数字段
@@ -114,27 +105,27 @@ Page({
       success (res){
         console.log("api/pay GET success >>>",res.data);
         var signObj = res.data.jsapi_sign
-        that.setData({
-          jsapi_sign: signObj,
-          out_trade_no: res.data.out_trade_no
-        })
-      },
-      fail (err){//支付信息获取异常
-        console.error("api/pay GET error >>>",err);
-        this.setData({
-          isOK : false
-        })
-        wx.showModal({
-          title: '域名解析异常',
-          content: '点击确认即可免费打印',
-          showCancel: false,
-          complete: (res) => {
-            if (res.confirm) {
-              console.log('用户点击确认')
-              that.print()
+        if(signObj != undefined){
+          that.setData({
+            jsapi_sign: signObj,
+            isdisabled : false
+          })
+        }else{ //DNS解析失败或其他原因，导致后端返回500
+          wx.showModal({
+            title: '后台响应异常',
+            content: '点击确定即可免费打印',
+            showCancel: false,
+            complete: (res) => {
+              if (res.confirm) {
+                console.log('用户点击确认')
+                that.print()
+              }
             }
-          }
-        })
+          })
+        }
+      },
+      fail (err){
+        console.error("api/pay GET error >>>",err);
       }
     })
   },

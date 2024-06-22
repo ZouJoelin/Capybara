@@ -50,6 +50,7 @@
     <button size="mini" 
     type="primary"
     bind:tap="pay"
+    disabled="{{isdisabled}}"
     >支付</button>
   </view>
 
