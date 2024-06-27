@@ -8,15 +8,15 @@
 # basic
 bind = '127.0.0.1:8000'                             #绑定监听ip和端口号
 workers = 3 #multiprocessing.cpu_count() * 2 + 1       #同时执行的进程数，推荐为当前CPU个数*2+1
-timeout = 90
 worker_class = 'gevent'                               #sync, gevent,meinheld   #工作模式选择，默认为sync，这里设定为gevent异步
 worker_connections = 1000
+timeout = 90
 
 
 # limit
 backlog = 1024                                        #等待服务客户的数量，最大为2048，即最大挂起的连接数
-max_requests = 0                                   #自动重启前最大http请求数量
-
+max_requests = 1200                                   #自动重启前最大http请求数量
+max_requests_jitter = 50
 
 # debug
 daemon = False                                        #是否后台运行

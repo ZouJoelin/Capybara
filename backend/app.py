@@ -142,6 +142,7 @@ def status():
                           "offline": "打印机未连接",
                           "unknown_error": "打印机发生未知错误"}
     status = printer_status()
+    # return jsonify({"error_message": printer_status_dict["out_of_toner"]}), 503
     if status == "ok":
         return jsonify({"backend_status": printer_status_dict[status]}), 200
     else:
