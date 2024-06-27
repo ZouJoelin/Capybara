@@ -288,28 +288,7 @@ Page({
           })
         } else if (res.statusCode == 503) {
           let info = ''
-          switch (status) {
-            case 'door_open':
-              info = '打印机盖未闭合'
-              break
-            case 'out_of_paper':
-              info = '纸张不足'
-              break
-            case 'out_of_toner':
-              info = '墨粉不足'
-              break
-            case 'jam':
-              info = '纸张堵塞'
-              break
-            case 'offline':
-              info = '打印机未连接'
-              break
-            case 'unknown_error':
-              info = '未知错误'
-              break
-            default:
-              console.error('前端未知错误', status)
-          }
+          info = res.data.error_message
           that.setData({
             offlineInfo: info
           })
