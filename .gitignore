@@ -7,6 +7,7 @@
 
 backend/__pycache__/
 backend/flask_session/
+backend/demo*
 
 /.docs
 /private_security

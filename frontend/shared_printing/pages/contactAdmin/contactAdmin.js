@@ -1,18 +1,11 @@
-// pages/subpayment/subpayment.js
+// pages/contactAdmin/contactAdmin.js
 Page({
 
   /**
    * 页面的初始数据
    */
   data: {
-    filename: '文件名加载中……',
-    location: '东校慎思园6号文化室'
-  },
 
-  backHome: function(){ //返回主页
-    wx.reLaunch({
-      url: '../index/index',
-    })
   },
 
   /**
@@ -21,10 +14,6 @@ Page({
   onLoad(options) {
     wx.hideShareMenu({
       menus: ['shareAppMessage', 'shareTimeline']
-    })
-    console.log(options)
-    this.setData({
-      filename: options.filename
     })
   },
 

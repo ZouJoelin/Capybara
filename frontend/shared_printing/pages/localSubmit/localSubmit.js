@@ -1,13 +1,13 @@
 import { strLenOptiize } from '../../utils/util'
 const app = getApp();
-const curDomain = app.globalData.domain //配置当前页面使用域名
+const curDomain = app.globalData.curDomain //配置当前页面使用域名
 Page({
 
   /**
    * 页面的初始数据
    */
   data: {
-    webUrl: curDomain+'local_upload'
+    webUrl: curDomain + 'local_upload'
   },
 
   getMessage:function(e){
@@ -38,7 +38,9 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad(options) {
-    
+    wx.hideShareMenu({
+      menus: ['shareAppMessage', 'shareTimeline']
+    })
   },
 
   /**

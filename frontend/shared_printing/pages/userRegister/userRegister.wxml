@@ -1,0 +1,76 @@
+
+<view class="container">
+  <van-notify id="van-notify" />
+  <view class="info">请完善用户信息</view>
+  <form bindsubmit="onSubmit" bindreset="onReset">
+    <view class="nickname table-item">
+      <view>昵称：</view>
+      <input type="nickname" name="nickname" maxlength="10" class="input-ui"
+      placeholder="请输入"/>
+    </view>
+
+    <view class="student-name table-item">
+      <view>姓名：</view>
+      <input type="text" name='student_name' maxlength="10" class="input-ui"
+      placeholder="请输入" bindinput="handleNameInput"/>
+    </view>
+
+    <view class="student-id table-item">
+      <view>学号：</view>
+      <input type="number" name='student_id' class="input-ui"
+      placeholder="请输入"/>
+    </view>
+
+    <view class="university table-item">
+      <view>学校：</view>
+      <picker mode="selector" bindchange="onUniversityChange" 
+      value="{{universityIndex}}" range="{{universitys}}"
+      name='university'>
+      <view class="picker-ui">
+      {{universitys[universityIndex]}}</view>
+      </picker>
+    </view>
+
+    <view class="region table-item">
+      <view>校区：</view>
+      <picker mode="selector" bindchange="onRegionChange" 
+      value="{{regionIndex}}" range="{{regions}}"
+      name='region'>
+      <view class="picker-ui">
+      {{regions[regionIndex]}}</view>
+      </picker>
+    </view>
+
+    <view class="school table-item">
+      <view>学院：</view>
+      <picker mode="selector" bindchange="onSchoolChange" 
+      value="{{schoolIndex}}" range="{{schools}}"
+      name='school'>
+      <view class="picker-ui">
+      {{schools[schoolIndex]}}</view>
+      </picker>
+    </view>
+
+    <view class="dormitory table-item">
+      <view>宿舍：</view>
+      <picker mode="selector" bindchange="onDormitoryChange" 
+      value="{{dormitoryIndex}}" range="{{dormitorys}}"
+      name='dormitory'>
+      <view class="picker-ui">
+      {{dormitorys[dormitoryIndex]}}</view>
+      </picker>
+    </view>
+
+    <view class="button">
+      <view class="reset-button">
+      <button type="default" size="mini" form-type="reset">重置</button>
+      </view>
+
+      <view class="submit-button">
+        <button type="primary" size="mini" 
+        disabled="{{isdisabled}}" form-type="submit">提交</button>
+      </view>
+    </view>
+
+  </form>
+</view>

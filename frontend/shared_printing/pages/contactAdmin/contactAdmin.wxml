@@ -1,0 +1,5 @@
+<!--pages/contactAdmin/contactAdmin.wxml-->
+<view class="container">
+  <text user-select="true" class="info">管理员一号微信：zjl1367245364</text>
+  <text user-select="true" class="info">管理员二号微信：yuuufan</text>
+</view>

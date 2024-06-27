@@ -10,7 +10,7 @@ server: ```HostName b11931e194356b82.natapp.cc``` ```User server``` ```Port 3652
 graph LR
 ori( ) --> branch0(web @Capybara_web.zip)
 ori( ) --> branch1(miniprogram @Capybara) --> gunicorn1[gunicorn端口：8000] --> nginx1[nginx端口：80] --> url1[网址：https://capybara.mynatapp.cc/]
-ori --> branch2(dev @Capybara_dev) --> gunicorn2[gunicorn端口：8080] --> nginx2[nginx端口：88] --> url2[网址：http://campusprinter.nat300.top/]
+ori --> branch2(dev @Capybara_dev) --> gunicorn2[gunicorn端口：8080] --> nginx2[nginx端口：88] --> url2[网址：https://capybara-dev.mynatapp.cc/]
 
 ```
 
@@ -61,10 +61,11 @@ ori --> branch2(dev @Capybara_dev) --> gunicorn2[gunicorn端口：8080] --> ngin
 ## To_Do_List
 * 小程序基础功能：上传->支付->打印（2024.05.01：√）
 * 文件上传：本地（移动端&PC端） + 从聊天记录上传（移动端）（2024.05.13：√）
-* 补丁：订单支付状态轮调 & 后台校验订单状态（optional）
-* --
-* 注册登录 + 共享文库 (DDL：2024.09.01)
+----
+* 注册登录 + 印币抵扣 + 转发送印币 (DDL：2024.06.23)
+* 共享文库 (DDL：2024.09.01)
 * 社区/留言板
 * 管理员后台
+* 补丁：订单支付状态轮调 & 后台校验订单状态（optional）
 
 

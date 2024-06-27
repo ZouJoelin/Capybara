@@ -7,7 +7,9 @@ from string import ascii_uppercase, digits
 
 from flask import Flask, session, request, jsonify, abort, make_response, render_template
 from flask_session import Session
+from flask_mobility import Mobility
 import requests
+import concurrent.futures
 import concurrent.futures
 
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -21,9 +23,14 @@ from utils import *
 # initialize Flask.app & session & sqlite
 ###############################################
 
+NOTIFICATION = "为配合后续共享文库，临时推出用户和印币抵扣模块。目前可通过转发小程序获取印币，限每日两次，每次3枚。"
 PRICE_PER_PAGE_ONE = 0.11
 PRICE_PER_PAGE_TWO = 0.10
+DISCOUNT_PER_COIN = 0.10
 UPLOAD_FOLDER = os.getcwd() + "/../files_temp/"
+sides_zh = {"one-sided": "单面打印", 
+            "two-sided-long-edge": "双面打印，长边翻转", 
+            "two-sided-short-edge": "双面打印，短边翻转"}
 
 PAPER_TYPE = {"A4"}
 COLOR = {"黑白"}
@@ -50,6 +57,8 @@ app.config["ALLOW_EXTENSIONS"] = ALLOW_EXTENSIONS
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
+
+Mobility(app)
 
 # Logger
 app.logger.setLevel(logging.INFO)
@@ -82,7 +91,7 @@ def not_found(error):
 
 
 ###############################################
-# API
+# Basic Printing
 ###############################################
 
 @app.route("/", methods=["GET"])
@@ -115,7 +124,9 @@ def index():
     open_id = response.get("openid")
     session["open_id"] = open_id
 
-    return jsonify({'initialized': 'ok'})
+    return jsonify({'initialized': 'ok',
+                    'open_id': session["open_id"],
+                    'notification': NOTIFICATION})
 
 
 @app.route("/api/status", methods=["GET"])
@@ -248,11 +259,16 @@ def count_fee():
     if (not form["copies"].isdigit()) or (int(form["copies"]) == 0):
         app.logger.warning(">>>>> Wrong copies input!!!")
         return jsonify({'error_message': "打印份数需为正整数"}), 400
-    
+    have_coins = db.execute("SELECT coins FROM users WHERE open_id = (?)", session["open_id"])
+    if form["spend_coins"] > have_coins:
+        app.logger.warning(">>>>> Not enough coins!!!")
+        return jsonify({'error_message': "您的印币不足"}), 400
+
     session["paper_type"] = form["paper_type"]
     session["color"] = form["color"]
     session["sides"] = form["sides"]
     session["copies"] = int(form["copies"])
+    session["spend_coins"] = int(form["spend_coins"])
 
     # calculate fee
     if session["sides"] == "one-sided":
@@ -261,11 +277,17 @@ def count_fee():
         residual = session["pages"] % 2
         session["fee"] = ((session["pages"] - residual) * PRICE_PER_PAGE_TWO + residual * PRICE_PER_PAGE_ONE) * session["copies"]
 
+    # discount
+    discount = round(min(session["spend_coins"]*DISCOUNT_PER_COIN, session["fee"]), 2)
+    session["spend_coins"] = round(discount/DISCOUNT_PER_COIN)
+    session["fee"] = max(session["fee"]-discount, 0.01)
+
     # print(">>>>>>>>>> session >>>>>>>>>>")
     # for key in session.keys():
     #     print(">>>>>"+ key +":     ", session[key])
 
-    return jsonify({'fee': f"{session['fee']:.2f}"})
+    return jsonify({'fee': f"{session['fee']:.2f}",
+                    'spend_coins': session["spend_coins"]})
 
 
 @app.route("/api/print_order_info", methods=["GET"])
@@ -285,9 +307,6 @@ def print_order_info():
             "fee": <int>
     }
     """
-    sides_zh = {"one-sided": "单面打印", 
-                "two-sided-long-edge": "双面打印，长边翻转", 
-                "two-sided-short-edge": "双面打印，短边翻转"}
     
     return jsonify({"filename": str(session["filename"]),
                     "pages": int(session["pages"]),
@@ -295,6 +314,7 @@ def print_order_info():
                     "color": str(session["color"]),
                     "sides": str(sides_zh[session["sides"]]),
                     "copies": int(session["copies"]),
+                    "spend_coins": int(session["spend_coins"]),
                     "price": str(f"{session['fee']:.2f}")})
 
 
@@ -321,7 +341,7 @@ def pay():
     """
     # generate out_trade_no
     if request.method == "POST":
-        out_trade_no = time.strftime("%Y%m%dT%H%M", time.localtime()) + ''.join(sample(ascii_uppercase,3))
+        out_trade_no = time.strftime("%Y%m%dT%H%M%S", time.localtime()) + ''.join(sample(ascii_uppercase,3))
         return jsonify({'out_trade_no': out_trade_no})
     
     # generate payment link
@@ -330,19 +350,19 @@ def pay():
             return jsonify({'error_message': "out_trade_no required"}), 400
         out_trade_no = request.args.get("out_trade_no")
         amount = int(session["fee"] * 100)
-        description = session["filename"]
+        description = f"{session['filename']}（{session['pages']}页-{sides_zh[session['sides']][:2]}-{session['copies']}份）"
+        device = "MOBILE" if request.MOBILE else "PC"
         # print(">>>>>amount:     " ,amount)
         # print(">>>>>out_trade_no:     " ,out_trade_no)
         # print(">>>>>description:     " ,description)
 
-        app.logger.info(f'>>>>> print_order:  filename: "{session["filename"]}"; pages: "{session["pages"]}"; copies: "{session["copies"]}"; fee: "{session["fee"]}"; out_trade_no: "{out_trade_no}"')
+        app.logger.info(f'>>>>> print_order:  filename: "{session["filename"]}"; pages: "{session["pages"]}"; copies: "{session["copies"]}"; spend_coins: "{session["spend_coins"]}"; fee: "{session["fee"]}"; out_trade_no: "{out_trade_no}"; device: {device}; ')
 
         # log into sql
-        db.execute("INSERT INTO print_order (id, filename, pages, paper_type, color, sides, copies, fee, out_trade_no, trade_type) VALUES((SELECT MAX(id) + 1 FROM print_order), ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                    session["filename"], session["pages"], session["paper_type"], session["color"], session["sides"], session["copies"], session["fee"],
-                    out_trade_no, "JSAPI")
+        db.execute("INSERT INTO print_order (user_open_id, filename, pages, paper_type, color, sides, copies, spend_coins, fee, out_trade_no, device, trade_type) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    session["open_id"], session["filename"], session["pages"], session["paper_type"], session["color"], session["sides"], session["copies"], session["spend_coins"], session["fee"],
+                    out_trade_no, device, "JSAPI")
 
-        # print(">>>>>access from mobile!!!")
         # code, prepay_id = pay_jsapi(amount, out_trade_no, description, session["open_id"])
         try:
             with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -496,6 +516,10 @@ def print_file():
         app.logger.warning(">>>>> Filename doesn't match!!!")
         return jsonify({'error_message': "订单号与提交文件不符"}), 403
 
+    # update user's coins
+    if session["spend_coins"] > 0:
+        db.execute("UPDATE users SET coins = coins - (?) WHERE open_id = (?)", session["spend_coins"], session["open_id"])
+
     # make print command according to session["*"]
     filepath = os.path.join(app.config["UPLOAD_FOLDER"], session["filename"])
     print_state = OSprint(filepath=filepath, session=session, logger=app.logger)
@@ -518,6 +542,113 @@ def print_file():
     else:
         return jsonify({'message': "正在打印",
                         'filename': session['filename']})
+
+        
+###############################################
+# User module
+###############################################
+
+@app.route("/api/get_user_info", methods=["GET"])
+def get_user_info():
+    """exchange user info by open_id from database.
+    
+    """
+    open_id = request.args.get("open_id")
+    if not open_id == session["open_id"]:
+        return jsonify({'error_message': "open_id不匹配"}), 403
+
+    user_info = db.execute("SELECT * FROM users WHERE open_id = (?)", open_id)
+    if not user_info:
+        return jsonify({'error_message': "用户不存在"}), 403
+
+    user_info = user_info[0]
+
+    return jsonify({"nickname": user_info["nickname"],
+                    "student_name": user_info["student_name"],
+                    "student_id": user_info["student_id"],
+                    "university_region_school": f"{user_info['university']}-{user_info['region']}-{user_info['school']}",
+                    "dormitory": user_info["dormitory"],
+                    "coins": user_info["coins"]})
+
+
+@app.route("/api/complete_user_info", methods=["POST"])
+def complete_user_info():
+    """register user info in database.
+    
+    """
+    if not request.form:
+        abort(400)
+    form = request.form
+
+    # validate user_info form
+    if not form["student_id"].isdigit():
+        return jsonify({'error_message': "请输入正确学号"}), 400
+
+    # insert user_info into database
+    db.execute("INSERT INTO users (open_id, nickname, student_name, student_id, university, region, school, dormitory) VALUES(?, ?, ?, ?, ?, ?, ?, ?)",
+                form["open_id"], form["nickname"], form["student_name"], form["student_id"], form["university"], form["region"], form["school"], form["dormitory"])
+
+    return jsonify({'message': "register completed"})
+
+
+def add_user_coin(open_id, coins: int):
+    """add coins to user's account.
+    
+    """
+    try:
+        db.execute("UPDATE users SET coins = coins + (?) WHERE open_id = (?)", coins, open_id)
+    except:
+        return False
+    return True
+
+
+@app.route("/api/get_today_share_times", methods=["GET"])
+def get_today_share_times():
+    """get user's today share times.
+    
+    """
+    open_id = request.args.get("open_id")
+    if not session.get("open_id"):
+        return jsonify({'error_message': "请先初始化"}), 403
+    if not open_id == session["open_id"]:
+        return jsonify({'error_message': "open_id不匹配"}), 403
+
+    date = time.strftime("%Y-%m-%d", time.localtime())
+    # app.logger.info(f">>>>> date: {date}")
+    share_times = db.execute("SELECT share_times FROM share WHERE user_open_id = (?) AND share_date = (?)", open_id, date)
+    
+    if len(share_times) == 0:
+        return jsonify({"share_times": 0})
+    else:
+        return jsonify({"share_times": share_times[0]["share_times"]})
+
+
+@app.route("/api/share_incentive", methods=["GET"])
+def share_incentive():
+    """share incentive.
+    
+    """
+    open_id = request.args.get("open_id")
+    incentive = int(request.args.get("incentive"))
+    
+    if not session.get("open_id"):
+        return jsonify({'error_message': "请先初始化"}), 403
+    if not open_id == session["open_id"]:
+        return jsonify({'error_message': "open_id不匹配"}), 403
+
+    date = time.strftime("%Y-%m-%d", time.localtime())
+    share_times = db.execute("SELECT share_times FROM share WHERE user_open_id = (?) AND share_date = (?)", open_id, date)
+    
+    if len(share_times) == 0:
+        db.execute("INSERT INTO share (user_open_id, share_date, share_times) VALUES(?, ?, ?)", open_id, date, 0)
+    else:
+        db.execute("UPDATE share SET share_times = share_times + 1 WHERE user_open_id = (?) AND share_date = (?)", open_id, date)
+    
+    incentive_state = add_user_coin(open_id, incentive)
+    if incentive_state:
+        return jsonify({"message": "印币已赠送"})
+    else:
+        return jsonify({"error_message": "印币赠送失败"})
 
 
 if __name__ == "__main__":
