@@ -23,7 +23,7 @@ from utils import *
 # initialize Flask.app & session & sqlite
 ###############################################
 
-NOTIFICATION = "为配合后续共享文库，临时推出用户和印币抵扣模块。目前可通过转发小程序获取印币，限每日两次，每次3枚。"
+NOTIFICATION = "为配合后续共享文库，临时推出用户和印币抵扣模块。目前可通过转发小程序获取印币，限每日一次，每次3枚。"
 PRICE_PER_PAGE_ONE = 0.11
 PRICE_PER_PAGE_TWO = 0.10
 DISCOUNT_PER_COIN = 0.10
@@ -259,16 +259,19 @@ def count_fee():
     if (not form["copies"].isdigit()) or (int(form["copies"]) == 0):
         app.logger.warning(">>>>> Wrong copies input!!!")
         return jsonify({'error_message': "打印份数需为正整数"}), 400
-    have_coins = db.execute("SELECT coins FROM users WHERE open_id = (?)", session["open_id"])
-    if form["spend_coins"] > have_coins:
-        app.logger.warning(">>>>> Not enough coins!!!")
-        return jsonify({'error_message': "您的印币不足"}), 400
 
     session["paper_type"] = form["paper_type"]
     session["color"] = form["color"]
     session["sides"] = form["sides"]
     session["copies"] = int(form["copies"])
     session["spend_coins"] = int(form["spend_coins"])
+
+    if session["spend_coins"] > 0:
+        have_coins = db.execute("SELECT coins FROM users WHERE open_id = (?)", session["open_id"])
+        have_coins = int(have_coins[0]["coins"])
+        if session["spend_coins"] > have_coins:
+            app.logger.warning(">>>>> Not enough coins!!!")
+            return jsonify({'error_message': "您的印币不足"}), 400
 
     # calculate fee
     if session["sides"] == "one-sided":
@@ -280,7 +283,7 @@ def count_fee():
     # discount
     discount = round(min(session["spend_coins"]*DISCOUNT_PER_COIN, session["fee"]), 2)
     session["spend_coins"] = round(discount/DISCOUNT_PER_COIN)
-    session["fee"] = max(session["fee"]-discount, 0.01)
+    session["fee"] = max(session["fee"]-session["spend_coins"]*DISCOUNT_PER_COIN, 0.01)
 
     # print(">>>>>>>>>> session >>>>>>>>>>")
     # for key in session.keys():
@@ -554,6 +557,8 @@ def get_user_info():
     
     """
     open_id = request.args.get("open_id")
+    if not session.get("open_id"):
+        return jsonify({'error_message': "请先初始化"}), 403
     if not open_id == session["open_id"]:
         return jsonify({'error_message': "open_id不匹配"}), 403
 
@@ -640,7 +645,7 @@ def share_incentive():
     share_times = db.execute("SELECT share_times FROM share WHERE user_open_id = (?) AND share_date = (?)", open_id, date)
     
     if len(share_times) == 0:
-        db.execute("INSERT INTO share (user_open_id, share_date, share_times) VALUES(?, ?, ?)", open_id, date, 0)
+        db.execute("INSERT INTO share (user_open_id, share_date, share_times) VALUES(?, ?, ?)", open_id, date, 1)
     else:
         db.execute("UPDATE share SET share_times = share_times + 1 WHERE user_open_id = (?) AND share_date = (?)", open_id, date)
     
