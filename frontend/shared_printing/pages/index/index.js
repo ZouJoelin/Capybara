@@ -1,7 +1,7 @@
 // index.js
 import Toast from '@vant/weapp/toast/toast';
 import Notify from '@vant/weapp/notify/notify';
-import { strLenOptiize,handleErrorMessage,getUserInfoUtil } from '../../utils/util'
+import { strLenOptiize,handleErrorMessage,getUserInfoUtil,getTodayShareTimes } from '../../utils/util'
 
 const app = getApp();
 const curDomain = app.globalData.curDomain //配置当前页面使用域名
@@ -38,6 +38,7 @@ Page({
     backend_status: false,
     filename: '',
     filename_forshow: '待上传文件 ( pdf格式 )',
+    notice_text:'加载中……',
     offlineInfo:'待连接至打印机',
     paper_type: 'A4',
     sides: 'two-sided-long-edge',
@@ -47,9 +48,10 @@ Page({
     coins: 0,//印币，默认为0
     useCoins:0,//用户在stepper选择的，不一定等于实际使用的
     price: 0,
+    shareTimes: 10,//用户今日转发次数，先设为一个“极大值”
     isupload: false,
     islocal: false,
-    isusecoin: false
+    isusecoin: false,
   }, 
   oversize:function(e){
     console.error('文件太大',e)
@@ -260,11 +262,21 @@ Page({
     getUserInfoUtil().then((data) => {
       //console.log('Received user data:', data)
       // 在这里处理接收到的用户数据
+      app.globalData.isLoading = true
       that.setData({
         coins : data.coins
       })
+      getTodayShareTimes().then((res) => {
+        this.setData({
+          shareTimes: res
+        })
+        app.globalData.shareTimes = res
+      }).catch((error) => {
+        console.error('Fail to get shareTimes',error)
+      })
     }).catch((error) => {
       console.error('Failed to get user data:', error);
+      app.globalData.isLoading = true
       // 在这里处理错误
     })
 
@@ -287,7 +299,11 @@ Page({
           });
           that.initialize().then((res) => {
             console.log('初始化会话：',res)
+            that.setData({
+              notice_text : res.data.notification
+            })
             that.getUserInfo()
+            
           })
           .catch((error) => {
             console.error('初始化会话失败：',error)
@@ -351,6 +367,25 @@ Page({
       }
     })
   },
+
+  shareIncentive:function(){
+    var that = this
+    wx.request({
+      url: curDomain+'api/share_incentive?open_id='+app.globalData.openid+'&incentive='+app.globalData.incentive,
+      method: 'GET',
+      header: {
+        'content-type': 'application/json',
+        'Cookie' : app.globalData.Cookie
+      },
+      success(res){
+        console.log('api/share_incentive GET >>>',res)
+        that.getUserInfo()
+        that.setData({
+          isusecoin : true
+        })
+      }
+    })
+  },
   
    /**
    * 生命周期函数--监听页面加载
@@ -394,11 +429,37 @@ Page({
       //本地上传的，先传cookie再获取打印费用
     }
     if(this.data.isusecoin){//本页面点击支付时用了硬币就重新获取用户信息（哪怕在支付页面返回了），用于刷新印币
-      console.log('使用了印币，重新获取用户信息')
+      console.log('印币变动，重新获取用户信息')
       this.setData({
         isusecoin : false
       })
       this.getUserInfo()
     }
   },
+
+  /**
+   * 用户点击右上角分享
+   */
+  onShareAppMessage() {
+
+    if(this.data.shareTimes < app.globalData.shareTimesLimit){
+      this.shareIncentive()
+    }
+
+    const promise = new Promise(resolve => {
+      resolve({
+        title: '我发现了个超好用的共享打印',
+        path: '/pages/index/index', // 转发的路径
+        imageUrl: '/images/头像默认.png'
+      })
+    })
+
+    return {
+      title: '我发现了个超好用的共享打印',
+      path: '/pages/index/index', // 转发的路径
+      imageUrl: '/images/头像默认.png',
+      promise
+    };
+  }
+
 })

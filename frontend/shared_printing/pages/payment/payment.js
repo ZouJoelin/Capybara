@@ -113,7 +113,7 @@ Page({
         }else{ //DNS解析失败或其他原因，导致后端返回500
           wx.showModal({
             title: '后台响应异常',
-            content: '点击确定即可免费打印',
+            content: '点击确定免费打印',
             showCancel: false,
             complete: (res) => {
               if (res.confirm) {
@@ -140,7 +140,7 @@ Page({
         'Cookie' : app.globalData.Cookie
       },
       success (res){
-        console.log('getTradeInfo success >>>',res.data);
+        console.log('api/pay POST success >>>',res.data);
         that.setData({
           out_trade_no : res.data.out_trade_no
         })
@@ -152,6 +152,9 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad(options) {
+    wx.hideShareMenu({
+      menus: ['shareAppMessage', 'shareTimeline']
+    })
     var that = this
     wx.request({
       url: curDomain+'api/print_order_info',

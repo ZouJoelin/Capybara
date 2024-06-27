@@ -6,19 +6,19 @@
     <view class="nickname table-item">
       <view>昵称：</view>
       <input type="nickname" name="nickname" maxlength="10" class="input-ui"
-      placeholder="最大输入长度为10"/>
+      placeholder="请输入"/>
     </view>
 
     <view class="student-name table-item">
       <view>姓名：</view>
       <input type="text" name='student_name' maxlength="10" class="input-ui"
-      placeholder="最大输入长度为10"/>
+      placeholder="请输入" bindinput="handleNameInput"/>
     </view>
 
     <view class="student-id table-item">
       <view>学号：</view>
       <input type="number" name='student_id' class="input-ui"
-      placeholder="仅支持数字"/>
+      placeholder="请输入"/>
     </view>
 
     <view class="university table-item">

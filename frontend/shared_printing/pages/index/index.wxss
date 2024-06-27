@@ -69,7 +69,7 @@
 }
 .table-coin {
   position: absolute;
-  left: 365rpx;
+  left: 340rpx;
   font-size: small;
   line-height: 60rpx;
 }

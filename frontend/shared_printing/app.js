@@ -22,7 +22,11 @@ App({
   */
   globalData: {
     userInfo: null,
+    incentive: 3, //转发激励
+    shareTimes: 10,//默认设置一个“极大值”
+    shareTimesLimit: 1, //当日最大有效分享次数上限
     isLogin: false, //用户是否已注册
+    isLoading : false, //首次加载完成
     openid: '',
     code: '',//登录凭证,在index.js中获取
     Cookie: null,

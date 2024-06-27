@@ -1,4 +1,13 @@
 <!-- <van-empty image="error" description="敬请期待！" /> -->
+
+<van-overlay show="{{ show }}" bind:click="">
+  <view class="loading">
+    <van-loading size="50px" vertical>信息加载中,请切换页面刷新</van-loading>
+  </view>
+</van-overlay>
+
+<van-toast id="van-toast" />
+
 <view class="container">
   <view class="user-profile">
     <image class="profile-img" src="../../images/头像默认.png" mode="aspectFit"/>

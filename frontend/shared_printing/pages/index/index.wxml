@@ -1,8 +1,9 @@
 <!--index.wxml-->
 <van-notice-bar scrollable="{{ false }}"
+wrapable
 left-icon="volume-o"
 mode="closeable"
-text="单面￥0.11/面，双面￥0.10/面" />
+text="{{notice_text}}" />
 
 <view class="container">
   <van-notify id="van-notify" />

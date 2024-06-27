@@ -1,4 +1,12 @@
 /* pages/user/user.wxss */
+
+.loading{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
 .container{
   color: #4e514e;
   display: flex;
@@ -24,7 +32,7 @@
 .profile-img{
   width: 135rpx;
   height: 135rpx;
-  margin-right: 10rpx;
+  margin-right: 15rpx;
 }
 
 .profile-text{
