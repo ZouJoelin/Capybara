@@ -423,7 +423,7 @@ https://capybara.mynatapp.cc/api/close_print_order?out_trade_no=20240423T2243BNP
 #### 应答参数
 |  key   | value  | 说明 |
 |  ----  | ----  | --- |
-| "message"  | “分享成功 |  |
+| "message"  | “印币已赠送” |  |
 
 #### 错误码
 * 403
@@ -431,6 +431,7 @@ https://capybara.mynatapp.cc/api/close_print_order?out_trade_no=20240423T2243BNP
 |  key   | value  | 说明 |
 |  ----  | ----  | --- |
 | "error_message" | "open_id不匹配" | session["open_id"]与请求的open_id不符 |
+|  | "印币赠送失败" | 用户未登录 |
 
 
 ##### 请求示例

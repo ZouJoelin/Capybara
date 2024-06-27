@@ -9,6 +9,7 @@ from flask import Flask, session, request, jsonify, abort, make_response, render
 from flask_session import Session
 from flask_mobility import Mobility
 import requests
+import concurrent.futures
 
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -21,6 +22,7 @@ from utils import *
 # initialize Flask.app & session & sqlite
 ###############################################
 
+NOTIFICATION = "为配合后续共享文库，临时推出用户和印币抵扣模块。目前可通过转发小程序获取印币，限每日两次，每次3枚。"
 PRICE_PER_PAGE_ONE = 0.01
 PRICE_PER_PAGE_TWO = 0.01
 DISCOUNT_PER_COIN = 0.01
@@ -123,7 +125,7 @@ def index():
 
     return jsonify({'initialized': 'ok',
                     'open_id': session["open_id"],
-                    'notification': '新通知'})
+                    'notification': NOTIFICATION})
 
 
 @app.route("/api/status", methods=["GET"])
@@ -317,55 +319,76 @@ def print_order_info():
                     "price": str(f"{session['fee']:.2f}")})
 
 
-@app.route("/api/pay", methods=["GET"])
+@app.route("/api/pay", methods=["GET", "POST"])
 @formfilled_required(session, app.logger)
 def pay():
     """generate payment link
 
     """
-    # generate trade info
-    amount = int(session["fee"] * 100)
-    out_trade_no = time.strftime("%Y%m%dT%H%M%S", time.localtime()) + ''.join(sample(ascii_uppercase,3))
-    description = f"{session['filename']}（{session['pages']}页-{sides_zh[session['sides']][:2]}-{session['copies']}份）"
-    # print(">>>>>amount:     " ,amount)
-    # print(">>>>>out_trade_no:     " ,out_trade_no)
-    # print(">>>>>description:     " ,description)
-
-    app.logger.info(f'>>>>> print_order:  filename: "{session["filename"]}"; pages: "{session["pages"]}"; copies: "{session["copies"]}"; spend_coins: "{session["spend_coins"]}"; fee: "{session["fee"]}"; out_trade_no: "{out_trade_no}"')
-
-    # print(">>>>>access from mobile!!!")
-    code, prepay_id = pay_jsapi(amount, out_trade_no, description, session["open_id"])
-    if code not in range(200, 300):
-        app.logger.error(">>>>> pay_jsapi() failed!!!", code)
-        return jsonify({'error_message': "下单失败"}), 500
+    # generate out_trade_no
+    if request.method == "POST":
+        out_trade_no = time.strftime("%Y%m%dT%H%M%S", time.localtime()) + ''.join(sample(ascii_uppercase,3))
+        return jsonify({'out_trade_no': out_trade_no})
     
-    timestamp = str(int(time.time()))
-    nonceStr = ''.join(sample(ascii_uppercase + digits, 16))
-    package = 'prepay_id=' + prepay_id
-    signType = 'RSA'
-    paySign = wxpay.sign([APPID, timestamp, nonceStr, package])
-    # print(">>>>>timestamp:     ", timestamp)
-    # print(">>>>>nonceStr:     ", nonceStr)
-    # print(">>>>>package:     ", package) 
-    # print(">>>>>paysign:     ", paySign)
 
-    device = "MOBILE" if request.MOBILE else "PC"
+    # generate payment link
+    else:
+        if not request.args.get("out_trade_no"):
+            return jsonify({'error_message': "out_trade_no required"}), 400
+        out_trade_no = request.args.get("out_trade_no")
+        amount = int(session["fee"] * 100)
+        description = f"{session['filename']}（{session['pages']}页-{sides_zh[session['sides']][:2]}-{session['copies']}份）"
+        device = "MOBILE" if request.MOBILE else "PC"
+        # print(">>>>>amount:     " ,amount)
+        # print(">>>>>out_trade_no:     " ,out_trade_no)
+        # print(">>>>>description:     " ,description)
+        app.logger.info(f'>>>>> print_order:  filename: "{session["filename"]}"; pages: "{session["pages"]}"; copies: "{session["copies"]}"; spend_coins: "{session["spend_coins"]}"; fee: "{session["fee"]}"; out_trade_no: "{out_trade_no}"; device: {device}; ')
 
-    # log into sql
-    db.execute("INSERT INTO print_order (user_open_id, filename, pages, paper_type, color, sides, copies, spend_coins, fee, out_trade_no, device, trade_type) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                session["open_id"], session["filename"], session["pages"], session["paper_type"], session["color"], session["sides"], session["copies"], session["spend_coins"], session["fee"],
-                out_trade_no, device, "JSAPI")
+        # log into sql
+        db.execute("INSERT INTO print_order (user_open_id, filename, pages, paper_type, color, sides, copies, spend_coins, fee, out_trade_no, device, trade_type) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    session["open_id"], session["filename"], session["pages"], session["paper_type"], session["color"], session["sides"], session["copies"], session["spend_coins"], session["fee"],
+                    out_trade_no, device, "JSAPI")
 
-    jsapi_sign = {
-        "appId": APPID,
-        "timestamp": timestamp,
-        "nonceStr": nonceStr,
-        "package" : package,
-        "signType": signType,
-        "paySign": paySign
-    }
-    return jsonify({"out_trade_no": out_trade_no, 
-                    "jsapi_sign": jsapi_sign})
+
+        # code, prepay_id = pay_jsapi(amount, out_trade_no, description, session["open_id"])
+        try:
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                future = executor.submit(pay_jsapi, amount, out_trade_no, description, session["open_id"])
+                code, prepay_id = future.result(timeout=3)  # 设置超时时间
+        except concurrent.futures.TimeoutError:
+            app.logger.error(">>>>> pay_jsapi() timed out!!!")
+            return jsonify({'error_message': "下单超时"}), 500
+        except Exception as e:
+            app.logger.error(f">>>>> pay_jsapi() failed with exception: {e}")
+            return jsonify({'error_message': "下单失败"}), 500
+
+        if code not in range(200, 300):
+            app.logger.error(">>>>> pay_jsapi() failed!!!", code)
+            return jsonify({'error_message': "下单失败"}), 500
+        
+        app.logger.info(f">>>>>code:     {code} >>>>>filename:    {session['filename']}")
+        timestamp = str(int(time.time()))
+        app.logger.info(f">>>>>timestamp:     {timestamp}")
+        nonceStr = ''.join(sample(ascii_uppercase + digits, 16))
+        app.logger.info(f">>>>>nonceStr:     {nonceStr}")
+        package = 'prepay_id=' + prepay_id
+        app.logger.info(f">>>>>package:     {package}") 
+        signType = 'RSA'
+        paySign = wxpay.sign([APPID, timestamp, nonceStr, package])
+        app.logger.info(f">>>>>paysign:     {paySign}")
+
+        jsapi_sign = {
+            "appId": APPID,
+            "timestamp": timestamp,
+            "nonceStr": nonceStr,
+            "package" : package,
+            "signType": signType,
+            "paySign": paySign
+        }
+        app.logger.info(f">>>>>jaspi_sign: {jsapi_sign}")
+
+        return jsonify({"out_trade_no": out_trade_no, 
+                        "jsapi_sign": jsapi_sign})
 
 
 @app.route("/api/polling_query", methods=["GET"])
@@ -559,7 +582,11 @@ def add_user_coin(open_id, coins: int):
     """add coins to user's account.
     
     """
-    db.execute("UPDATE users SET coins = coins + (?) WHERE open_id = (?)", coins, open_id)
+    try:
+        db.execute("UPDATE users SET coins = coins + (?) WHERE open_id = (?)", coins, open_id)
+    except:
+        return False
+    return True
 
 
 @app.route("/api/get_today_share_times", methods=["GET"])
@@ -574,6 +601,7 @@ def get_today_share_times():
         return jsonify({'error_message': "open_id不匹配"}), 403
 
     date = time.strftime("%Y-%m-%d", time.localtime())
+    # app.logger.info(f">>>>> date: {date}")
     share_times = db.execute("SELECT share_times FROM share WHERE user_open_id = (?) AND share_date = (?)", open_id, date)
     
     if len(share_times) == 0:
@@ -600,13 +628,14 @@ def share_incentive():
     
     if len(share_times) == 0:
         db.execute("INSERT INTO share (user_open_id, share_date, share_times) VALUES(?, ?, ?)", open_id, date, 0)
-        add_user_coin(open_id, incentive)
     else:
         db.execute("UPDATE share SET share_times = share_times + 1 WHERE user_open_id = (?) AND share_date = (?)", open_id, date)
-        add_user_coin(open_id, incentive)
-
-    return jsonify({"message": "分享成功"})
-
+    
+    incentive_state = add_user_coin(open_id, incentive)
+    if incentive_state:
+        return jsonify({"message": "印币已赠送"})
+    else:
+        return jsonify({"error_message": "印币赠送失败"})
 
 
 if __name__ == "__main__":
