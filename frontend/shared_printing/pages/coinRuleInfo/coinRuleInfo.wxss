@@ -1,0 +1,28 @@
+/* pages/coinRuleInfo/coinRuleInfo.wxss */
+.container{
+  color: #4e514e;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* 将内容从顶部开始排列 */
+  padding-top: 50rpx; /* 调整padding-top可以控制整个内容往上移动的量 */
+}
+
+.title{
+  font-size: larger;
+  font-weight: bold;
+  margin-top: 20rpx; /* 添加一些顶部间距 */
+}
+
+.info-container{
+  display: flex;
+  justify-content: center;
+  width: 100%; /* 确保容器的宽度是全屏 */
+  padding-top: 20rpx; /* 调整padding-top可以控制文字往上移动的量 */
+}
+
+.info{
+  font-size: large;
+  padding: 20rpx;
+  width: 80%; /* 控制rich-text的宽度 */
+}

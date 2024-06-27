@@ -1,0 +1,7 @@
+/* pages/contactAdmin/contactAdmin.wxss */
+.info{
+  color: #4e514e;
+  font-size: larger;
+  font-weight: bold;
+  margin-bottom: 30rpx;
+}

@@ -1,10 +1,10 @@
 // index.js
 import Toast from '@vant/weapp/toast/toast';
 import Notify from '@vant/weapp/notify/notify';
-import { strLenOptiize,handleErrorMessage } from '../../utils/util'
+import { strLenOptiize,handleErrorMessage,getUserInfoUtil,getTodayShareTimes } from '../../utils/util'
 
 const app = getApp();
-const curDomain = app.globalData.devDomain //配置当前页面使用域名
+const curDomain = app.globalData.curDomain //配置当前页面使用域名
 Page({  
   data: {
     btnList:[
@@ -38,21 +38,20 @@ Page({
     backend_status: false,
     filename: '',
     filename_forshow: '待上传文件 ( pdf格式 )',
+    notice_text:'加载中……',
     offlineInfo:'待连接至打印机',
-    // color_index: 0,  
-    // size_index: 0,
-    // danshuang_index: 0,
-    // color_array: ['黑白'],
-    // size_array: ['A4'],
-    // danshuang_array:['双面长边','单面','双面短边'],
     paper_type: 'A4',
     sides: 'two-sided-long-edge',
     color: '黑白',
     qty: 1,
     pgnum: 0, //页数
+    coins: 0,//印币，默认为0
+    useCoins:0,//用户在stepper选择的，不一定等于实际使用的
     price: 0,
+    shareTimes: 10,//用户今日转发次数，先设为一个“极大值”
     isupload: false,
-    islocal: false
+    islocal: false,
+    isusecoin: false,
   }, 
   oversize:function(e){
     console.error('文件太大',e)
@@ -127,7 +126,8 @@ Page({
         "paper_type" : that.data.paper_type,
         "color" : that.data.color,
         "sides" : that.data.sides,
-        "copies" : that.data.qty
+        "copies" : that.data.qty,
+        "spend_coins" : that.data.useCoins
       },
       header : {
         'content-type': 'application/x-www-form-urlencoded',
@@ -148,10 +148,15 @@ Page({
       url: './index'
     })
   },
-  submit:function(){
+  submit:function(){ //打印按钮
     if(this.data.pgnum == 0){
       Notify({ type: 'primary', message: '未上传文件' })
     }else{
+      if(this.data.useCoins != 0){//使用了印币
+        this.setData({
+          isusecoin : true
+        })
+      }
       var url = '/pages/payment/payment?price='+this.data.price
       wx.navigateTo({
       url: url,
@@ -159,14 +164,15 @@ Page({
     }
   },
 
-  initialize:function(){ //在getStatus重用于初始化
+  initialize:function(){ //在getStatus用于初始化
     var that = this
     return new Promise((resolve,reject) => {
       wx.request({
         url: curDomain+'?code='+that.data.code,
         method: 'GET',
         success: (res) => {
-          // console.log(res);
+          app.globalData.Cookie = res.cookies[0]
+          app.globalData.openid = res.data.open_id
           // console.log(app.globalData)
           resolve(res);
         },
@@ -176,26 +182,6 @@ Page({
       });
     });
   },
-  // bindColorChange: function(e) {  
-  //   this.setData({  
-  //     color_index: e.detail.value  
-  //   })
-  //   if (this.data.isupload) {
-  //     //this.updatePgnum() 因只有黑色，暂不启用
-  //   }else{
-  //     Notify({ type: 'primary', message: '未上传文件' })
-  //   }
-  // },
-  // bindSizeChange: function(e){
-  //   this.setData({
-  //     size_index: e.detail.value
-  //   })
-  //   if (this.data.isupload) {
-  //     //this.updatePgnum() 因只有A4，暂不启用
-  //   }else{
-  //     Notify({ type: 'primary', message: '未上传文件' })
-  //   }
-  // },
   // bindDanShuangChange: function(e){
   //   console.log(e.detail)
   //   let value = e.detail.value
@@ -242,6 +228,20 @@ Page({
     }
   },
 
+  onCoinsChange:function(e){
+    var that = this
+    Toast.loading({
+      message: '加载中...',
+      forbidClick:true});
+    setTimeout(()=>{
+      Toast.clear();
+      this.setData({
+        useCoins: e.detail
+      })
+      that.updatePgnum();
+    },400)
+  },
+
   onQtyChange: function(e){
     var that = this
     Toast.loading({
@@ -257,6 +257,31 @@ Page({
    
   },
   
+  getUserInfo: function(){ //向后台获取用户信息
+    var that = this
+    getUserInfoUtil().then((data) => {
+      //console.log('Received user data:', data)
+      // 在这里处理接收到的用户数据
+      app.globalData.isLoading = true
+      that.setData({
+        coins : data.coins
+      })
+      getTodayShareTimes().then((res) => {
+        this.setData({
+          shareTimes: res
+        })
+        app.globalData.shareTimes = res
+      }).catch((error) => {
+        console.error('Fail to get shareTimes',error)
+      })
+    }).catch((error) => {
+      console.error('Failed to get user data:', error);
+      app.globalData.isLoading = true
+      // 在这里处理错误
+    })
+
+  },
+
   getStatus: function(){ //获取打印机状态
     var that = this
     wx.request({
@@ -266,7 +291,7 @@ Page({
         'content-type': 'application/json' // 默认值
       },
       success (res) {
-        console.log('获取打印机状态：',res)
+        //console.log('获取打印机状态：',res)
         let status = res.data.backend_status
         if(status == "ok"){
           that.setData({
@@ -274,7 +299,11 @@ Page({
           });
           that.initialize().then((res) => {
             console.log('初始化会话：',res)
-            app.globalData.Cookie = res.cookies[0]
+            that.setData({
+              notice_text : res.data.notification
+            })
+            that.getUserInfo()
+            
           })
           .catch((error) => {
             console.error('初始化会话失败：',error)
@@ -285,28 +314,8 @@ Page({
           })
         }else if(res.statusCode == 503){
           let info = ''
-          switch(status){
-            case 'door_open':
-              info = '打印机盖未闭合'
-              break
-            case 'out_of_paper':
-              info = '纸张不足'
-              break
-            case 'out_of_toner':
-              info = '墨粉不足'
-              break
-            case 'jam':
-              info = '纸张堵塞'
-              break
-            case 'offline':
-              info = '打印机未连接'
-              break
-            case 'unknown_error':
-              info = '未知错误'
-              break
-            default:
-              console.error('前端未知错误',status)
-          }
+          //console.error('前端未知错误', res.data.error_message)
+          info = res.data.error_message
           that.setData({
             offlineInfo: info
           })
@@ -338,12 +347,31 @@ Page({
       }
     })
   },
+
+  shareIncentive:function(){
+    var that = this
+    wx.request({
+      url: curDomain+'api/share_incentive?open_id='+app.globalData.openid+'&incentive='+app.globalData.incentive,
+      method: 'GET',
+      header: {
+        'content-type': 'application/json',
+        'Cookie' : app.globalData.Cookie
+      },
+      success(res){
+        console.log('api/share_incentive GET >>>',res)
+        that.getUserInfo()
+        that.setData({
+          isusecoin : true
+        })
+      }
+    })
+  },
   
    /**
    * 生命周期函数--监听页面加载
    */
   onLoad(options) {
-    console.log(curDomain)
+    console.log('当前环境使用域名：',curDomain)
     var that = this;
     wx.login({
       success: (result) => {
@@ -352,8 +380,7 @@ Page({
           code : result.code
         })
         app.globalData.code = result.code
-        //console.log(result.code)
-        that.getStatus();
+        that.getStatus()
       },
       fail: (err) => {
         console.error(err)
@@ -362,6 +389,7 @@ Page({
         //console.log(res)
       },
     })
+    
   },
 
   /**
@@ -380,5 +408,38 @@ Page({
       this.localPost();
       //本地上传的，先传cookie再获取打印费用
     }
+    if(this.data.isusecoin){//本页面点击支付时用了硬币就重新获取用户信息（哪怕在支付页面返回了），用于刷新印币
+      console.log('印币变动，重新获取用户信息')
+      this.setData({
+        isusecoin : false
+      })
+      this.getUserInfo()
+    }
   },
+
+  /**
+   * 用户点击右上角分享
+   */
+  onShareAppMessage() {
+
+    if(this.data.shareTimes < app.globalData.shareTimesLimit){
+      this.shareIncentive()
+    }
+
+    const promise = new Promise(resolve => {
+      resolve({
+        title: '我发现了个超好用的共享打印',
+        path: '/pages/index/index', // 转发的路径
+        imageUrl: '/images/头像默认.png'
+      })
+    })
+
+    return {
+      title: '我发现了个超好用的共享打印',
+      path: '/pages/index/index', // 转发的路径
+      imageUrl: '/images/头像默认.png',
+      promise
+    };
+  }
+
 })

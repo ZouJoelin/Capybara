@@ -1,7 +1,7 @@
 import { strLenOptiize } from '../../utils/util'
 import Toast from '@vant/weapp/toast/toast';
 const app = getApp();
-const curDomain = app.globalData.devDomain //配置当前页面使用域名
+const curDomain = app.globalData.curDomain //配置当前页面使用域名
 Page({
 
   /**
@@ -15,8 +15,10 @@ Page({
     sides: "单面",
     copies: 0,
     price: 0,
+    spend_coins: 0,
     jsapi_sign: {},
-    out_trade_no: '' //每个订单在商户后端的唯一标识
+    out_trade_no: '', //每个订单在商户后端的唯一标识
+    isdisabled : true //用于禁用支付按钮
   },
   
   cancel: function(){//用户取消打印则调用该函数
@@ -49,6 +51,29 @@ Page({
       }
     })
   },
+
+  print: function(){
+    var that = this
+    let out_trade_no = that.data.out_trade_no
+    wx.request({
+      url: curDomain+'api/print_file?out_trade_no='+out_trade_no,
+      method: 'GET',
+      header: {
+        'content-type': 'application/json',
+        'Cookie' : app.globalData.Cookie
+      },
+      success (res){
+        console.log('api/print_file SUCCESS >>>',res)
+        wx.redirectTo({
+          url: '../subpayment/subpayment?filename='+ that.data.file_name
+        })
+      },
+      fail (err){
+        console.log('api/print_file ERROR >>>',err)
+      }
+    })
+  },
+
   pay: function(){
     const signObj = this.data.jsapi_sign
     var that = this
@@ -59,51 +84,67 @@ Page({
       signType: signObj.signType,
       paySign: signObj.paySign,
       success (res) { 
-        let out_trade_no = that.data.out_trade_no
         console.log('支付成功',res)
-        wx.request({
-          url: curDomain+'api/print_file?out_trade_no='+out_trade_no,
-          method: 'GET',
-          header: {
-            'content-type': 'application/json',
-            'Cookie' : app.globalData.Cookie
-          },
-          success (res){
-            console.log('调用打印接口成功>>>',res)
-            wx.redirectTo({
-              url: '../subpayment/subpayment?filename='+ that.data.file_name
-            })
-          },
-          fail (err){
-            console.log('调用打印接口失败>>>',err)
-          }
-        })
+        that.print()
       },
       fail (err) {
         console.error('支付失败',err)
-       }
+        }
     })
   },
-  prepay: function(){
+
+  prepay: function(){// 获取调取支付需要的参数字段
     var that = this
     wx.request({
-      url: curDomain+'api/pay',
+      url: curDomain+'api/pay?out_trade_no='+this.data.out_trade_no,
       method: 'GET',
       header: {
         'content-type': 'application/json',
         'Cookie' : app.globalData.Cookie
       },
       success (res){
-        console.log('api/pay success >>>',res.data);
+        console.log("api/pay GET success >>>",res.data);
         var signObj = res.data.jsapi_sign
-        that.setData({
-          jsapi_sign: signObj,
-          out_trade_no: res.data.out_trade_no
-        })
+        if(signObj != undefined){
+          that.setData({
+            jsapi_sign: signObj,
+            isdisabled : false
+          })
+        }else{ //DNS解析失败或其他原因，导致后端返回500
+          wx.showModal({
+            title: '后台响应异常',
+            content: '点击确定免费打印',
+            showCancel: false,
+            complete: (res) => {
+              if (res.confirm) {
+                console.log('用户点击确认')
+                that.print()
+              }
+            }
+          })
+        }
       },
       fail (err){
-        console.error('api/pay error >>>',err);
-        Toast.fail('支付信息异常');
+        console.error("api/pay GET error >>>",err);
+      }
+    })
+  },
+
+  getTradeInfo: function(){ //获取支付需要的打印订单和支付信息，用于onload
+    var that = this
+    wx.request({
+      url: curDomain+'api/pay',
+      method: 'POST',
+      header: {
+        'content-type': 'application/json',
+        'Cookie' : app.globalData.Cookie
+      },
+      success (res){
+        console.log('api/pay POST success >>>',res.data);
+        that.setData({
+          out_trade_no : res.data.out_trade_no
+        })
+        that.prepay();
       }
     })
   },
@@ -111,6 +152,9 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad(options) {
+    wx.hideShareMenu({
+      menus: ['shareAppMessage', 'shareTimeline']
+    })
     var that = this
     wx.request({
       url: curDomain+'api/print_order_info',
@@ -122,8 +166,9 @@ Page({
       success (res){
         console.log('后端输出打印信息>>>',res.data);
         const info = res.data
-        that.prepay();
-        let filename = strLenOptiize(12,info.filename)
+        that.getTradeInfo();//获取预信息
+        //that.prepay();
+        let filename = strLenOptiize(15,info.filename)
         that.setData({
           file_name : filename,
           pages : info.pages,
@@ -131,7 +176,8 @@ Page({
           color : info.color,
           sides : info.sides,
           copies : info.copies,
-          price : info.price
+          price : info.price,
+          spend_coins : info.spend_coins
         })
       }
     })

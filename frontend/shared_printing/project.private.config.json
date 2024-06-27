@@ -3,12 +3,33 @@
   "projectname": "shared_printing",
   "setting": {
     "compileHotReLoad": true,
-    "urlCheck": false
+    "urlCheck": true
   },
-  "libVersion": "3.4.3",
+  "libVersion": "3.4.5",
   "condition": {
     "miniprogram": {
       "list": [
+        {
+          "name": "用户注册页面",
+          "pathName": "pages/userRegister/userRegister",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "用户注册页面",
+          "pathName": "pages/userRegister/userRegister",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "我的页面",
+          "pathName": "pages/user/user",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
         {
           "name": "支付完成页面",
           "pathName": "pages/subpayment/subpayment",

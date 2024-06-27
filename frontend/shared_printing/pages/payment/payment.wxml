@@ -1,7 +1,7 @@
 <van-toast id="van-toast" />
 <view class="container">
   <view class="info">
-  请确认打印信息
+  请确认您的打印信息
   </view>
 
   <view class="table">
@@ -34,6 +34,11 @@
       <view class="td_1">份数</view>
       <view class="td_2">{{copies}}</view>
     </view>
+
+    <view class="tr_1">
+      <view class="td_1">印币</view>
+      <view class="td_2">使用印币 {{spend_coins}} 枚</view>
+    </view>
   </view>
   <view class="price">￥{{price}}</view>
   <view class="btnbox">
@@ -45,6 +50,7 @@
     <button size="mini" 
     type="primary"
     bind:tap="pay"
+    disabled="{{isdisabled}}"
     >支付</button>
   </view>
 

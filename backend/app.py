@@ -257,19 +257,16 @@ def count_fee():
     if (not form["copies"].isdigit()) or (int(form["copies"]) == 0):
         app.logger.warning(">>>>> Wrong copies input!!!")
         return jsonify({'error_message': "打印份数需为正整数"}), 400
+    have_coins = db.execute("SELECT coins FROM users WHERE open_id = (?)", session["open_id"])
+    if form["spend_coins"] > have_coins:
+        app.logger.warning(">>>>> Not enough coins!!!")
+        return jsonify({'error_message': "您的印币不足"}), 400
 
     session["paper_type"] = form["paper_type"]
     session["color"] = form["color"]
     session["sides"] = form["sides"]
     session["copies"] = int(form["copies"])
     session["spend_coins"] = int(form["spend_coins"])
-
-    if session["spend_coins"] > 0:
-        have_coins = db.execute("SELECT coins FROM users WHERE open_id = (?)", session["open_id"])
-        have_coins = int(have_coins[0]["coins"])
-        if session["spend_coins"] > have_coins:
-            app.logger.warning(">>>>> Not enough coins!!!")
-            return jsonify({'error_message': "您的印币不足"}), 400
 
     # calculate fee
     if session["sides"] == "one-sided":
@@ -539,8 +536,6 @@ def get_user_info():
     
     """
     open_id = request.args.get("open_id")
-    if not session.get("open_id"):
-        return jsonify({'error_message': "请先初始化"}), 403
     if not open_id == session["open_id"]:
         return jsonify({'error_message': "open_id不匹配"}), 403
 

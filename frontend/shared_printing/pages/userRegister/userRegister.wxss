@@ -1,0 +1,36 @@
+/* pages/userRegister/userRegister.wxss */
+.container{
+  width: 100%;
+  color: #4e514e;
+}
+
+.info{
+  font-size: 45rpx;
+  font-weight: bolder;
+  color: #3ab54a;
+  position: absolute;
+  top: 100rpx;
+}
+
+.table-item{
+  display: flex;
+  border-bottom: 1rpx dotted #3ab54a;
+  height: 50rpx;
+  padding: 10rpx;
+  margin-bottom: 20rpx;
+}
+
+.button{
+  display: flex;
+  margin-top: 50rpx;
+}
+
+.submit-button{
+  position: relative;
+  left: 220rpx;
+}
+
+.reset-button{
+  position: relative;
+  left: 200rpx;
+}

@@ -1,0 +1,6 @@
+<view class="container">
+  <view class="title">印币使用规则介绍</view>
+  <view class="info-container">
+    <rich-text class="info" space="nbsp" nodes="{{info}}"/>
+  </view>
+</view>

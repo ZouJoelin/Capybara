@@ -11,7 +11,7 @@
   font-size: larger;
 }
 .container > view {  
-  margin-bottom: 40rpx; /* 每个view标签之间的下边距 */  
+  margin-bottom: 35rpx; /* 每个view标签之间的下边距 */  
 } 
 .uploader-text{
   font-size: medium;
@@ -20,7 +20,7 @@
 .uploader-container{
   width: 90%;
   display: flex;
-  margin-top: 20rpx;
+  margin-top: 10rpx;
   flex-direction: row;
 }
 .weixin-uploader{
@@ -67,16 +67,25 @@
   left: 25rpx;
   padding: 5rpx;
 }
+.table-coin {
+  position: absolute;
+  left: 340rpx;
+  font-size: small;
+  line-height: 60rpx;
+}
+
+.table-right{
+  position: absolute;
+  right: 50rpx;
+}
+
 .single-btn {
   width: 100rpx;
 }
 .btn-group {
   width: 450rpx;
 }
-.table-right{
-  position: absolute;
-  right: 50rpx;
-}
+
 .table-beautify{
   border: 2px solid #3ab54a;
   border-radius: 6px;
