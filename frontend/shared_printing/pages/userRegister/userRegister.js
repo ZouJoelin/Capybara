@@ -48,7 +48,7 @@ Page({
         if(res.statusCode == 403){
           console.log(res.data.error_message)
         }else if(res.statusCode == 200){
-          console.log('当前用户已注册',res.data)
+          console.log('注册成功',res.data)
           app.globalData.isLogin = true
           app.globalData.userInfo= res.data
           wx.reLaunch({

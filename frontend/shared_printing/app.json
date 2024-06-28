@@ -24,18 +24,7 @@
         "selectedIconPath": "images/printer-selected.png",
         "text": "打印"
       },
-      {
-        "pagePath": "pages/sharedDocument/sharedDocument",
-        "iconPath": "images/file.png",
-        "selectedIconPath": "images/file-selected.png",
-        "text": "共享文档"
-      },
-      {
-        "pagePath": "pages/community/community",
-        "iconPath": "images/community.png",
-        "selectedIconPath": "images/community-selected.png",
-        "text": "社区"
-      },
+      
       {
         "pagePath": "pages/user/user",
         "iconPath": "images/user.png",

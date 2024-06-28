@@ -182,28 +182,6 @@ Page({
       });
     });
   },
-  // bindDanShuangChange: function(e){
-  //   console.log(e.detail)
-  //   let value = e.detail.value
-  //   let tmpSides = ''
-  //   if(value == 0){
-  //     tmpSides = 'two-sided-long-edge'
-  //   }else if(value == 1){
-  //     tmpSides = 'one-sided'
-  //   }else if(value == 2){
-  //     tmpSides = 'two-sided-short-edge'
-  //   }
-  //   console.log(tmpSides)
-  //   this.setData({
-  //     danshuang_index: value,
-  //     sides : tmpSides
-  //   })
-  //   if (this.data.isupload) {
-  //     this.updatePgnum()
-  //   }else{
-  //     Notify({ type: 'primary', message: '未上传文件' })
-  //   }
-  // },
 
   handleBtnEvent(e){
     // 按钮组点击触发，接收子组件传过来的数据，进行操作
@@ -303,7 +281,6 @@ Page({
               notice_text : res.data.notification
             })
             that.getUserInfo()
-            
           })
           .catch((error) => {
             console.error('初始化会话失败：',error)
@@ -360,9 +337,9 @@ Page({
       success(res){
         console.log('api/share_incentive GET >>>',res)
         that.getUserInfo()
-        that.setData({
-          isusecoin : true
-        })
+        // that.setData({
+        //   isusecoin : true
+        // })
       }
     })
   },
