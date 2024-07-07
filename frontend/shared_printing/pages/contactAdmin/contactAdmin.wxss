@@ -5,3 +5,7 @@
   font-weight: bold;
   margin-bottom: 30rpx;
 }
+
+.contact-button{
+  margin-top: 20rpx;
+}

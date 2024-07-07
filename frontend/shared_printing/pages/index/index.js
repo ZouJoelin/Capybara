@@ -1,7 +1,7 @@
 // index.js
 import Toast from '@vant/weapp/toast/toast';
 import Notify from '@vant/weapp/notify/notify';
-import { strLenOptiize,handleErrorMessage,getUserInfoUtil,getTodayShareTimes } from '../../utils/util'
+import { strLenOptiize,handleErrorMessage,getUserInfoUtil,getTodayShareTimes,shareIncentiveUtil } from '../../utils/util'
 
 const app = getApp();
 const curDomain = app.globalData.curDomain //配置当前页面使用域名
@@ -275,23 +275,13 @@ Page({
           that.setData({
             backend_status : true
           });
-          that.initialize().then((res) => {
-            console.log('初始化会话：',res)
-            that.setData({
-              notice_text : res.data.notification
-            })
-            that.getUserInfo()
-          })
-          .catch((error) => {
-            console.error('初始化会话失败：',error)
-          })
         }else if(res.statusCode == 404 && res.data.includes("Tunnel")){
           that.setData({
             offlineInfo: '服务器掉线'
           })
         }else if(res.statusCode == 503){
           let info = ''
-          //console.error('前端未知错误', res.data.error_message)
+          console.error('前端未知错误', res)
           info = res.data.error_message
           that.setData({
             offlineInfo: info
@@ -301,6 +291,17 @@ Page({
             offlineInfo: '应用框架异常'
           })
         }
+        
+        that.initialize().then((res) => {
+          console.log('初始化会话：',res)
+          that.setData({
+            notice_text : res.data.notification
+          })
+          that.getUserInfo()
+        })
+        .catch((error) => {
+          console.error('初始化会话失败：',error)
+        })
       }
     })
   },
@@ -326,21 +327,10 @@ Page({
   },
 
   shareIncentive:function(){
-    var that = this
-    wx.request({
-      url: curDomain+'api/share_incentive?open_id='+app.globalData.openid+'&incentive='+app.globalData.incentive,
-      method: 'GET',
-      header: {
-        'content-type': 'application/json',
-        'Cookie' : app.globalData.Cookie
-      },
-      success(res){
-        console.log('api/share_incentive GET >>>',res)
-        that.getUserInfo()
-        // that.setData({
-        //   isusecoin : true
-        // })
-      }
+    shareIncentiveUtil().then((res) => {
+      this.getUserInfo()
+    }).catch((error) => {
+      console.error('api/share_incentive GET >>>',error)
     })
   },
   

@@ -23,6 +23,7 @@ text="{{notice_text}}" />
   <view class="uploader-container">
     <button
     bind:tap="localSubmit"
+    disabled="{{!backend_status}}"
     class="local-uploader"
     plain="true"
     size="mini"
@@ -31,7 +32,6 @@ text="{{notice_text}}" />
     <text class="uploader-text">本地上传</text>
     </button>
     <van-uploader file-list="{{ fileList }}" 
-    disabled="{{!backend_status}}"
     use-before-read="true"
     bind:before-read="beforeRead"
     bind:after-read="afterRead" 
@@ -42,6 +42,7 @@ text="{{notice_text}}" />
     >
     <button
     class="weixin-uploader"
+    disabled="{{!backend_status}}"
     size="mini"
     plain="true"
     type="primary"

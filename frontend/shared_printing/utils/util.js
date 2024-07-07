@@ -66,6 +66,31 @@ const getTodayShareTimes = () => { //获取用户今日转发次数
   })
 }
 
+const shareIncentiveUtil = () => {
+  return new Promise((resolve, reject) =>{
+    wx.request({
+      url: curDomain+'api/share_incentive?open_id='+app.globalData.openid+'&incentive='+app.globalData.incentive,
+      method: 'GET',
+      header: {
+        'content-type': 'application/json',
+        'Cookie' : app.globalData.Cookie
+      },
+      success(res){
+        console.log('api/share_incentive GET >>>',res)
+        if(res.statusCode == 403){
+          console.log('api/share_incentive GET 403 >>>',res.data.error_message)
+          reject(res.data)
+        }else{
+          resolve(res)
+        }
+      },
+      fail: (error) => {
+        reject(error)
+      }
+    })
+  })
+}
+
 const getUserInfoUtil = () => { //向后台获取用户信息
   return new Promise((resolve, reject) => {
     wx.request({
@@ -104,5 +129,6 @@ module.exports = {
   strLenOptiize,
   handleErrorMessage,
   getUserInfoUtil,
-  getTodayShareTimes
+  getTodayShareTimes,
+  shareIncentiveUtil
 }
